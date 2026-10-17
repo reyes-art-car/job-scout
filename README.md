@@ -29,6 +29,10 @@
     <td><img src="docs/screenshots/ofertas.png" alt="Ofertas"></td>
     <td><img src="docs/screenshots/adaptar-cv.png" alt="Adaptar CV"></td>
   </tr>
+  <tr>
+    <td><img src="docs/screenshots/carta.png" alt="Cover letter editor"></td>
+    <td><img src="docs/screenshots/skills.png" alt="Skills gap analysis"></td>
+  </tr>
 </table>
 
 ## Stack
