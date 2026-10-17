@@ -1,34 +1,35 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpErrorResponse } from '@angular/common/http';
 import { Injectable, computed, inject, signal } from '@angular/core';
-import { firstValueFrom, timeout } from 'rxjs';
+import { ApiOfferGateway } from './gateways/api-offer.gateway';
+import { DemoOfferGateway } from './gateways/demo-offer.gateway';
+import { OfferGateway } from './gateways/offer-gateway';
 import { KANBAN_STATUSES, KanbanStatus, NewOffer, Offer } from './models';
 
 export type DataMode = 'loading' | 'api' | 'demo';
 
-interface OfferPage {
-  items: Offer[];
-}
-
-const STORAGE_KEY = 'jobhunter.demo.offers.v1';
-const API_TIMEOUT_MS = 2500;
+const HTTP_UNAUTHORIZED = 401;
 
 /**
- * Fuente única de ofertas. Intenta hablar con la API FastAPI (`/api`, vía proxy en desarrollo);
- * si no responde, cae a los datos de demostración y guarda los cambios en el navegador, de modo
- * que la aplicación es totalmente usable desde un hosting estático (p. ej. GitHub Pages).
+ * Estado de las ofertas para toda la aplicación. Delega el acceso a datos en un `OfferGateway`:
+ * la API si responde y tiene datos y, si no, la demo con persistencia en el navegador. Por eso la misma
+ * aplicación funciona en local con backend y en un hosting estático (GitHub Pages).
  */
 @Injectable({ providedIn: 'root' })
 export class OfferStore {
-  private readonly http = inject(HttpClient);
+  private readonly api = inject(ApiOfferGateway);
+  private readonly demo = inject(DemoOfferGateway);
+  private gateway: OfferGateway = this.demo;
 
   readonly offers = signal<Offer[]>([]);
   readonly mode = signal<DataMode>('loading');
+  /** La API respondió 401: hace falta el token de acceso. */
+  readonly authRequired = signal(false);
 
   readonly stats = computed(() => {
     const all = this.offers();
     const byStatus = Object.fromEntries(KANBAN_STATUSES.map((s) => [s, 0])) as Record<KanbanStatus, number>;
     for (const o of all) byStatus[o.kanban_status] += 1;
-    const avg = all.length === 0 ? 0 : Math.round(all.reduce((a, o) => a + o.compatibility, 0) / all.length);
+    const avg = all.length === 0 ? 0 : Math.round(all.reduce((sum, o) => sum + o.compatibility, 0) / all.length);
     return {
       total: all.length,
       high: all.filter((o) => o.priority === 'Alta').length,
@@ -38,80 +39,35 @@ export class OfferStore {
   });
 
   async load(): Promise<void> {
+    this.authRequired.set(false);
     try {
-      const page = await firstValueFrom(
-        this.http.get<OfferPage>('/api/offers', { params: { page_size: 500 } }).pipe(timeout(API_TIMEOUT_MS)),
-      );
+      const items = await this.api.list();
       // Una API vacía (BD recién creada) no sirve para enseñar la aplicación: se usa la demo.
-      if (page.items.length > 0) {
-        this.offers.set(page.items);
-        this.mode.set('api');
+      if (items.length > 0) {
+        this.use(this.api, items, 'api');
         return;
       }
-    } catch {
-      // Sin backend: modo demo.
+    } catch (error) {
+      if (error instanceof HttpErrorResponse && error.status === HTTP_UNAUTHORIZED) this.authRequired.set(true);
     }
-    await this.loadDemo();
-  }
-
-  private async loadDemo(): Promise<void> {
-    const saved = this.readSaved();
-    const offers = saved ?? (await firstValueFrom(this.http.get<Offer[]>('demo/offers.json')));
-    this.offers.set(offers);
-    this.mode.set('demo');
+    this.use(this.demo, await this.demo.list(), 'demo');
   }
 
   async resetDemo(): Promise<void> {
-    try {
-      localStorage.removeItem(STORAGE_KEY);
-    } catch {
-      // almacenamiento no disponible
-    }
-    const offers = await firstValueFrom(this.http.get<Offer[]>('demo/offers.json'));
-    this.offers.set(offers);
+    this.offers.set(await this.demo.reset());
   }
 
   async setStatus(offer: Offer, status: KanbanStatus): Promise<void> {
-    const apply = (o: Offer) => ({ ...o, kanban_status: status });
-    if (this.mode() === 'api') {
-      const updated = await firstValueFrom(
-        this.http.patch<Offer>(`/api/offers/${offer.id}/status`, { status }),
-      );
-      this.replace(updated);
-      return;
-    }
-    this.replace(apply(offer));
-    this.persist();
+    this.replace(await this.gateway.setStatus(offer, status));
   }
 
   async setNotes(offer: Offer, notes: string): Promise<void> {
-    if (this.mode() === 'api') {
-      const updated = await firstValueFrom(this.http.patch<Offer>(`/api/offers/${offer.id}`, { notes }));
-      this.replace(updated);
-      return;
-    }
-    this.replace({ ...offer, notes });
-    this.persist();
+    this.replace(await this.gateway.setNotes(offer, notes));
   }
 
   async add(draft: NewOffer): Promise<Offer> {
-    if (this.mode() === 'api') {
-      const created = await firstValueFrom(this.http.post<Offer>('/api/offers', draft));
-      this.offers.update((list) => [created, ...list]);
-      return created;
-    }
-    const list = this.offers();
-    const nextNum = list.reduce((max, o) => Math.max(max, Number(o.code.replace(/\D/g, '')) || 0), 0) + 1;
-    const created: Offer = {
-      ...draft,
-      id: list.reduce((max, o) => Math.max(max, o.id), 0) + 1,
-      code: `OF${String(nextNum).padStart(3, '0')}`,
-      priority: draft.priority ?? (draft.compatibility >= 75 ? 'Alta' : 'Secundaria'),
-      adapted_cv_filename: null,
-      source: 'document_upload',
-    };
-    this.offers.set([created, ...list]);
-    this.persist();
+    const created = await this.gateway.add(draft);
+    this.offers.update((list) => [created, ...list]);
     return created;
   }
 
@@ -119,24 +75,13 @@ export class OfferStore {
     return this.offers().find((o) => o.id === id);
   }
 
+  private use(gateway: OfferGateway, offers: Offer[], mode: DataMode): void {
+    this.gateway = gateway;
+    this.offers.set(offers);
+    this.mode.set(mode);
+  }
+
   private replace(updated: Offer): void {
     this.offers.update((list) => list.map((o) => (o.id === updated.id ? updated : o)));
-  }
-
-  private readSaved(): Offer[] | null {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      return raw ? (JSON.parse(raw) as Offer[]) : null;
-    } catch {
-      return null;
-    }
-  }
-
-  private persist(): void {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(this.offers()));
-    } catch {
-      // modo privado o cuota agotada: la sesión sigue funcionando sin persistencia
-    }
   }
 }
