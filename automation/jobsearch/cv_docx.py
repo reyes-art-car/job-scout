@@ -1,6 +1,6 @@
 """Generación del CV adaptado en .docx."""
 
-from pathlib import Path
+from pathlib import Path, PurePosixPath, PureWindowsPath
 
 from docx import Document
 from docx.enum.text import WD_ALIGN_PARAGRAPH
@@ -64,6 +64,15 @@ class CvDocumentBuilder:
 
     def output_path(self, filename: str) -> Path:
         """Ruta de salida dentro del directorio de CVs; se rechaza cualquier nombre que intente salir de él."""
+        # Valida ambas sintaxis: en Linux, una barra invertida es un carácter de nombre válido.
+        windows_path = PureWindowsPath(filename)
+        if (
+            not filename
+            or PurePosixPath(filename).name != filename
+            or windows_path.name != filename
+            or windows_path.drive
+        ):
+            raise ValueError(f"Nombre de fichero no permitido: {filename!r}")
         target = (self._output_dir / filename).resolve()
         if target.parent != self._output_dir:
             raise ValueError(f"Nombre de fichero no permitido: {filename!r}")

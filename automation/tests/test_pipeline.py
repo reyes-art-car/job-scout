@@ -110,10 +110,33 @@ def test_cv_is_written_inside_the_cv_directory(profile, paths) -> None:
     assert "Resumen adaptado" in text
 
 
-@pytest.mark.parametrize("name", ["../fuera.docx", "..\\fuera.docx", "sub/cv.docx", "/tmp/cv.docx", "C:/cv.docx"])
+@pytest.mark.parametrize(
+    "name",
+    [
+        "../fuera.docx",
+        "..\\fuera.docx",
+        "sub/cv.docx",
+        "sub\\cv.docx",
+        "/tmp/cv.docx",
+        "C:/cv.docx",
+        "C:\\cv.docx",
+        "C:cv.docx",
+        "\\\\server\\share\\cv.docx",
+        "./cv.docx",
+        "",
+        ".",
+        "..",
+    ],
+)
 def test_builder_refuses_paths_outside_the_directory(profile, paths, name: str) -> None:
     with pytest.raises(ValueError, match="no permitido"):
         CvDocumentBuilder(profile, paths.cv_dir).output_path(name)
+
+
+@pytest.mark.parametrize("name", ["cv.docx", "CV Ada Lovelace.docx", "CV_María.docx"])
+def test_builder_accepts_plain_filenames(profile, paths, name: str) -> None:
+    target = CvDocumentBuilder(profile, paths.cv_dir).output_path(name)
+    assert target == paths.cv_dir.resolve() / name
 
 
 # ── Ejecución completa ───────────────────────────────────────────────────────────────────────
