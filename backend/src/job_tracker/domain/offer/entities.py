@@ -1,14 +1,14 @@
 from dataclasses import dataclass, field
 from datetime import date, datetime
-from enum import Enum
+from enum import StrEnum
 
 
-class Priority(str, Enum):
+class Priority(StrEnum):
     ALTA = "Alta"
     SECUNDARIA = "Secundaria"
 
 
-class KanbanStatus(str, Enum):
+class KanbanStatus(StrEnum):
     PENDIENTE = "Pendiente"
     APLICADO = "Aplicado"
     ENTREVISTA = "Entrevista"
@@ -16,7 +16,7 @@ class KanbanStatus(str, Enum):
     RECHAZO = "Rechazo"
 
 
-class OfferSource(str, Enum):
+class OfferSource(StrEnum):
     LEGACY_EXCEL = "legacy_excel"
     CLAUDE_AGENT_SEARCH = "claude_agent_search"
     DOCUMENT_UPLOAD = "document_upload"

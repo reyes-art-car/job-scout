@@ -9,7 +9,12 @@ from pathlib import Path
 import openpyxl
 
 from job_tracker.domain.offer.entities import KanbanStatus, Offer, OfferSource, Priority
-from job_tracker.domain.offer.repository import OfferRepository
+from job_tracker.domain.offer.repository import OfferRegistry
+from job_tracker.domain.offer.scoring import priority_for
+from job_tracker.shared.sanitize import clean_bounded, validate_http_url
+
+MAX_ROWS = 5_000  # tope defensivo: un Excel malicioso o corrupto no debe agotar la memoria
+SHORT, LONG = 255, 4000
 
 
 @dataclass
@@ -49,29 +54,39 @@ def _date(raw: object) -> date | None:
 
 
 def _priority(raw: object, compatibility: int) -> Priority:
-    if str(raw).strip().lower() == "alta":
-        return Priority.ALTA
-    if str(raw).strip().lower() == "secundaria":
-        return Priority.SECUNDARIA
-    return Priority.ALTA if compatibility >= 75 else Priority.SECUNDARIA
+    declared = str(raw).strip().lower()
+    for priority in Priority:
+        if priority.value.lower() == declared:
+            return priority
+    return priority_for(compatibility)
 
 
-def _str(raw: object, default: str = "") -> str:
-    return default if raw is None else str(raw).strip()
+def _str(raw: object, default: str = "", max_length: int = SHORT) -> str:
+    """Texto saneado (el Excel es entrada no confiable) y recortado al tamaño de su columna."""
+    return default if raw is None else clean_bounded(str(raw), max_length)
 
 
-def import_excel(path: Path, repository: OfferRepository) -> ImportReport:
+def _url(raw: object) -> str | None:
+    try:
+        return validate_http_url(str(raw)[:1000]) if raw else None
+    except ValueError:
+        return None
+
+
+def import_excel(path: Path, repository: OfferRegistry) -> ImportReport:
     """Importa filas del Excel con las 21 columnas de busqueda_diaria.py, sin duplicar por ID o URL."""
     report = ImportReport()
     workbook = openpyxl.load_workbook(path, read_only=True, data_only=True)
     try:
         sheet = workbook.active
-        for row in sheet.iter_rows(min_row=2, values_only=True):
+        if sheet is None:
+            return report
+        for row in sheet.iter_rows(min_row=2, max_row=MAX_ROWS + 1, values_only=True):
             code, title, company = _str(row[0]), _str(row[3]), _str(row[4])
             if not (code and title and company):
                 report.skipped_invalid += 1
                 continue
-            url = _str(row[6]) or None
+            url = _url(row[6])
             if repository.exists_by_code_or_url(code, url):
                 report.skipped_duplicates += 1
                 continue
@@ -92,14 +107,14 @@ def import_excel(path: Path, repository: OfferRepository) -> ImportReport:
                     contract_type=_str(row[10], "No especificado"),
                     salary=_str(row[11]) or None,
                     experience_required=_str(row[12], "No especificado"),
-                    mandatory_tech=_str(row[13]),
-                    desirable_tech=_str(row[14]),
-                    requirements_met=_str(row[15]),
-                    requirements_missing=_str(row[16]),
-                    score_reason=_str(row[17]),
+                    mandatory_tech=_str(row[13], max_length=LONG),
+                    desirable_tech=_str(row[14], max_length=LONG),
+                    requirements_met=_str(row[15], max_length=LONG),
+                    requirements_missing=_str(row[16], max_length=LONG),
+                    score_reason=_str(row[17], max_length=LONG),
                     kanban_status=_status(row[18]),
                     adapted_cv_filename=_str(row[19]) or None if len(row) > 19 else None,
-                    notes=_str(row[20]) or None if len(row) > 20 else None,
+                    notes=_str(row[20], max_length=LONG) or None if len(row) > 20 else None,
                     source=OfferSource.LEGACY_EXCEL,
                 )
             )
@@ -109,11 +124,11 @@ def import_excel(path: Path, repository: OfferRepository) -> ImportReport:
     return report
 
 
-def import_demo_json(path: Path, repository: OfferRepository) -> ImportReport:
+def import_demo_json(path: Path, repository: OfferRegistry) -> ImportReport:
     """Carga data/demo/offers.json (mismo formato que devuelve la API)."""
     report = ImportReport()
     for item in json.loads(path.read_text(encoding="utf-8")):
-        url = item.get("url") or None
+        url = _url(item.get("url"))
         if repository.exists_by_code_or_url(item["code"], url):
             report.skipped_duplicates += 1
             continue
