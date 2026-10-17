@@ -10,9 +10,9 @@ import { IconComponent } from './icon.component';
   template: `
     <a class="skip-link" href="#public-content">Ir al contenido</a>
     <header class="top">
-      <a class="brand" routerLink="/" aria-label="Job Hopper &amp; Learning, inicio">
+      <a class="brand" routerLink="/" aria-label="Job Hopping &amp; Learning, inicio">
         <span class="logo"><app-icon name="target" [size]="18" /></span>
-        <strong>Job Hopper &amp; Learning</strong>
+        <span><strong>Job Hopping</strong><small>&amp; Learning</small></span>
       </a>
       <nav aria-label="Principal">
         <a routerLink="/" fragment="como-funciona">Cómo funciona</a>
@@ -23,7 +23,7 @@ import { IconComponent } from './icon.component';
     <main id="public-content" tabindex="-1"><ng-content /></main>
     <footer class="foot">
       <p>
-        Job Hopper &amp; Learning es un proyecto personal de portfolio de María Reyes Artacho Carrero. Gratuito y sin cuentas:
+        Job Hopping &amp; Learning es un proyecto personal de portfolio de María Reyes Artacho Carrero. Gratuito y sin cuentas:
         tu CV se queda en tu navegador.
       </p>
       <nav aria-label="Información legal">

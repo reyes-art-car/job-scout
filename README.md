@@ -1,4 +1,4 @@
-# Job Hopper & Learning
+# Job Hopping & Learning
 
 **IT job search manager built with Angular, TypeScript, and Python (FastAPI).** Track applications, score job offers against a candidate profile, tailor CVs, generate cover letters, and identify skills gaps.
 

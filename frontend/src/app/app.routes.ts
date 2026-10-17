@@ -1,6 +1,6 @@
 import { Routes } from '@angular/router';
 
-const SITE = 'Job Hopper & Learning';
+const SITE = 'Job Hopping & Learning';
 
 export const routes: Routes = [
   {

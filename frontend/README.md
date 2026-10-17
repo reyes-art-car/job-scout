@@ -1,4 +1,4 @@
-# Frontend · Job Hopper & Learning
+# Frontend · Job Hopping & Learning
 
 Angular 20 con componentes standalone, signals y carga diferida por ruta. Ver [docs/ARCHITECTURE.md](../docs/ARCHITECTURE.md).
 
