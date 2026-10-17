@@ -1,4 +1,4 @@
-# JobHunter
+# Job Hopper & Learning
 
 **IT job search manager built with Angular, TypeScript, and Python (FastAPI).** Track applications, score job offers against a candidate profile, tailor CVs, generate cover letters, and identify skills gaps.
 
@@ -11,6 +11,8 @@
 **[Try the demo](https://reyes-art-car.github.io/job-scout/)** — runs without a backend, using sample data and browser storage. No account required. The application interface and sample content are currently in Spanish.
 
 ![Job search dashboard](docs/screenshots/panel.png)
+
+**Bring your own CV.** The landing page lets anyone upload a PDF, DOCX or TXT résumé. It is read in the browser (`pdfjs-dist`, `fflate`), turned into an editable profile and stored in `localStorage`; the sample offers are re-scored against that profile. Nothing is sent to a server, so there are no accounts. A "Borrar mis datos" button erases everything, and the app ships Spanish legal pages (aviso legal, privacidad, cookies, condiciones de uso).
 
 ## Features
 
@@ -141,7 +143,7 @@ npm test -- --watch=false --browsers=ChromeHeadless
 npm run build
 ```
 
-Latest local validation: **81 backend tests passed, 78 automation tests passed, and 70 frontend tests passed**. One additional backend test was skipped because creating symbolic links requires privileges on the Windows test machine. Backend coverage was **93.06%**. Linting, formatting, type checks, Bandit, and the production frontend build also passed.
+Latest local validation: **81 backend tests passed, 78 automation tests passed, and 95 frontend tests passed**. One additional backend test was skipped because creating symbolic links requires privileges on the Windows test machine. Backend coverage was **93.06%**. Linting, formatting, type checks, Bandit, and the production frontend build also passed.
 
 GitHub Actions is configured to run quality checks, dependency audits, secret scanning, and CodeQL analysis. See [CONTRIBUTING.md](CONTRIBUTING.md) for local commit hooks and contribution conventions.
 

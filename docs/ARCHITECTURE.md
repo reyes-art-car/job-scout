@@ -1,6 +1,6 @@
 # Arquitectura
 
-JobHunter son tres piezas que comparten un único modelo de oferta (`Offer`):
+Job Hopper & Learning son tres piezas que comparten un único modelo de oferta (`Offer`):
 
 ```mermaid
 flowchart LR
