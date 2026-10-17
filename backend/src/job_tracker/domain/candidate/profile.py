@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from functools import lru_cache
 from pathlib import Path
+from typing import Any
 
 import yaml
 
@@ -26,18 +27,16 @@ class CandidateProfile:
     languages: str
 
 
-def _load_yaml(path: Path) -> dict:
+def _load_yaml(path: Path) -> dict[str, Any]:
     with open(path, encoding="utf-8") as f:
-        return yaml.safe_load(f)
+        data: dict[str, Any] = yaml.safe_load(f)
+        return data
 
 
 @lru_cache
 def load_candidate_profile(path: Path) -> CandidateProfile:
     data = _load_yaml(path)
-    skills = {
-        order_name: [SkillGroup(**group) for group in groups]
-        for order_name, groups in data["skills"].items()
-    }
+    skills = {order_name: [SkillGroup(**group) for group in groups] for order_name, groups in data["skills"].items()}
     return CandidateProfile(
         name=data["name"],
         title=data["title"],

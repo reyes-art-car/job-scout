@@ -23,11 +23,10 @@ class OfferStats:
     by_status: dict[str, int]
 
 
-class OfferRepository(Protocol):
-    """Puerto del dominio: define el contrato de persistencia sin conocer
-    el motor de almacenamiento. Implementado por un adaptador en infrastructure/db.
-    """
+# Puertos pequeños y específicos (segregación de interfaces): cada caso de uso depende solo de lo que usa.
 
+
+class OfferReader(Protocol):
     def list(self, filters: OfferFilters) -> tuple[list[Offer], int]:
         """Devuelve (ofertas de la página solicitada, total de resultados sin paginar)."""
         ...
@@ -36,17 +35,34 @@ class OfferRepository(Protocol):
 
     def get_by_code(self, code: str) -> Offer | None: ...
 
-    def exists_by_code_or_url(self, code: str, url: str | None) -> bool: ...
 
+class OfferStatsReader(Protocol):
+    def stats(self) -> OfferStats: ...
+
+
+class OfferWriter(Protocol):
     def add(self, offer: Offer) -> Offer: ...
 
     def update(self, offer: Offer) -> Offer: ...
 
     def update_status(self, offer_id: int, status: KanbanStatus) -> Offer: ...
 
+
+class OfferIdentity(Protocol):
+    def exists_by_code_or_url(self, code: str, url: str | None) -> bool: ...
+
     def next_code(self) -> str:
-        """Genera el siguiente ID secuencial tipo OF037, igual que
-        get_existing_urls_and_last_id() en busqueda_diaria.py."""
+        """Siguiente ID secuencial tipo OF037, igual que get_existing_urls_and_last_id() del buscador."""
         ...
 
-    def stats(self) -> OfferStats: ...
+
+class OfferEditor(OfferReader, OfferWriter, Protocol):
+    """Leer y guardar: lo que necesita la edición de una oferta."""
+
+
+class OfferRegistry(OfferIdentity, OfferWriter, Protocol):
+    """Identidad y escritura: lo que necesitan el alta y los importadores."""
+
+
+class OfferRepository(OfferReader, OfferStatsReader, OfferWriter, OfferIdentity, Protocol):
+    """Contrato completo que implementa el adaptador de persistencia."""

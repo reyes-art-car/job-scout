@@ -33,9 +33,7 @@ class SqlAlchemyInterviewRepository:
         self._session = session
 
     def create_session(self, session: InterviewSession) -> InterviewSession:
-        row = InterviewSessionModel(
-            mode=session.mode.value, offer_id=session.offer_id, title=session.title
-        )
+        row = InterviewSessionModel(mode=session.mode.value, offer_id=session.offer_id, title=session.title)
         self._session.add(row)
         self._session.commit()
         self._session.refresh(row)
@@ -51,16 +49,16 @@ class SqlAlchemyInterviewRepository:
         return _session_to_entity(row) if row else None
 
     def list_sessions(self) -> list[InterviewSession]:
-        stmt = select(InterviewSessionModel).options(
-            selectinload(InterviewSessionModel.messages)
-        ).order_by(InterviewSessionModel.created_at.desc())
+        stmt = (
+            select(InterviewSessionModel)
+            .options(selectinload(InterviewSessionModel.messages))
+            .order_by(InterviewSessionModel.created_at.desc())
+        )
         rows = self._session.scalars(stmt).all()
         return [_session_to_entity(r) for r in rows]
 
     def add_message(self, message: ChatMessage) -> ChatMessage:
-        row = ChatMessageModel(
-            session_id=message.session_id, role=message.role.value, content=message.content
-        )
+        row = ChatMessageModel(session_id=message.session_id, role=message.role.value, content=message.content)
         self._session.add(row)
         self._session.commit()
         self._session.refresh(row)
