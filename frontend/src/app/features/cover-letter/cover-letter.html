@@ -14,7 +14,7 @@
       <section class="card opts">
         <label>
           Oferta
-          <select [value]="selectedId()" (change)="pick($any($event.target).value)">
+          <select [value]="selectedId()" (change)="pick(value($event))">
             @for (x of offers(); track x.id) {
               <option [value]="x.id" [selected]="x.id === selectedId()">{{ x.title }} — {{ x.company }}</option>
             }
@@ -22,21 +22,21 @@
         </label>
         <label>
           Tono
-          <select [value]="tone()" (change)="tone.set($any($event.target).value)">
+          <select [value]="tone()" (change)="setTone(value($event))">
             <option value="formal">Formal (consultoras, banca, grandes empresas)</option>
             <option value="cercano">Cercano (startups, producto)</option>
           </select>
         </label>
         <label>
           Disponibilidad
-          <input [value]="availability()" (input)="availability.set($any($event.target).value)" />
+          <input [value]="availability()" (input)="availability.set(value($event))" />
         </label>
         <label>
           Texto de la oferta (opcional)
-          <textarea rows="4" placeholder="Pega la descripción para afinar el contenido…" [value]="description()" (input)="description.set($any($event.target).value)"></textarea>
+          <textarea rows="4" placeholder="Pega la descripción para afinar el contenido…" [value]="description()" (input)="description.set(value($event))"></textarea>
         </label>
         <label class="inline">
-          <input type="checkbox" [checked]="mentionGaps()" (change)="mentionGaps.set($any($event.target).checked)" />
+          <input type="checkbox" [checked]="mentionGaps()" (change)="mentionGaps.set(checked($event))" />
           Mencionar con honestidad lo que aún no he usado
         </label>
         @if (gaps().length > 0) {
@@ -62,7 +62,7 @@
           rows="26"
           [attr.aria-label]="'Carta para ' + o.company"
           [value]="text()"
-          (input)="text.set($any($event.target).value)"
+          (input)="text.set(value($event))"
         ></textarea>
       </section>
     </div>

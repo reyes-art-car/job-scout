@@ -1,0 +1,23 @@
+.form .fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
+
+  .wide {
+    grid-column: 1 / -1;
+  }
+}
+
+.estimate {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  justify-content: flex-end;
+  align-items: flex-start;
+}
+
+.error {
+  color: var(--bad);
+  font-weight: 500;
+}

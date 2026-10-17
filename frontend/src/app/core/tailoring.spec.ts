@@ -1,5 +1,6 @@
 import { offer, PROFILE } from '../../testing/fixtures';
-import { analyzeOffer, extractRequirements, tailorCv } from './tailoring';
+import { analyzeOffer, extractRequirements } from './offer-analysis';
+import { tailorCv } from './tailoring';
 
 describe('analyzeOffer', () => {
   it('pondera más las obligatorias que las deseables', () => {
