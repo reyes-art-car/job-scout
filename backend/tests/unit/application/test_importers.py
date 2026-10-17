@@ -10,19 +10,53 @@ from job_tracker.infrastructure.excel_import.importer import import_demo_json, i
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
 HEADERS = [
-    "ID", "Prioridad", "% Compatibilidad", "Puesto", "Empresa", "Portal", "Enlace", "Fecha publicación",
-    "Ubicación", "Modalidad", "Tipo contrato", "Salario", "Experiencia solicitada",
-    "Tecnologías obligatorias", "Tecnologías deseables", "Requisitos que cumplo",
-    "Requisitos que NO cumplo", "Motivo puntuación", "Estado candidatura", "Nombre CV adaptado",
+    "ID",
+    "Prioridad",
+    "% Compatibilidad",
+    "Puesto",
+    "Empresa",
+    "Portal",
+    "Enlace",
+    "Fecha publicación",
+    "Ubicación",
+    "Modalidad",
+    "Tipo contrato",
+    "Salario",
+    "Experiencia solicitada",
+    "Tecnologías obligatorias",
+    "Tecnologías deseables",
+    "Requisitos que cumplo",
+    "Requisitos que NO cumplo",
+    "Motivo puntuación",
+    "Estado candidatura",
+    "Nombre CV adaptado",
     "Observaciones",
 ]
 
 
 def _row(code: str, url: str, status: str = "Pendiente de revisión") -> list:
     return [
-        code, "Alta", "82%", "Java Developer", "Acme", "Tecnoempleo", url, "2026-09-03", "España",
-        "Remoto 100%", "Indefinido", "30.000 €", "1-2 años", "Java, Spring Boot", "Docker", "Java ✓",
-        "Kafka", "Tech 30/40", status, "OF001_Acme.docx", "Nota",
+        code,
+        "Alta",
+        "82%",
+        "Java Developer",
+        "Acme",
+        "Tecnoempleo",
+        url,
+        "2026-09-03",
+        "España",
+        "Remoto 100%",
+        "Indefinido",
+        "30.000 €",
+        "1-2 años",
+        "Java, Spring Boot",
+        "Docker",
+        "Java ✓",
+        "Kafka",
+        "Tech 30/40",
+        status,
+        "OF001_Acme.docx",
+        "Nota",
     ]
 
 

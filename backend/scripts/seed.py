@@ -33,8 +33,7 @@ def main() -> None:
         else:
             report = import_excel((args.excel or get_settings().legacy_excel_path).resolve(), repository)
     print(
-        f"Importadas: {report.imported} · duplicadas: {report.skipped_duplicates}"
-        f" · inválidas: {report.skipped_invalid}"
+        f"Importadas: {report.imported} · duplicadas: {report.skipped_duplicates} · inválidas: {report.skipped_invalid}"
     )
 
 
