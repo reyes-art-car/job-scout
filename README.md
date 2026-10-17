@@ -1,117 +1,167 @@
 # JobHunter
 
-**Gestor de búsqueda de empleo IT**: recopila ofertas, las puntúa frente a tu perfil, adapta el currículum a cada una, genera la carta de presentación y te dice qué tecnologías te faltan.
+**IT job search manager built with Angular, TypeScript, and Python (FastAPI).** Track applications, score job offers against a candidate profile, tailor CVs, generate cover letters, and identify skills gaps.
 
 [![CI](https://github.com/reyes-art-car/job-scout/actions/workflows/ci.yml/badge.svg)](https://github.com/reyes-art-car/job-scout/actions/workflows/ci.yml)
 ![Angular](https://img.shields.io/badge/Angular-20-DD0031?logo=angular&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?logo=typescript&logoColor=white)
-![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688?logo=fastapi&logoColor=white)
+![FastAPI](https://img.shields.io/badge/FastAPI-0.143.3-009688?logo=fastapi&logoColor=white)
 ![Python](https://img.shields.io/badge/Python-3.13-3776AB?logo=python&logoColor=white)
-![Tests](https://img.shields.io/badge/tests-81%20backend%20%C2%B7%2067%20automation%20%C2%B7%2051%20frontend-1b7a4b)
-![Security](https://img.shields.io/badge/security-hardened-1b7a4b)
 
-**[▶ Probar la demo](https://reyes-art-car.github.io/job-scout/)** · funciona sin servidor, con datos de ejemplo y sin registrarse.
+**[Try the demo](https://reyes-art-car.github.io/job-scout/)** — runs without a backend, using sample data and browser storage. No account required. The application interface and sample content are currently in Spanish.
 
-![Panel de búsqueda](docs/screenshots/panel.png)
+![Job search dashboard](docs/screenshots/panel.png)
 
-## Qué hace
+## Features
 
-| Sección | Qué resuelve |
-|---|---|
-| **Panel** | Indicadores del pipeline, embudo de candidaturas, distribución por compatibilidad y las tecnologías más pedidas |
-| **Ofertas** | Tabla y tablero Kanban con arrastrar y soltar, filtros, alta manual con estimación automática y exportación a Excel (CSV) |
-| **Adaptar CV** | Detecta las tecnologías de la oferta, reordena logros y competencias, propone titular y resumen y exporta a Word o PDF. **Solo usa lo que el perfil acredita** |
-| **Carta de presentación** | Carta editable a partir de la oferta y el perfil, en tono formal o cercano, con opción de mencionar con honestidad lo que aún no has usado |
-| **Brecha de skills** | Qué piden las ofertas y no figura en el CV, con prioridad, ofertas que desbloquea cada tecnología y cómo acreditarla |
+| Area | What it does |
+| --- | --- |
+| **Dashboard** | Application pipeline metrics, recruitment funnel, compatibility distribution, and the most requested technologies |
+| **Job offers** | Filterable table and drag-and-drop Kanban board, manual entry with estimated compatibility, and Excel-compatible CSV export |
+| **CV tailoring** | Detects technologies in an offer, prioritizes relevant achievements and skills, and suggests a headline and summary using only experience supported by the profile |
+| **Cover letters** | Editable letters based on the offer and profile, with formal or conversational wording and the option to acknowledge skills still being learned |
+| **Skills gap analysis** | Highlights missing technologies, their priority, the offers they could unlock, and ways to demonstrate proficiency |
+| **Search automation** | Uses Claude Code to search for offers, apply a 100-point scoring rubric, update a spreadsheet without duplicate URLs, and generate tailored CV documents |
+
+The frontend exports Word-compatible HTML and supports PDF output through the browser print dialog. The Python automation generates `.docx` files.
 
 <table>
   <tr>
-    <td><img src="docs/screenshots/ofertas.png" alt="Ofertas"></td>
-    <td><img src="docs/screenshots/adaptar-cv.png" alt="Adaptar CV"></td>
+    <td><img src="docs/screenshots/ofertas.png" alt="Job offers table"></td>
+    <td><img src="docs/screenshots/adaptar-cv.png" alt="CV tailoring workspace"></td>
   </tr>
 </table>
 
-## Stack
+## Technology stack
 
-| Capa | Tecnología |
-|---|---|
-| Frontend | Angular 20 · TypeScript · signals · componentes standalone · SCSS · Karma/Jasmine |
-| Backend | Python 3.13 · FastAPI · Pydantic · SQLAlchemy 2 · SQLite · pytest |
-| Automatización | Claude Code (búsqueda diaria con rúbrica de 100 puntos) · openpyxl · python-docx |
-| Calidad y seguridad | ruff (con reglas bandit) · mypy strict · ESLint · pip-audit · gitleaks · CodeQL · Dependabot · Docker sin privilegios |
+| Layer | Technologies |
+| --- | --- |
+| Frontend | Angular 20, TypeScript, signals, standalone components, SCSS, Karma/Jasmine |
+| Backend | Python, FastAPI, Pydantic, SQLAlchemy 2, SQLite, pytest |
+| Automation | Claude Code, openpyxl, python-docx, a modular `jobsearch` package, Windows Task Scheduler |
+| Quality and security | Ruff, mypy strict mode, Bandit, ESLint, pip-audit, Gitleaks, CodeQL, Dependabot |
+| Delivery | GitHub Actions, GitHub Pages demo, Docker Compose, unprivileged nginx |
 
-## Decisiones de diseño
+## Architecture and design
 
-- **Arquitectura hexagonal en el backend**: el dominio no depende de SQLAlchemy ni de FastAPI y los casos de uso se prueban sin base de datos. [Detalle](docs/ARCHITECTURE.md).
-- **Un solo frontend, dos fuentes de datos**: usa la API si responde y, si no, los datos de demostración con persistencia en el navegador. Por eso la demo en GitHub Pages es totalmente interactiva.
-- **La lógica de adaptación son funciones puras** (`core/tailoring.ts`) con tests: sin red, sin estado y sin inventar tecnologías que el perfil no acredita.
-- **Seguridad por capas, con una prueba por cada defensa**: token Bearer con denegado por defecto, límites de ritmo y de tamaño, saneado de toda entrada, CSP, cabeceras, validación de datos en el navegador, y la salida del modelo de lenguaje tratada como entrada no confiable. Qué hay, dónde y qué falta: [docs/SECURITY.md](docs/SECURITY.md).
-- **SOLID aplicado de forma verificable**: puertos pequeños, casos de uso de una sola responsabilidad, inyección de dependencias y estrategias en lugar de `if/elif`. [Dónde se ve cada principio](docs/ARCHITECTURE.md#principios-solid-aplicados).
+- **Hexagonal backend architecture:** framework-independent domain entities and small repository ports, with application use cases and infrastructure adapters. See the [architecture documentation](docs/ARCHITECTURE.md).
+- **API and demo gateways:** the frontend accesses offers through an abstraction, with API access and a browser-persisted demo implementation.
+- **Testable CV tailoring:** pure functions analyze offer requirements and prioritize profile content without inventing qualifications.
+- **Security controls:** bearer authentication when a token is configured, mandatory token configuration in production, request size and rate limits, input sanitization, security headers, and validation of browser storage and model output. See the [security implementation and limitations](docs/SECURITY.md).
+- **Separated automation stages:** configuration, prompts, model execution, parsing, spreadsheet storage, document generation, and reporting have dedicated modules.
 
-## Ejecutarlo en local
+## Run locally
 
-Requisitos: Node 22 y Python 3.11 o superior.
+Prerequisites: Node.js 22, Python 3.11 or later, and Chrome or Chromium for frontend tests. Python 3.13 is used in CI.
 
-```bash
-# 1) Backend (opcional: sin él, el frontend funciona en modo demo)
+### Backend
+
+From the repository root, run the following in PowerShell:
+
+```powershell
 cd backend
-python -m venv .venv && .venv\Scripts\activate        # Linux/macOS: source .venv/bin/activate
-pip install -r requirements-dev.txt && pip install -e .
-cp .env.example .env                                  # en producción: APP_ENV=production y API_TOKEN de 32+ caracteres
-python scripts/seed.py --demo                         # carga las ofertas de ejemplo
-uvicorn job_tracker.main:app --reload                 # http://localhost:8000/docs
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install -r requirements-dev.txt
+python -m pip install -e .
+Copy-Item .env.example .env
+python scripts/seed.py --demo
+uvicorn job_tracker.main:app --reload
+```
 
-# 2) Frontend
+On Linux or macOS, activate the environment with `source .venv/bin/activate` and copy the configuration with `cp .env.example .env`.
+
+The development API runs at `http://localhost:8000`, with interactive documentation at `http://localhost:8000/docs`. To import your own spreadsheet, run `python scripts/seed.py --excel path/to/Offers.xlsx` from `backend/`.
+
+Local development can run without an API token. If `API_TOKEN` is configured, enter it in the frontend sidebar; it is stored in `sessionStorage` and sent only to `/api/` requests. Production requires `APP_ENV=production` and an API token of at least 32 characters.
+
+### Frontend
+
+In a separate terminal, from the repository root:
+
+```powershell
 cd frontend
 npm ci
-npm start                                             # http://localhost:4200 (proxy a /api)
+npm start
 ```
 
-Importar tu propio Excel: `python scripts/seed.py --excel ruta/Ofertas.xlsx`.
+Open `http://localhost:4200`. Development requests to `/api` are proxied to port 8000. The backend is optional for trying the application with demo data.
 
-### Tests
+### Search automation
 
-```bash
-cd backend    && pytest -q --cov=job_tracker                       # 81 pruebas
-cd automation && pytest -q                                          # 67 pruebas
-cd frontend   && npx ng test --watch=false --browsers=ChromeHeadless  # 51 pruebas
+Install `automation/requirements.txt` and configure an authenticated Claude Code installation. See the [automation setup guide](automation/README.md) for search modes, candidate configuration, and Windows scheduling.
 
-# Calidad y seguridad
-cd backend  && ruff check src tests scripts && mypy && bandit -q -r src && pip-audit -r requirements.txt
-cd frontend && npx ng lint && npm audit --omit=dev
+### Containers
+
+Copy `backend/.env.example` to `backend/.env`, configure a production API token, and run from the repository root:
+
+```powershell
+docker compose -f infra/docker-compose.yml up --build
 ```
 
-## Estructura
+The web interface is exposed at `http://localhost:8080`; the API is accessed through nginx. The reference stack uses unprivileged containers, a persistent database volume, and read-only container filesystems. Container execution has not yet been validated locally.
 
+## Tests and quality checks
+
+Run each group from its respective directory, with its dependencies installed. The backend development environment provides the Python quality tools; automation also needs `automation/requirements.txt`.
+
+```powershell
+# backend/
+python -m ruff check src tests scripts
+python -m ruff format --check src tests scripts
+python -m mypy
+python -m bandit -q -r src
+python -m pytest -q --cov=job_tracker --cov-fail-under=85
+
+# automation/
+python -m ruff check .
+python -m pytest -q
+
+# frontend/
+npm run lint
+npm test -- --watch=false --browsers=ChromeHeadless
+npm run build
 ```
-├── frontend/          Angular 20 (panel, ofertas, adaptar CV, carta, brecha de skills)
-├── backend/           FastAPI · domain / application / infrastructure / api · tests
-├── automation/        Búsqueda diaria de ofertas con Claude Code (paquete jobsearch/) + tarea programada de Windows
-├── data/demo/         Ofertas y perfil de demostración (datos públicos de anuncios)
-├── infra/             nginx con límites y cabeceras, docker-compose de referencia
-├── docs/              Arquitectura, seguridad, hoja de ruta, informe de búsqueda y brecha de skills
-└── .github/workflows/ CI y despliegue de la demo
+
+Latest local validation: **81 backend tests passed, 67 automation tests passed, and 51 frontend tests passed**. One additional backend test was skipped because creating symbolic links requires privileges on the Windows test machine. Backend coverage was **93.06%**. Linting, formatting, type checks, Bandit, and the production frontend build also passed.
+
+GitHub Actions is configured to run quality checks, dependency audits, secret scanning, and CodeQL analysis. See [CONTRIBUTING.md](CONTRIBUTING.md) for local commit hooks and contribution conventions.
+
+## Repository structure
+
+```text
+frontend/          Angular application, offer gateways, CV tools, and tests
+backend/           FastAPI domain, application, infrastructure, API, and tests
+automation/        Modular jobsearch package, CLI, prompts, and scheduling
+data/demo/         Sample offers and a candidate profile used by the demo
+infra/             nginx configuration and reference Docker Compose stack
+docs/              Architecture, security, roadmap, and market analysis
+.github/workflows/ Quality checks, security scans, and demo deployment
 ```
 
-## Documentación
+## Documentation
 
-- [Arquitectura y SOLID](docs/ARCHITECTURE.md)
-- [Seguridad](docs/SECURITY.md) · [Política de divulgación](SECURITY.md) · [Contribuir](CONTRIBUTING.md)
-- [Hoja de ruta y sugerencias](docs/ROADMAP.md)
-- [Brecha de skills (análisis de mercado)](docs/SKILLS_GAP.md)
-- [Informe de búsqueda de ofertas, 17/10/2026](docs/BUSQUEDA_2026-10-17.md)
+Most detailed guides are currently in Spanish.
 
-## Privacidad
+- [Architecture and SOLID principles](docs/ARCHITECTURE.md)
+- [Security controls and limitations](docs/SECURITY.md)
+- [Vulnerability disclosure policy](SECURITY.md)
+- [Contributing](CONTRIBUTING.md)
+- [Branch organization and development workflow](docs/DEVELOPMENT_WORKFLOW.md)
+- [Roadmap and suggested improvements](docs/ROADMAP.md)
+- [Skills gap and market analysis](docs/SKILLS_GAP.md)
+- [Job search report — October 17, 2026](docs/BUSQUEDA_2026-10-17.md)
 
-Los currículums, las cartas, los Excel de ofertas, los registros y el perfil con datos de contacto **no se versionan** (ver `.gitignore`; un hook `pre-commit` y gitleaks lo vigilan). El repositorio solo contiene datos de demostración procedentes de anuncios públicos. Para usar tu propio perfil, copia `backend/config/candidate_profile.example.yaml` a `candidate_profile.yaml`.
+## Data and privacy
 
-## English summary
+Generated CVs, letters, personal offer spreadsheets, logs, credentials, and the private candidate configuration are excluded from version control through `.gitignore`. Optional local hooks and CI secret scanning add checks for sensitive files and credential patterns.
 
-JobHunter is a full-stack job-search assistant: it collects job offers, scores them against a candidate profile, tailors the CV and cover letter to each offer using only skills the profile actually proves, and reports the technology gap against the market. Angular 20 + TypeScript frontend, FastAPI backend with hexagonal architecture, pytest and Karma test suites, CI and a live demo on GitHub Pages.
+The public demo includes sample job offers and the author's professional profile, including public contact information. To configure the backend and automation for your own use, copy `backend/config/candidate_profile.example.yaml` to `backend/config/candidate_profile.yaml`. The frontend profile is loaded separately from `data/demo/profile.json`; review it before publishing a customized demo.
 
-## Autora
+## Author
 
-**María Reyes Artacho Carrero** · Desarrolladora full-stack junior (Java · Spring Boot · Angular) · Sevilla
-[LinkedIn](https://www.linkedin.com/in/maria-reyes-a-carrero/) · [mariareyesartcar+github@gmail.com](mailto:mariareyesartcar+github@gmail.com)
+**María Reyes Artacho Carrero** · Junior full-stack developer (Java, Spring Boot, Angular) · Seville, Spain
 
-Licencia [MIT](LICENSE).
+[LinkedIn](https://www.linkedin.com/in/maria-reyes-a-carrero/) · [Email](mailto:mariareyesartcar+github@gmail.com)
+
+Licensed under the [MIT License](LICENSE).
