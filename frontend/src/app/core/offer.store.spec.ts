@@ -4,6 +4,7 @@ import { TestBed } from '@angular/core/testing';
 import { offer } from '../../testing/fixtures';
 import { OfferStorage } from './gateways/offer-storage';
 import { Offer } from './models';
+import { CareerService } from './career.service';
 import { OfferStore } from './offer.store';
 
 class MemoryStorage extends OfferStorage {
@@ -95,6 +96,17 @@ describe('OfferStore', () => {
     await loading;
     expect(store.offers().map((o) => o.id)).toEqual([2]);
     expect(store.offers()[0].url).toBeNull();
+  });
+
+  it('does not record a history event when the API rejects a status change', async () => {
+    await loadWithApi(flushApi({ items: [offer({ id: 7 })] }));
+    const record = spyOn(TestBed.inject(CareerService), 'recordStatus');
+    const pending = store.setStatus(store.offers()[0], 'Entrevista');
+    const rejected = expectAsync(pending).toBeRejected();
+    http.expectOne(r => r.method === 'PATCH').flush({ error: 'Denied' }, { status: 500, statusText: 'Error' });
+    await rejected;
+    expect(record).not.toHaveBeenCalled();
+    expect(store.offers()[0].kanban_status).toBe('Pendiente');
   });
 
   describe('en modo demo', () => {

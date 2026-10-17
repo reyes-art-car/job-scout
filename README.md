@@ -34,7 +34,21 @@ The frontend exports Word-compatible HTML and supports PDF output through the br
     <td><img src="docs/screenshots/carta.png" alt="Cover letter editor"></td>
     <td><img src="docs/screenshots/skills.png" alt="Skills gap analysis"></td>
   </tr>
+  <tr>
+    <td><img src="docs/screenshots/evidencias.png" alt="Competency evidence and preferences"></td>
+    <td><img src="docs/screenshots/historial.png" alt="CV versions and application history"></td>
+  </tr>
 </table>
+
+## Evidence-based job search
+
+- Inspect requirement sources and weights, correct their classification, and distinguish technical coverage from interview probability.
+- Attach projects, achievements, and certificates to skills. Confirm new competencies explicitly before including them in the CV.
+- Track learning progress against the offers that need each skill, with links to the relevant opportunities.
+- Review experience, seniority, location, and remote-work warnings separately from the technical score.
+- Save CV versions, register applications, review seven-day follow-up dates, and retain a local status history.
+
+The career workspace is stored in your browser, including when offers come from the API. Export or restore a JSON backup from **Mi experiencia** to retain it across devices. See the [workflow and limitations](docs/EVIDENCE_BASED_SEARCH.md).
 
 ## Technology stack
 
@@ -127,7 +141,7 @@ npm test -- --watch=false --browsers=ChromeHeadless
 npm run build
 ```
 
-Latest local validation: **81 backend tests passed, 67 automation tests passed, and 51 frontend tests passed**. One additional backend test was skipped because creating symbolic links requires privileges on the Windows test machine. Backend coverage was **93.06%**. Linting, formatting, type checks, Bandit, and the production frontend build also passed.
+Latest local validation: **81 backend tests passed, 78 automation tests passed, and 70 frontend tests passed**. One additional backend test was skipped because creating symbolic links requires privileges on the Windows test machine. Backend coverage was **93.06%**. Linting, formatting, type checks, Bandit, and the production frontend build also passed.
 
 GitHub Actions is configured to run quality checks, dependency audits, secret scanning, and CodeQL analysis. See [CONTRIBUTING.md](CONTRIBUTING.md) for local commit hooks and contribution conventions.
 

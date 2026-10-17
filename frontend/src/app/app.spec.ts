@@ -19,13 +19,13 @@ describe('App', () => {
     }).compileComponents();
   });
 
-  it('muestra la navegación principal con las cinco secciones', () => {
+  it('muestra la navegación principal con las siete secciones', () => {
     const fixture = TestBed.createComponent(App);
     fixture.detectChanges();
     const links = Array.from((fixture.nativeElement as HTMLElement).querySelectorAll('nav a')).map((a) =>
       a.textContent?.trim(),
     );
-    expect(links).toEqual(['Panel', 'Ofertas', 'Adaptar CV', 'Carta de presentación', 'Brecha de skills']);
+    expect(links).toEqual(['Panel', 'Ofertas', 'Adaptar CV', 'Carta de presentación', 'Brecha de skills', 'Mi experiencia', 'Mi historial']);
   });
 
   it('muestra el nombre de la candidata en el pie lateral', () => {

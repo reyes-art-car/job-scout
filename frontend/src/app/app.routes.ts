@@ -27,5 +27,7 @@ export const routes: Routes = [
     title: 'Brecha de skills · JobHunter',
     loadComponent: () => import('./features/skills/skills-gap').then((m) => m.SkillsGap),
   },
+  { path: 'mi-perfil', title: 'Mi experiencia · JobHunter', loadComponent: () => import('./features/career/profile').then(m => m.CareerProfile) },
+  { path: 'candidaturas', title: 'Mi historial · JobHunter', loadComponent: () => import('./features/career/history').then(m => m.ApplicationHistory) },
   { path: '**', redirectTo: 'panel' },
 ];

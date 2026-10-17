@@ -1,7 +1,7 @@
 import { Profile, SkillGroup, SkillsOrder } from './models';
 import { OfferAnalysis, OfferInput, Role, analyzeOffer, topMatched } from './offer-analysis';
 import { capitalize, joinEs } from './text';
-import { detectTechs } from './tech-catalog';
+import { TechLevel, detectTechs } from './tech-catalog';
 
 export interface SkillItem {
   text: string;
@@ -68,8 +68,8 @@ function buildSummary(analysis: OfferAnalysis): string {
   return `${s1} ${s2[analysis.role]} ${s3}${lang}`.replace(/\s+/g, ' ').trim();
 }
 
-export function tailorCv(profile: Profile, offer: OfferInput, description = ''): TailoredCv {
-  const analysis = analyzeOffer(offer, description);
+export function tailorCv(profile: Profile, offer: OfferInput, description = '', levels: Record<string, TechLevel> = {}, corrected?: OfferAnalysis): TailoredCv {
+  const analysis = corrected ?? analyzeOffer(offer, description, levels);
   const weightById = new Map(analysis.requirements.map((r) => [r.tech.id, r.weight] as const));
 
   const bullets: TailoredBullet[] = profile.bullets
@@ -83,7 +83,7 @@ export function tailorCv(profile: Profile, offer: OfferInput, description = ''):
   const skillsOrder = SKILLS_BY_ROLE[analysis.role];
   const hitIds = new Set(analysis.requirements.map((r) => r.tech.id));
   const groups: TailoredGroup[] = profile.skills[skillsOrder].map((g: SkillGroup) => {
-    const items = g.content.split(',').map((raw) => {
+    const items = g.content.split(',').filter(raw => !detectTechs(raw).some(t => levels[t.id] === 'gap' || levels[t.id] === 'partial')).map((raw) => {
       const text = raw.trim();
       return { text, hit: detectTechs(text).some((t) => hitIds.has(t.id)) };
     });
@@ -91,11 +91,11 @@ export function tailorCv(profile: Profile, offer: OfferInput, description = ''):
     return { label: g.label, items: [...items.filter((i) => i.hit), ...items.filter((i) => !i.hit)] };
   });
 
-  const topNames = topMatched(analysis, 3).map((n) => n.toUpperCase());
+  const topNames = (Object.keys(levels).length ? analysis.matched.slice(0, 3).map(r => r.tech.name) : topMatched(analysis, 3)).map(n => n.toUpperCase());
   return {
     analysis,
     title: `JUNIOR ${ROLE_LABEL[analysis.role]} · ${topNames.join(' · ')}`,
-    summary: buildSummary(analysis),
+    summary: Object.keys(levels).length ? `${profile.title}. ${profile.project}. ${analysis.matched.length ? 'Competencias relevantes: ' + analysis.matched.map(r => r.tech.name).join(', ') + '.' : 'Revisa los requisitos y selecciona la experiencia que puedas demostrar.'}` : buildSummary(analysis),
     bullets,
     skillsOrder,
     groups,

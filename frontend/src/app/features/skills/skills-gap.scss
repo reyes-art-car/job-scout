@@ -43,3 +43,8 @@ td strong {
 .mt {
   margin-top: 12px;
 }
+
+.learning-step { padding:20px 0;border-bottom:1px solid var(--border); }
+.learning-step p, .learning-step label { margin:12px 0; }
+.learning-step select { max-width:300px; }
+.learning-step summary { cursor:pointer;padding:12px 0; }
