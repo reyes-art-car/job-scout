@@ -33,7 +33,7 @@ jobs:
       - run: npx ng build --base-href "/${{ github.event.repository.name }}/"
         working-directory: frontend
       - uses: actions/configure-pages@v5
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@v5
         with:
           path: frontend/dist/job-hunter/browser
       - id: deployment
