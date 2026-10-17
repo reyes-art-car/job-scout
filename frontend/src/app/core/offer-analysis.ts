@@ -1,5 +1,5 @@
 import { Offer } from './models';
-import { LEVEL_WEIGHT, Tech, detectTechs } from './tech-catalog';
+import { LEVEL_WEIGHT, Tech, TechLevel, detectTechs } from './tech-catalog';
 
 export type Role = 'backend' | 'fullstack' | 'frontend';
 export type Origin = 'obligatoria' | 'deseable' | 'texto';
@@ -71,8 +71,8 @@ function detectRole(offer: OfferInput, requirements: Requirement[]): Role {
 const sumWeights = (items: Requirement[], factor: (r: Requirement) => number): number =>
   items.reduce((sum, r) => sum + r.weight * factor(r), 0);
 
-export function analyzeOffer(offer: OfferInput, description = ''): OfferAnalysis {
-  const requirements = extractRequirements(offer, description);
+export function analyzeOffer(offer: OfferInput, description = '', levels: Record<string, TechLevel> = {}, corrected?: Requirement[]): OfferAnalysis {
+  const requirements = corrected ?? extractRequirements(offer, description).map(r => ({ ...r, tech: { ...r.tech, level: levels[r.tech.id] ?? r.tech.level } }));
   const total = sumWeights(requirements, () => 1);
   const covered = sumWeights(requirements, (r) => LEVEL_WEIGHT[r.tech.level]);
   return {

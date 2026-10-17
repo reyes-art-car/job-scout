@@ -1,5 +1,8 @@
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { CareerService } from '../../core/career.service';
+import { profileLevels } from '../../core/career';
+import { ProfileService } from '../../core/profile.service';
 import { techDemand } from '../../core/market';
 import { KANBAN_STATUSES } from '../../core/models';
 import { OfferStore } from '../../core/offer.store';
@@ -15,6 +18,8 @@ import { IconComponent } from '../../shared/icon.component';
 })
 export class Dashboard {
   private readonly store = inject(OfferStore);
+  private readonly career = inject(CareerService);
+  private readonly profile = inject(ProfileService).profile;
 
   protected readonly stats = this.store.stats;
   protected readonly tone = scoreTone;
@@ -51,7 +56,7 @@ export class Dashboard {
   });
 
   protected readonly demand = computed(() =>
-    techDemand(this.store.offers())
+    techDemand(this.store.offers(), profileLevels(this.profile, this.career.data()))
       .filter((d) => d.tech.id !== 'english')
       .slice(0, 10),
   );

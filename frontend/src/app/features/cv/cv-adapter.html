@@ -34,12 +34,12 @@
         </div>
 
         <div class="card">
-          <h2>Cobertura de palabras clave</h2>
+          <h2>Cobertura técnica orientativa</h2>
           <div class="meter" role="img" [attr.aria-label]="'Cobertura ' + cv.analysis.coverage + '%'">
             <i [style.width.%]="cv.analysis.coverage"></i>
           </div>
           <p class="small muted">
-            <b>{{ cv.analysis.coverage }}%</b> de lo que pide la oferta (ponderado) está acreditado en tu perfil · rol detectado:
+            <b>{{ cv.analysis.coverage }}%</b> de lo que pide la oferta (ponderado) figura en tu perfil · rol detectado:
             <b>{{ cv.analysis.role }}</b>
           </p>
 
@@ -69,6 +69,10 @@
           }
         </div>
 
+        @if (offer(); as selected) {
+          <app-match-review [offer]="selected" [profile]="profile" [mode]="store.mode()" [description]="description()" />
+        }
+
         <div class="card">
           <h2>Titular y resumen</h2>
           <label>
@@ -91,6 +95,12 @@
           <button class="btn primary" type="button" (click)="print()"><app-icon name="print" /> Imprimir / PDF</button>
         </div>
 
+        <section class="card no-print archive-panel">
+          <h2>Conservar esta versión</h2><p class="small muted">Guarda el texto y el documento de esta versión. Registrar un envío confirma una acción que ya has hecho; no envía candidaturas. Se conserva solo en este navegador.</p>
+          <div class="actions"><button class="btn" type="button" [disabled]="saving()" (click)="archive(false)">Guardar borrador</button>
+          <label>Fecha del envío<input type="date" name="appliedOn" [(ngModel)]="appliedOn" /></label><button class="btn primary" type="button" [disabled]="saving() || !appliedOn" (click)="archive(true)">Registrar envío y guardar CV</button></div>
+          <p role="status">{{ archiveMessage() || career.notice() }}</p><a routerLink="/candidaturas">Ver mi historial →</a>
+        </section>
         <article class="paper" aria-label="Vista previa del currículum">
           <header>
             <h1>{{ profile.name.toUpperCase() }}</h1>
@@ -128,10 +138,9 @@
             <b>{{ profile.education.degree }}</b> | {{ profile.education.school }} | {{ profile.education.years }}
           </p>
 
-          <h2>IDIOMAS</h2>
-          <p>
-            <b>{{ profile.languages.name }}</b> — {{ profile.languages.detail }}
-          </p>
+          @if (cvProfile().languages.name) {
+            <h2>IDIOMAS</h2><p><b>{{ cvProfile().languages.name }}</b> — {{ cvProfile().languages.detail }}</p>
+          }
         </article>
         <p class="small muted no-print">
           Las competencias resaltadas son las que pide la oferta y suben dentro de su bloque; al imprimir se quita el resaltado.

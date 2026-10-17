@@ -1,0 +1,39 @@
+<div class="page">
+  <header class="page-header"><div><span class="eyebrow">LO QUE PUEDES DEMOSTRAR</span><h1>Tu experiencia tiene pruebas.</h1><p>Relaciona cada competencia con un proyecto, logro o certificado. Las evidencias las aportas tú; la aplicación no las verifica.</p></div></header>
+  <p class="callout">Este espacio se guarda solo en este navegador, también cuando usas la API. Exporta una copia para conservarlo o moverlo a otro dispositivo.</p>
+  <p role="status">{{ message() || career.notice() }}</p>
+  <div class="grid cols-2">
+    <form class="card stack" (ngSubmit)="preferences()"><h2>Qué buscas ahora</h2>
+      <label>Años de experiencia profesional<input type="number" name="years" min="0" max="50" step="0.5" [(ngModel)]="years" required /></label>
+      <label>Ubicación de referencia (opcional)<input name="location" maxlength="160" [(ngModel)]="location" placeholder="Sevilla" /></label>
+      <label class="inline"><input type="checkbox" name="remoteOnly" [(ngModel)]="remoteOnly" /> Solo quiero trabajo remoto</label>
+      <p class="small muted">Las alertas señalan condiciones que revisar; no descartan automáticamente ninguna oferta.</p><button class="btn" type="submit">Guardar preferencias</button>
+    </form>
+    <form class="card stack" (ngSubmit)="addEvidence()"><h2>Añadir una evidencia</h2>
+      <label>Competencia<select name="techId" [(ngModel)]="techId">@for (tech of catalog; track tech.id) { <option [value]="tech.id">{{ tech.name }}</option> }</select></label>
+      <label>Proyecto, logro o certificado<input name="title" maxlength="160" required [(ngModel)]="title" /></label>
+      <label>Qué hiciste y qué demuestra<textarea name="description" rows="3" maxlength="2000" required [(ngModel)]="description"></textarea></label>
+      <label>Enlace público (opcional)<input name="url" type="url" maxlength="2000" [(ngModel)]="url" placeholder="https://github.com/…" /></label>
+      <button class="btn primary" type="submit">Guardar evidencia</button>
+    </form>
+  </div>
+  <section class="card stack"><h2>Tus evidencias</h2>
+    @for (e of career.data().evidence; track e.id) {
+      <article class="entry"><strong>{{ e.title }} · {{ name(e.techId) }}</strong><p>{{ e.description }}</p>
+        <div class="actions">@if (e.url) { <a [href]="e.url" target="_blank" rel="noopener noreferrer">Ver evidencia ↗</a> }<button class="btn" type="button" (click)="career.removeEvidence(e.id)">Eliminar evidencia</button></div>
+      </article>
+    } @empty { <p class="muted">Aún no has adjuntado evidencias. Los logros de tu perfil siguen disponibles como referencia.</p> }
+  </section>
+  <section class="card stack"><h2>Revisar mis competencias</h2><p class="small muted">Completar una práctica no añade una competencia al CV automáticamente. Para confirmarla necesitas una evidencia y una decisión explícita.</p>
+    <label>Buscar una competencia<input name="skillSearch" [ngModel]="search()" (ngModelChange)="search.set($event)" placeholder="Java, Angular, Kafka…" /></label>
+    <div class="table-wrap"><table><thead><tr><th>Competencia</th><th>Qué la respalda</th><th>Mi nivel</th></tr></thead><tbody>
+      @for (tech of visibleTechs(); track tech.id) { <tr><td>{{ tech.name }}</td><td>@for (source of sources(tech.id); track source) { <p class="small">{{ source }}</p> } @empty { <span class="muted">Sin evidencia</span> }</td><td>
+        <select [attr.aria-label]="'Nivel de ' + tech.name" [ngModel]="levels()[tech.id]" (ngModelChange)="setLevel(tech.id, $event)"><option value="have" [disabled]="!canConfirm(tech.id)">Puedo demostrarla</option><option value="partial">En práctica</option><option value="gap">Aún no la tengo</option></select>
+      </td></tr> }
+    </tbody></table></div>
+  </section>
+  <section class="card stack"><h2>Conservar mi progreso</h2><p>La copia incluye evidencias, preferencias, correcciones, historial y CV guardados. Puede contener datos personales; guárdala en un lugar privado.</p>
+    <button class="btn" type="button" (click)="export()">Exportar copia JSON</button>
+    <details><summary>Restaurar una copia</summary><label>Pega el contenido del archivo<textarea name="backup" rows="5" maxlength="10000000" [(ngModel)]="backup"></textarea></label><label class="inline"><input type="checkbox" [(ngModel)]="confirmImport" /> Sustituir el progreso actual por esta copia</label><button class="btn" type="button" [disabled]="!confirmImport || !backup" (click)="import()">Restaurar copia</button></details>
+  </section>
+</div>

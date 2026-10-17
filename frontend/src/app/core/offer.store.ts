@@ -1,5 +1,6 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { Injectable, computed, inject, signal } from '@angular/core';
+import { CareerService } from './career.service';
 import { ApiOfferGateway } from './gateways/api-offer.gateway';
 import { DemoOfferGateway } from './gateways/demo-offer.gateway';
 import { OfferGateway } from './gateways/offer-gateway';
@@ -17,6 +18,7 @@ const HTTP_UNAUTHORIZED = 401;
 @Injectable({ providedIn: 'root' })
 export class OfferStore {
   private readonly api = inject(ApiOfferGateway);
+  private readonly career = inject(CareerService);
   private readonly demo = inject(DemoOfferGateway);
   private gateway: OfferGateway = this.demo;
 
@@ -58,7 +60,9 @@ export class OfferStore {
   }
 
   async setStatus(offer: Offer, status: KanbanStatus): Promise<void> {
-    this.replace(await this.gateway.setStatus(offer, status));
+    const updated = await this.gateway.setStatus(offer, status);
+    this.career.recordStatus(offer, this.mode(), status);
+    this.replace(updated);
   }
 
   async setNotes(offer: Offer, notes: string): Promise<void> {

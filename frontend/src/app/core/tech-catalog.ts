@@ -65,7 +65,7 @@ export const TECH_CATALOG: readonly Tech[] = [
   T('javascript', 'JavaScript', 'Frontend', 'have', 'javascript|ecmascript|es6'),
   T('html-css', 'HTML5 / CSS3', 'Frontend', 'have', 'html5?|css3?|sass|scss'),
   T('bootstrap', 'Bootstrap', 'Frontend', 'have', 'bootstrap|tailwind'),
-  T('react', 'React / Next.js', 'Frontend', 'gap', 'react(?:\\.?js)?|reactjs|next\\.?js|redux', 'A', 'Segundo cliente del tracker en React + Vite (ya hay scaffold).'),
+  T('react', 'React / Next.js', 'Frontend', 'gap', 'react(?:\\.?js)?|reactjs|next\\.?js|redux', 'A', 'Segundo cliente del tracker en React + Vite.'),
   T('rxjs', 'RxJS / NgRx', 'Frontend', 'gap', 'rxjs|ngrx', 'B', 'Estado del tablero Kanban con NgRx SignalStore.'),
   T('angular-material', 'Angular Material', 'Frontend', 'gap', 'angular\\s*material', 'B', 'Reescribir la tabla de ofertas con Material Table.'),
   T('vue', 'Vue.js', 'Frontend', 'gap', 'vue(?:\\.?js|3)?', 'C'),
