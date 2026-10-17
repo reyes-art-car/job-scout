@@ -1,4 +1,4 @@
-# Backend · Job Hunter API
+# Backend · Job Hopper & Learning API
 
 FastAPI con arquitectura hexagonal. Ver [docs/ARCHITECTURE.md](../docs/ARCHITECTURE.md).
 
