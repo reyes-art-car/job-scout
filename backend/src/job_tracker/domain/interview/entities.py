@@ -1,16 +1,16 @@
 from dataclasses import dataclass
 from datetime import datetime
-from enum import Enum
+from enum import StrEnum
 
 
-class GuidedMode(str, Enum):
+class GuidedMode(StrEnum):
     TECHNICAL_QUESTION = "technical_question"
     BEHAVIORAL_STAR = "behavioral_star"
     MOCK_INTERVIEW = "mock_interview"
     GENERAL_TIPS = "general_tips"
 
 
-class ChatRole(str, Enum):
+class ChatRole(StrEnum):
     USER = "user"
     ASSISTANT = "assistant"
 

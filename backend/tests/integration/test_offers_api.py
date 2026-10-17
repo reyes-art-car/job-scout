@@ -80,7 +80,7 @@ def test_patch_updates_notes_and_salary(client: TestClient, offer_payload: dict)
 
 
 def test_export_csv_is_excel_friendly(client: TestClient, offer_payload: dict) -> None:
-    _create(client, {**offer_payload, "notes": "=HYPERLINK(\"http://evil\")"})
+    _create(client, {**offer_payload, "notes": '=HYPERLINK("http://evil")'})
     response = client.get("/api/offers/export.csv")
 
     assert response.status_code == 200

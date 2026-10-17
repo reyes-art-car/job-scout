@@ -3,9 +3,8 @@ from datetime import date
 
 from job_tracker.domain.offer.entities import KanbanStatus, Offer, OfferSource, Priority
 from job_tracker.domain.offer.exceptions import DuplicateOfferError
-from job_tracker.domain.offer.repository import OfferRepository
-
-HIGH_PRIORITY_THRESHOLD = 75  # mismo umbral que la rúbrica de busqueda_diaria.py
+from job_tracker.domain.offer.repository import OfferRegistry
+from job_tracker.domain.offer.scoring import priority_for
 
 
 @dataclass
@@ -35,16 +34,14 @@ class NewOfferData:
 class CreateOffer:
     """Caso de uso: alta de una oferta, con ID secuencial (OF037…) y detección de duplicados por URL."""
 
-    def __init__(self, repository: OfferRepository):
+    def __init__(self, repository: OfferRegistry):
         self._repository = repository
 
     def execute(self, data: NewOfferData) -> Offer:
         code = self._repository.next_code()
         if self._repository.exists_by_code_or_url(code, data.url):
             raise DuplicateOfferError(code=code, url=data.url)
-        priority = data.priority or (
-            Priority.ALTA if data.compatibility >= HIGH_PRIORITY_THRESHOLD else Priority.SECUNDARIA
-        )
+        priority = data.priority or priority_for(data.compatibility)
         offer = Offer(
             id=None,
             code=code,

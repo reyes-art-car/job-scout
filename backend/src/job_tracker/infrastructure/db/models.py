@@ -44,9 +44,7 @@ class OfferModel(Base):
     cv_summary: Mapped[str | None] = mapped_column(Text, nullable=True)
     bullets_order_csv: Mapped[str] = mapped_column(String(50), default="0,1,2,3,4,5")
     created_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)
-    updated_at: Mapped[datetime] = mapped_column(
-        DateTime, default=_utcnow, onupdate=_utcnow
-    )
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow, onupdate=_utcnow)
 
 
 class InterviewSessionModel(Base):
@@ -54,9 +52,7 @@ class InterviewSessionModel(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     mode: Mapped[str] = mapped_column(String(30))
-    offer_id: Mapped[int | None] = mapped_column(
-        ForeignKey("offers.id", ondelete="SET NULL"), nullable=True
-    )
+    offer_id: Mapped[int | None] = mapped_column(ForeignKey("offers.id", ondelete="SET NULL"), nullable=True)
     title: Mapped[str] = mapped_column(String(255))
     created_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)
 
@@ -69,9 +65,7 @@ class ChatMessageModel(Base):
     __tablename__ = "chat_messages"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    session_id: Mapped[int] = mapped_column(
-        ForeignKey("interview_sessions.id", ondelete="CASCADE")
-    )
+    session_id: Mapped[int] = mapped_column(ForeignKey("interview_sessions.id", ondelete="CASCADE"))
     role: Mapped[str] = mapped_column(String(10))
     content: Mapped[str] = mapped_column(Text)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)

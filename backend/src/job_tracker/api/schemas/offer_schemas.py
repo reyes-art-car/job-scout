@@ -2,6 +2,7 @@ from datetime import date, datetime
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from job_tracker.api.schemas.types import SafeUrl, Text100, Text255, Text4000
 from job_tracker.domain.offer.entities import KanbanStatus, Offer, OfferSource, Priority
 
 
@@ -53,32 +54,39 @@ class OfferStatsOut(BaseModel):
 
 
 class OfferStatusUpdate(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
     status: KanbanStatus
 
 
 class OfferPatch(BaseModel):
-    notes: str | None = None
-    salary: str | None = None
+    model_config = ConfigDict(extra="forbid")
+
+    notes: Text4000 | None = None
+    salary: Text255 | None = None
     kanban_status: KanbanStatus | None = None
 
 
 class OfferCreate(BaseModel):
-    title: str = Field(min_length=1, max_length=255)
-    company: str = Field(min_length=1, max_length=255)
-    portal: str = Field(default="Otro", max_length=255)
-    url: str | None = Field(default=None, max_length=1000)
+    # extra="forbid": un campo desconocido es un error, no se ignora en silencio (evita mass assignment).
+    model_config = ConfigDict(extra="forbid")
+
+    title: Text255 = Field(min_length=1)
+    company: Text255 = Field(min_length=1)
+    portal: Text255 = "Otro"
+    url: SafeUrl | None = None
     published_date: date | None = None
-    location: str = Field(default="", max_length=255)
-    modality: str = Field(default="", max_length=100)
-    contract_type: str = Field(default="No especificado", max_length=100)
-    salary: str | None = Field(default=None, max_length=255)
-    experience_required: str = Field(default="No especificado", max_length=255)
-    mandatory_tech: str = ""
-    desirable_tech: str = ""
-    requirements_met: str = ""
-    requirements_missing: str = ""
-    score_reason: str = ""
+    location: Text255 = ""
+    modality: Text100 = ""
+    contract_type: Text100 = "No especificado"
+    salary: Text255 | None = None
+    experience_required: Text255 = "No especificado"
+    mandatory_tech: Text4000 = ""
+    desirable_tech: Text4000 = ""
+    requirements_met: Text4000 = ""
+    requirements_missing: Text4000 = ""
+    score_reason: Text4000 = ""
     compatibility: int = Field(default=0, ge=0, le=100)
     kanban_status: KanbanStatus = KanbanStatus.PENDIENTE
-    notes: str | None = None
+    notes: Text4000 | None = None
     priority: Priority | None = None
