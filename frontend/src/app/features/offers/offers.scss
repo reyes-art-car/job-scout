@@ -6,25 +6,6 @@
   clip: rect(0 0 0 0);
 }
 
-.form .fields {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 12px;
-  margin-bottom: 16px;
-
-  .wide {
-    grid-column: 1 / -1;
-  }
-}
-
-.estimate {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  justify-content: flex-end;
-  align-items: flex-start;
-}
-
 .filters {
   display: flex;
   flex-wrap: wrap;
@@ -42,6 +23,7 @@
 .searchbox {
   position: relative;
   display: block;
+
   app-icon {
     position: absolute;
     left: 10px;
@@ -66,6 +48,7 @@
     padding: 8px 10px;
     color: var(--muted);
     cursor: pointer;
+
     &.on {
       background: var(--accent-soft);
       color: var(--accent);
@@ -75,6 +58,7 @@
 
 .title {
   min-width: 240px;
+
   strong,
   span {
     display: block;
@@ -88,52 +72,9 @@
 
 .row-actions {
   white-space: nowrap;
+
   .btn {
     padding: 6px 8px;
     margin-left: 4px;
-  }
-}
-
-.board {
-  display: grid;
-  grid-auto-flow: column;
-  grid-auto-columns: minmax(250px, 1fr);
-  gap: 14px;
-  overflow-x: auto;
-  padding-bottom: 8px;
-
-  .col {
-    background: var(--surface-2);
-    border: 1px dashed var(--border);
-    border-radius: var(--radius);
-    padding: 12px;
-    min-height: 220px;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-
-    h2 {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-  }
-}
-
-.k-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  cursor: grab;
-  box-shadow: var(--shadow);
-
-  .top {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
   }
 }

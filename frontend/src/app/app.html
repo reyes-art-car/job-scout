@@ -30,6 +30,15 @@
           <span class="chip">Cargando…</span>
         }
       }
+      @if (store.authRequired()) {
+        <form class="token" (submit)="connect($event, tokenInput.value)">
+          <label>
+            La API pide un token
+            <input #tokenInput type="password" autocomplete="off" maxlength="200" required />
+          </label>
+          <button class="btn primary" type="submit">Conectar</button>
+        </form>
+      }
       <p class="small muted">{{ profile.name }}<br />{{ profile.title }}</p>
     </div>
   </aside>

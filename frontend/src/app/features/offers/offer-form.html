@@ -1,0 +1,75 @@
+<form class="card form" (ngSubmit)="submit()" #f="ngForm">
+  <h2>Nueva oferta</h2>
+  <div class="fields">
+    <label>
+      Puesto *
+      <input name="title" required [maxlength]="maxText" [(ngModel)]="draft.title" (ngModelChange)="updateEstimate()" />
+    </label>
+    <label>Empresa * <input name="company" required [maxlength]="maxText" [(ngModel)]="draft.company" /></label>
+    <label>
+      Portal
+      <select name="portal" [(ngModel)]="draft.portal">
+        <option>LinkedIn</option>
+        <option>Tecnoempleo</option>
+        <option>Infojobs</option>
+        <option>Indeed</option>
+        <option>Web de empresa</option>
+        <option>Otro</option>
+      </select>
+    </label>
+    <label>
+      Enlace
+      <input
+        name="url"
+        inputmode="url"
+        placeholder="https://"
+        maxlength="1000"
+        [(ngModel)]="draft.url"
+        (ngModelChange)="validateUrl()"
+        [attr.aria-invalid]="urlInvalid()"
+      />
+      @if (urlInvalid()) {
+        <span class="error" role="alert">Solo se admiten enlaces http o https.</span>
+      }
+    </label>
+    <label>Ubicación<input name="location" [maxlength]="maxText" [(ngModel)]="draft.location" /></label>
+    <label>
+      Modalidad
+      <select name="modality" [(ngModel)]="draft.modality">
+        <option>Remoto 100%</option>
+        <option>Híbrido</option>
+        <option>Presencial</option>
+      </select>
+    </label>
+    <label>Salario<input name="salary" placeholder="30.000 – 36.000 €/año" [maxlength]="maxText" [(ngModel)]="draft.salary" /></label>
+    <label>Experiencia<input name="exp" placeholder="1-2 años" [maxlength]="maxText" [(ngModel)]="draft.experience_required" /></label>
+    <label class="wide">
+      Tecnologías obligatorias
+      <input
+        name="mand"
+        placeholder="Java, Spring Boot, Angular, Docker…"
+        [maxlength]="maxLong"
+        [(ngModel)]="draft.mandatory_tech"
+        (ngModelChange)="updateEstimate()"
+      />
+    </label>
+    <label class="wide">
+      Tecnologías deseables
+      <input name="des" [maxlength]="maxLong" [(ngModel)]="draft.desirable_tech" (ngModelChange)="updateEstimate()" />
+    </label>
+    <label>
+      Compatibilidad (0 = automática)
+      <input name="compat" type="number" min="0" max="100" [(ngModel)]="draft.compatibility" />
+    </label>
+    <div class="estimate">
+      <span class="muted small">Estimación por palabras clave</span>
+      <span class="score" [class]="tone(estimate())">{{ estimate() }}%</span>
+    </div>
+  </div>
+  <div class="actions">
+    <button class="btn primary" type="submit" [disabled]="f.invalid || urlInvalid()">
+      <app-icon name="check" /> Guardar
+    </button>
+    <button class="btn" type="button" (click)="cancelled.emit()">Cancelar</button>
+  </div>
+</form>
