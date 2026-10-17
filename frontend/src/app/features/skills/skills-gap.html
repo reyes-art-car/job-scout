@@ -17,6 +17,18 @@
     </div>
   </header>
 
+  <section class="card">
+    <h2>Tu siguiente práctica</h2><p class="small muted">Ordenado por brechas técnicas que puedes cerrar y demanda en tus ofertas. Cerrar una brecha no garantiza cumplir experiencia o ubicación.</p>
+    <p role="status">{{ progressMessage() || career.notice() }}</p>
+    @for (g of gaps().slice(0, 3); track g.tech.id) {
+      <article class="learning-step">
+        <h3>{{ g.tech.name }} · {{ g.offers }} ofertas</h3><p>{{ g.tech.plan ?? 'Construye una pequeña funcionalidad con pruebas y documenta lo que has aprendido.' }}</p>
+        <label>Mi progreso<select [value]="career.data().skills[g.tech.id]?.stage ?? 'pendiente'" (change)="stage(g.tech.id, value($event))"><option value="pendiente">Por empezar</option><option value="practicando">En práctica</option><option value="completado">Práctica completada</option></select></label>
+        <a routerLink="/mi-perfil" [queryParams]="{ tech: g.tech.id }">Adjuntar evidencia y revisar mi nivel →</a>
+        <details><summary>Ver las {{ g.offers }} ofertas relacionadas</summary><ul>@for (offer of opportunities(g.tech.id); track offer.id) { <li><a routerLink="/adaptar-cv" [queryParams]="{ oferta: offer.id }">{{ offer.title }} · {{ offer.company }}</a></li> }</ul></details>
+      </article>
+    } @empty { <p class="empty">No hay brechas detectadas en las tecnologías reconocidas.</p> }
+  </section>
   <div class="table-wrap">
     <table>
       <thead>
@@ -55,7 +67,7 @@
                 <span class="chip" [class.bad]="g.tech.priority === 'A'" [class.warn]="g.tech.priority === 'B'">{{ g.tech.priority }}</span>
               }
             </td>
-            <td class="small">{{ g.tech.plan ?? 'Aprender solo si una oferta concreta lo exige.' }}</td>
+            <td class="small"><a routerLink="/mi-perfil" [queryParams]="{ tech: g.tech.id }">Añadir evidencia</a><br />{{ g.tech.plan ?? 'Aprender solo si una oferta concreta lo exige.' }}</td>
           </tr>
         } @empty {
           <tr>

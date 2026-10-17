@@ -1,6 +1,6 @@
 import { Offer } from './models';
 import { analyzeOffer } from './offer-analysis';
-import { Tech } from './tech-catalog';
+import { Tech, TechLevel } from './tech-catalog';
 
 export interface TechDemand {
   tech: Tech;
@@ -13,10 +13,10 @@ export interface TechDemand {
 }
 
 /** Frecuencia de cada tecnología del catálogo en el conjunto de ofertas. */
-export function techDemand(offers: readonly Offer[]): TechDemand[] {
+export function techDemand(offers: readonly Offer[], levels: Record<string, TechLevel> = {}): TechDemand[] {
   const counts = new Map<string, { tech: Tech; offers: number; mandatory: number }>();
   for (const offer of offers) {
-    for (const req of analyzeOffer(offer).requirements) {
+    for (const req of analyzeOffer(offer, '', levels).requirements) {
       const entry = counts.get(req.tech.id) ?? { tech: req.tech, offers: 0, mandatory: 0 };
       entry.offers += 1;
       if (req.origin === 'obligatoria') entry.mandatory += 1;

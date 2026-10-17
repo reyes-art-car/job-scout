@@ -6,7 +6,8 @@ import { Tone, buildCoverLetter, letterToText } from '../../core/cover-letter';
 import { downloadFile, letterToWordHtml, slug } from '../../core/export';
 import { OfferStore } from '../../core/offer.store';
 import { ProfileService } from '../../core/profile.service';
-import { analyzeOffer } from '../../core/offer-analysis';
+import { analyzeForCareer, enrichedProfile } from '../../core/career';
+import { CareerService } from '../../core/career.service';
 import { inputChecked, inputValue } from '../../shared/dom';
 import { IconComponent } from '../../shared/icon.component';
 
@@ -24,6 +25,7 @@ const MONTHS = [
 })
 export class CoverLetter {
   private readonly store = inject(OfferStore);
+  private readonly career = inject(CareerService);
   protected readonly profile = inject(ProfileService).profile;
 
   protected readonly value = inputValue;
@@ -51,20 +53,21 @@ export class CoverLetter {
 
   protected readonly gaps = computed(() => {
     const offer = this.offer();
-    return offer ? analyzeOffer(offer, this.description()).missing.slice(0, 3) : [];
+    return offer ? analyzeForCareer(this.profile, this.career.data(), offer, this.store.mode(), this.description()).missing.slice(0, 3) : [];
   });
 
   private readonly generated = computed(() => {
     const offer = this.offer();
     if (!offer) return '';
-    const letter = buildCoverLetter(this.profile, offer, {
+    const letter = buildCoverLetter(enrichedProfile(this.profile, this.career.data()), offer, {
+      analysis: analyzeForCareer(this.profile, this.career.data(), offer, this.store.mode(), this.description()),
       tone: this.tone(),
       mentionGaps: this.mentionGaps(),
       availability: this.availability(),
       description: this.description(),
     });
     const now = new Date();
-    const dateLine = `Sevilla, ${now.getDate()} de ${MONTHS[now.getMonth()]} de ${now.getFullYear()}`;
+    const dateLine = `${this.profile.location}, ${now.getDate()} de ${MONTHS[now.getMonth()]} de ${now.getFullYear()}`;
     return letterToText(letter, offer.company, dateLine);
   });
 

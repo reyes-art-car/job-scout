@@ -1,0 +1,18 @@
+<div class="page">
+  <header class="page-header"><div><span class="eyebrow">TU RECORRIDO</span><h1>Cada candidatura, con contexto.</h1><p>Conserva qué enviaste y cuándo. Registrar un envío no presenta la candidatura en el portal de empleo.</p></div></header>
+  <p class="callout">Historial local de este navegador. Separa ofertas de demo y API. Guarda una copia desde «Mi experiencia» para conservar los documentos.</p>
+  <div class="grid cols-2"><div class="card"><h2>Envíos registrados con CV</h2><strong>{{ sent() }}</strong></div><div class="card"><h2>Ofertas con paso a entrevista registrado</h2><strong>{{ interviews() }}</strong><p class="small muted">Estos recuentos no permiten atribuir resultados a un CV concreto. No reconstruyen actividad anterior.</p></div></div>
+  <label>Buscar por puesto o empresa<input name="search" [ngModel]="query()" (ngModelChange)="query.set($event)" /></label>
+  <section class="card stack"><h2>Versiones de CV y envíos</h2>
+    @for (s of snapshots(); track s.id) {
+      <article class="entry"><strong>{{ s.title }} · {{ s.company }}</strong><p class="small muted">{{ s.offerKey.startsWith('demo:') ? 'Demo' : 'API' }} · Guardado {{ s.at | date:'short' }}</p>
+        @if (s.appliedOn) { <p>Envío: {{ s.appliedOn | date:'mediumDate' }} · Revisar respuesta: {{ s.followUpOn | date:'mediumDate' }}</p>@if (s.followUpOn && s.followUpOn <= today) { <span class="chip warn">Fecha de seguimiento alcanzada</span> } } @else { <span class="chip">Borrador guardado; no enviado</span> }
+        <p class="small muted">Último estado registrado de la oferta: {{ currentStatus(s) }}. Puede corresponder a varias versiones enviadas.</p>
+        <details><summary>Ver el texto exacto guardado</summary><pre>{{ s.text }}</pre><button class="btn" type="button" (click)="download(s)">Descargar copia de texto</button></details>
+      </article>
+    } @empty { <p class="empty">Guarda una versión desde «Adaptar CV» o registra allí un envío para iniciar tu historial.</p> }
+  </section>
+  <section class="card stack"><h2>Cambios de estado</h2>
+    @for (e of events(); track e.id) { <article class="entry"><strong>{{ e.title }} · {{ e.company }}</strong><p>{{ e.from }} → {{ e.to }}</p><p class="small muted">{{ e.offerKey.startsWith('demo:') ? 'Demo' : 'API' }} · {{ e.at | date:'short' }}</p></article> } @empty { <p class="muted">Los cambios de estado se registran a partir de ahora.</p> }
+  </section>
+</div>

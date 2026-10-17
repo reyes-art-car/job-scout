@@ -1,5 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { CareerService } from '../../core/career.service';
+import { fitWarnings } from '../../core/career';
 import { downloadFile, offersToCsv } from '../../core/export';
 import { KANBAN_STATUSES, KanbanStatus, NewOffer, Offer, Priority } from '../../core/models';
 import { EMPTY_QUERY, OfferQuery, SortKey, applyQuery } from '../../core/offer-query';
@@ -23,6 +25,8 @@ const MAX_CHIPS = 6;
 })
 export class Offers {
   private readonly store = inject(OfferStore);
+  private readonly career = inject(CareerService);
+  protected readonly hideExperienceMismatch = signal(false);
 
   protected readonly statuses = KANBAN_STATUSES;
   protected readonly tone = scoreTone;
@@ -31,7 +35,9 @@ export class Offers {
   protected readonly view = signal<View>('tabla');
   protected readonly showForm = signal(false);
   protected readonly query = signal<OfferQuery>(EMPTY_QUERY);
-  protected readonly filtered = computed(() => applyQuery(this.store.offers(), this.query()));
+  protected readonly filtered = computed(() => applyQuery(this.store.offers(), this.query()).filter(offer => !this.hideExperienceMismatch() || !this.warnings(offer).some(w => w.kind === 'experience')));
+
+  protected warnings(offer: Offer) { return fitWarnings(offer, this.career.data().preferences); }
 
   protected patchQuery(patch: Partial<OfferQuery>): void {
     this.query.update((current) => ({ ...current, ...patch }));
