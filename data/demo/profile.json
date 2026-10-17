@@ -1,0 +1,70 @@
+{
+  "name": "María Reyes Artacho Carrero",
+  "title": "Junior Full-Stack Developer",
+  "location": "Sevilla, España",
+  "email": "mariareyesartcar+github@gmail.com",
+  "linkedin": "https://www.linkedin.com/in/maria-reyes-a-carrero/",
+  "github": "https://github.com/reyes-art-car",
+  "company": "Freelance",
+  "role": "Desarrolladora Java/Angular",
+  "period": "Marzo 2026 - Actualidad",
+  "project": "CRM de gestión comercial · Desarrollo, despliegue y evolución continua",
+  "bullets": [
+    {
+      "text": "Puse en producción y mantengo un CRM comercial desarrollado de forma individual, cubriendo arquitectura, backend, frontend, despliegue y evolución funcional según necesidades reales.",
+      "tags": ["java", "spring-boot", "angular", "docker", "clean-arch"]
+    },
+    {
+      "text": "Protegí el acceso mediante 3 mecanismos complementarios: JWT, refresh tokens y autorización por roles (RBAC) con Spring Security.",
+      "tags": ["spring-security", "jwt", "rest"]
+    },
+    {
+      "text": "Diseñé la persistencia con Java, Spring Data JPA, Hibernate y SQL, con compatibilidad para 2 motores: MySQL y PostgreSQL, aplicando arquitectura por capas y principios SOLID.",
+      "tags": ["jpa", "sql", "mysql", "postgresql", "solid", "java", "clean-arch"]
+    },
+    {
+      "text": "Construí una interfaz responsive con Angular, TypeScript, Bootstrap, HTML5 y CSS3, e integré el frontend con la API REST para gestionar la operativa comercial.",
+      "tags": ["angular", "typescript", "bootstrap", "html-css", "rest"]
+    },
+    {
+      "text": "Habilité importación y exportación de datos en 2 formatos, Excel y CSV, para agilizar la carga y extracción de información.",
+      "tags": ["excel-csv"]
+    },
+    {
+      "text": "Automaticé el ciclo de entrega con GitHub Actions y Docker, desplegué la aplicación en un VPS de IONOS y generé una APK Android.",
+      "tags": ["docker", "ci-cd", "git", "android"]
+    }
+  ],
+  "skills": {
+    "backend_first": [
+      { "label": "Backend", "content": "Java, programación orientada a objetos (POO), Spring Boot, Spring Security, Spring Data JPA, Hibernate, APIs REST, JWT, refresh tokens, RBAC, Maven, Lombok, MapStruct" },
+      { "label": "Datos", "content": "SQL, MySQL, PostgreSQL, Excel, CSV" },
+      { "label": "Calidad, arquitectura y metodología", "content": "JUnit, Mockito, SOLID, arquitectura por capas, Scrum, OpenAPI/Swagger, Postman, Bruno" },
+      { "label": "DevOps y herramientas", "content": "Git, GitHub, Docker, CI/CD, GitHub Actions, VPS IONOS, Railway, Render, Vercel, Neon" },
+      { "label": "Frontend", "content": "Angular, TypeScript, JavaScript, Bootstrap, HTML5, CSS3, diseño responsive, integración con APIs REST" }
+    ],
+    "fullstack": [
+      { "label": "Backend", "content": "Java, programación orientada a objetos (POO), Spring Boot, Spring Security, Spring Data JPA, Hibernate, APIs REST, JWT, refresh tokens, RBAC, Maven, Lombok, MapStruct" },
+      { "label": "Frontend", "content": "Angular, TypeScript, JavaScript, Bootstrap, HTML5, CSS3, diseño responsive, integración con APIs REST" },
+      { "label": "Datos", "content": "SQL, MySQL, PostgreSQL, Excel, CSV" },
+      { "label": "Calidad, arquitectura y metodología", "content": "JUnit, Mockito, SOLID, arquitectura por capas, Scrum, OpenAPI/Swagger, Postman, Bruno" },
+      { "label": "DevOps y herramientas", "content": "Git, GitHub, Docker, CI/CD, GitHub Actions, VPS IONOS, Railway, Render, Vercel, Neon" }
+    ],
+    "frontend_first": [
+      { "label": "Frontend", "content": "Angular, TypeScript, JavaScript, Bootstrap, HTML5, CSS3, diseño responsive, integración con APIs REST" },
+      { "label": "Backend", "content": "Java, programación orientada a objetos (POO), Spring Boot, Spring Security, Spring Data JPA, Hibernate, APIs REST, JWT, Maven" },
+      { "label": "Datos", "content": "SQL, MySQL, PostgreSQL" },
+      { "label": "Calidad, arquitectura y metodología", "content": "JUnit, Mockito, SOLID, arquitectura por capas, Scrum, OpenAPI/Swagger" },
+      { "label": "DevOps y herramientas", "content": "Git, GitHub, Docker, CI/CD, GitHub Actions, VPS IONOS" }
+    ]
+  },
+  "education": {
+    "degree": "Técnica Superior en Desarrollo de Aplicaciones Web (DAW)",
+    "school": "MEDAC Sevilla",
+    "years": "2024-2026"
+  },
+  "languages": {
+    "name": "Inglés C1",
+    "detail": "acreditado por la Universidad de Cambridge"
+  }
+}
