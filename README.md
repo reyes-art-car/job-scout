@@ -7,7 +7,8 @@
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?logo=typescript&logoColor=white)
 ![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688?logo=fastapi&logoColor=white)
 ![Python](https://img.shields.io/badge/Python-3.13-3776AB?logo=python&logoColor=white)
-![Tests](https://img.shields.io/badge/tests-14%20backend%20%C2%B7%2025%20frontend-1b7a4b)
+![Tests](https://img.shields.io/badge/tests-81%20backend%20%C2%B7%2067%20automation%20%C2%B7%2051%20frontend-1b7a4b)
+![Security](https://img.shields.io/badge/security-hardened-1b7a4b)
 
 **[▶ Probar la demo](https://reyes-art-car.github.io/job-scout/)** · funciona sin servidor, con datos de ejemplo y sin registrarse.
 
@@ -37,14 +38,15 @@
 | Frontend | Angular 20 · TypeScript · signals · componentes standalone · SCSS · Karma/Jasmine |
 | Backend | Python 3.13 · FastAPI · Pydantic · SQLAlchemy 2 · SQLite · pytest |
 | Automatización | Claude Code (búsqueda diaria con rúbrica de 100 puntos) · openpyxl · python-docx |
-| Calidad | GitHub Actions (tests + build) · despliegue de la demo en GitHub Pages |
+| Calidad y seguridad | ruff (con reglas bandit) · mypy strict · ESLint · pip-audit · gitleaks · CodeQL · Dependabot · Docker sin privilegios |
 
 ## Decisiones de diseño
 
 - **Arquitectura hexagonal en el backend**: el dominio no depende de SQLAlchemy ni de FastAPI y los casos de uso se prueban sin base de datos. [Detalle](docs/ARCHITECTURE.md).
 - **Un solo frontend, dos fuentes de datos**: usa la API si responde y, si no, los datos de demostración con persistencia en el navegador. Por eso la demo en GitHub Pages es totalmente interactiva.
 - **La lógica de adaptación son funciones puras** (`core/tailoring.ts`) con tests: sin red, sin estado y sin inventar tecnologías que el perfil no acredita.
-- **Seguridad básica desde el principio**: CORS cerrado, protección frente a *path traversal* en la descarga de CVs, neutralización de fórmulas en el CSV y validación estricta de entradas.
+- **Seguridad por capas, con una prueba por cada defensa**: token Bearer con denegado por defecto, límites de ritmo y de tamaño, saneado de toda entrada, CSP, cabeceras, validación de datos en el navegador, y la salida del modelo de lenguaje tratada como entrada no confiable. Qué hay, dónde y qué falta: [docs/SECURITY.md](docs/SECURITY.md).
+- **SOLID aplicado de forma verificable**: puertos pequeños, casos de uso de una sola responsabilidad, inyección de dependencias y estrategias en lugar de `if/elif`. [Dónde se ve cada principio](docs/ARCHITECTURE.md#principios-solid-aplicados).
 
 ## Ejecutarlo en local
 
@@ -54,7 +56,8 @@ Requisitos: Node 22 y Python 3.11 o superior.
 # 1) Backend (opcional: sin él, el frontend funciona en modo demo)
 cd backend
 python -m venv .venv && .venv\Scripts\activate        # Linux/macOS: source .venv/bin/activate
-pip install -r requirements.txt && pip install -e .
+pip install -r requirements-dev.txt && pip install -e .
+cp .env.example .env                                  # en producción: APP_ENV=production y API_TOKEN de 32+ caracteres
 python scripts/seed.py --demo                         # carga las ofertas de ejemplo
 uvicorn job_tracker.main:app --reload                 # http://localhost:8000/docs
 
@@ -69,8 +72,13 @@ Importar tu propio Excel: `python scripts/seed.py --excel ruta/Ofertas.xlsx`.
 ### Tests
 
 ```bash
-cd backend  && pytest -q                                        # 14 pruebas
-cd frontend && npx ng test --watch=false --browsers=ChromeHeadless   # 25 pruebas
+cd backend    && pytest -q --cov=job_tracker                       # 81 pruebas
+cd automation && pytest -q                                          # 67 pruebas
+cd frontend   && npx ng test --watch=false --browsers=ChromeHeadless  # 51 pruebas
+
+# Calidad y seguridad
+cd backend  && ruff check src tests scripts && mypy && bandit -q -r src && pip-audit -r requirements.txt
+cd frontend && npx ng lint && npm audit --omit=dev
 ```
 
 ## Estructura
@@ -78,22 +86,24 @@ cd frontend && npx ng test --watch=false --browsers=ChromeHeadless   # 25 prueba
 ```
 ├── frontend/          Angular 20 (panel, ofertas, adaptar CV, carta, brecha de skills)
 ├── backend/           FastAPI · domain / application / infrastructure / api · tests
-├── automation/        Búsqueda diaria de ofertas con Claude Code + tarea programada de Windows
+├── automation/        Búsqueda diaria de ofertas con Claude Code (paquete jobsearch/) + tarea programada de Windows
 ├── data/demo/         Ofertas y perfil de demostración (datos públicos de anuncios)
-├── docs/              Arquitectura, hoja de ruta, informe de búsqueda y brecha de skills
+├── infra/             nginx con límites y cabeceras, docker-compose de referencia
+├── docs/              Arquitectura, seguridad, hoja de ruta, informe de búsqueda y brecha de skills
 └── .github/workflows/ CI y despliegue de la demo
 ```
 
 ## Documentación
 
-- [Arquitectura](docs/ARCHITECTURE.md)
+- [Arquitectura y SOLID](docs/ARCHITECTURE.md)
+- [Seguridad](docs/SECURITY.md) · [Política de divulgación](SECURITY.md) · [Contribuir](CONTRIBUTING.md)
 - [Hoja de ruta y sugerencias](docs/ROADMAP.md)
 - [Brecha de skills (análisis de mercado)](docs/SKILLS_GAP.md)
 - [Informe de búsqueda de ofertas, 17/10/2026](docs/BUSQUEDA_2026-10-17.md)
 
 ## Privacidad
 
-Los currículums, las cartas, los Excel de ofertas, los registros y el perfil con datos de contacto **no se versionan** (ver `.gitignore`). El repositorio solo contiene datos de demostración procedentes de anuncios públicos. Para usar tu propio perfil, copia `backend/config/candidate_profile.example.yaml` a `candidate_profile.yaml`.
+Los currículums, las cartas, los Excel de ofertas, los registros y el perfil con datos de contacto **no se versionan** (ver `.gitignore`; un hook `pre-commit` y gitleaks lo vigilan). El repositorio solo contiene datos de demostración procedentes de anuncios públicos. Para usar tu propio perfil, copia `backend/config/candidate_profile.example.yaml` a `candidate_profile.yaml`.
 
 ## English summary
 

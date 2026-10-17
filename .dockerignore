@@ -1,0 +1,15 @@
+**/.git
+**/node_modules
+**/.venv
+**/__pycache__
+**/dist
+**/.angular
+CV_adaptados
+Ofertas_*
+Posibles_Ofertas_*
+private
+logs
+.env
+**/.env
+backend/config/candidate_profile.yaml
+*.db

@@ -1,0 +1,37 @@
+#!/bin/sh
+# Bloquea commits que contengan secretos o datos personales. Es una red de seguridad básica:
+# en CI además se ejecuta gitleaks. Se activa con:  git config core.hooksPath .githooks
+
+staged=$(git diff --cached --name-only --diff-filter=ACM)
+[ -z "$staged" ] && exit 0
+fail=0
+
+# 1) Ficheros que nunca deben versionarse.
+for f in $staged; do
+  case "$f" in
+    .env|*/.env|*.db|*.sqlite3|*/candidate_profile.yaml|CV_adaptados/*|Ofertas_*.xlsx|Ofertas_*.ods|private/*|logs/*|*.pem|*.key)
+      echo "BLOQUEADO: '$f' es un fichero privado (ver .gitignore)."
+      fail=1 ;;
+  esac
+done
+
+# 2) Patrones de secretos en el contenido añadido.
+added=$(git diff --cached -U0 --diff-filter=ACM | grep -E '^\+[^+]' || true)
+check() {
+  if echo "$added" | grep -Eq -e "$1"; then
+    echo "BLOQUEADO: $2"
+    fail=1
+  fi
+}
+check 'sk-ant-[A-Za-z0-9_-]{20,}'                  'parece una clave de la API de Anthropic.'
+check 'AKIA[0-9A-Z]{16}'                           'parece una clave de acceso de AWS.'
+check 'gh[pousr]_[A-Za-z0-9]{30,}'                 'parece un token de GitHub.'
+check '-----BEGIN [A-Z ]*PRIVATE KEY-----'         'contiene una clave privada.'
+check 'API_TOKEN=[A-Za-z0-9_-]{16,}'               'contiene un API_TOKEN con valor real.'
+
+if [ "$fail" -ne 0 ]; then
+  echo ""
+  echo "Commit cancelado. Si es un falso positivo, revisa el contenido y usa 'git commit --no-verify' con cuidado."
+  exit 1
+fi
+exit 0
