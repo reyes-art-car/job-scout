@@ -9,8 +9,8 @@
 }
 .brand { display: flex; align-items: center; gap: 12px; text-decoration: none; color: inherit; padding: 0 8px; }
 .brand strong { display: block; font-size: 1.1rem; line-height: 1.15; letter-spacing: -0.03em; }
-.brand small { color: var(--muted); font-size: 0.72rem; }
-.logo { display: grid; place-items: center; width: 40px; height: 40px; border: 1px solid #799875; border-radius: 50%; color: #d5e5b6; }
+.brand small { display: block; color: #d5e5b6; font-size: 0.8rem; letter-spacing: 0.05em; margin-top: 4px; }
+.logo { display: grid; place-items: center; width: 40px; height: 40px; flex-shrink: 0; border: 1px solid #799875; border-radius: 50%; color: #d5e5b6; }
 .nav-label { color: #a8c0ac; font-size: 0.62rem; letter-spacing: 0.13em; padding: 16px 12px 0; margin-bottom: -16px; }
 nav { display: flex; flex-direction: column; gap: 6px; }
 nav a { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 8px; color: #cbd9cd; text-decoration: none; font-size: 0.88rem; font-weight: 500; border-left: 3px solid transparent; }
