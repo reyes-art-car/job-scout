@@ -38,6 +38,16 @@
                 "glob": "**/*",
                 "input": "../data/demo",
                 "output": "/demo"
+              },
+              {
+                "glob": "*.png",
+                "input": "../docs/screenshots",
+                "output": "/img"
+              },
+              {
+                "glob": "pdf.worker.min.mjs",
+                "input": "node_modules/pdfjs-dist/build",
+                "output": "/pdf"
               }
             ],
             "styles": [
@@ -112,6 +122,16 @@
                 "glob": "**/*",
                 "input": "../data/demo",
                 "output": "/demo"
+              },
+              {
+                "glob": "*.png",
+                "input": "../docs/screenshots",
+                "output": "/img"
+              },
+              {
+                "glob": "pdf.worker.min.mjs",
+                "input": "node_modules/pdfjs-dist/build",
+                "output": "/pdf"
               }
             ],
             "styles": [
