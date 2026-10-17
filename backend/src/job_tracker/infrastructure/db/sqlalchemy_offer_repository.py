@@ -6,6 +6,16 @@ from job_tracker.domain.offer.exceptions import OfferNotFoundError
 from job_tracker.domain.offer.repository import OfferFilters, OfferStats
 from job_tracker.infrastructure.db.models import OfferModel
 
+_LIKE_ESCAPE = "\\"
+
+
+def _contains(term: str) -> str:
+    """Patrón LIKE «contiene» con los comodines (%, _) del texto del usuario escapados."""
+    escaped = term.replace(_LIKE_ESCAPE, _LIKE_ESCAPE * 2)
+    for wildcard in ("%", "_"):
+        escaped = escaped.replace(wildcard, _LIKE_ESCAPE + wildcard)
+    return f"%{escaped}%"
+
 
 def _to_entity(row: OfferModel) -> Offer:
     return Offer(
@@ -91,10 +101,15 @@ class SqlAlchemyOfferRepository:
         if filters.max_compatibility is not None:
             stmt = stmt.where(OfferModel.compatibility <= filters.max_compatibility)
         if filters.portal:
-            stmt = stmt.where(OfferModel.portal.ilike(f"%{filters.portal}%"))
+            stmt = stmt.where(OfferModel.portal.ilike(_contains(filters.portal), escape=_LIKE_ESCAPE))
         if filters.search:
-            like = f"%{filters.search}%"
-            stmt = stmt.where(or_(OfferModel.title.ilike(like), OfferModel.company.ilike(like)))
+            like = _contains(filters.search)
+            stmt = stmt.where(
+                or_(
+                    OfferModel.title.ilike(like, escape=_LIKE_ESCAPE),
+                    OfferModel.company.ilike(like, escape=_LIKE_ESCAPE),
+                )
+            )
 
         total = self._session.scalar(select(func.count()).select_from(stmt.subquery())) or 0
 
@@ -117,9 +132,7 @@ class SqlAlchemyOfferRepository:
     def exists_by_code_or_url(self, code: str, url: str | None) -> bool:
         stmt = select(OfferModel.id).where(OfferModel.code == code)
         if url:
-            stmt = select(OfferModel.id).where(
-                or_(OfferModel.code == code, OfferModel.url == url)
-            )
+            stmt = select(OfferModel.id).where(or_(OfferModel.code == code, OfferModel.url == url))
         return self._session.scalar(stmt) is not None
 
     def add(self, offer: Offer) -> Offer:
@@ -162,14 +175,12 @@ class SqlAlchemyOfferRepository:
         total = self._session.scalar(select(func.count()).select_from(OfferModel)) or 0
         high_priority = (
             self._session.scalar(
-                select(func.count())
-                .select_from(OfferModel)
-                .where(OfferModel.priority == Priority.ALTA.value)
+                select(func.count()).select_from(OfferModel).where(OfferModel.priority == Priority.ALTA.value)
             )
             or 0
         )
         rows = self._session.execute(
             select(OfferModel.kanban_status, func.count()).group_by(OfferModel.kanban_status)
         ).all()
-        by_status = {status: count for status, count in rows}
+        by_status = {status: count for status, count in rows}  # noqa: C416  (Row no es una tupla simple)
         return OfferStats(total=total, high_priority=high_priority, by_status=by_status)

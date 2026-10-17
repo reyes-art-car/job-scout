@@ -5,7 +5,13 @@ class OfferNotFoundError(Exception):
 
 
 class DuplicateOfferError(Exception):
+    """Ya existe una oferta con el mismo ID o la misma URL."""
+
     def __init__(self, code: str | None = None, url: str | None = None):
-        super().__init__(f"Oferta duplicada (code={code!r}, url={url!r})")
+        super().__init__("Oferta duplicada")
         self.code = code
         self.url = url
+
+
+class CvNotAvailableError(Exception):
+    """La oferta no tiene un CV adaptado o el fichero no está disponible."""
