@@ -1,0 +1,206 @@
+<div class="page">
+  <header class="page-header">
+    <div>
+      <h1>Ofertas</h1>
+      <p>Recopila, filtra y mueve cada oferta por tu embudo. Todo se exporta a Excel con un clic.</p>
+    </div>
+    <div class="actions">
+      <button class="btn" type="button" (click)="exportCsv()">
+        <app-icon name="download" /> Exportar a Excel (CSV)
+      </button>
+      <button class="btn primary" type="button" (click)="showForm.set(!showForm())">
+        <app-icon name="plus" /> Añadir oferta
+      </button>
+    </div>
+  </header>
+
+  @if (showForm()) {
+    <form class="card form" (ngSubmit)="save()" #f="ngForm">
+      <h2>Nueva oferta</h2>
+      <div class="fields">
+        <label>Puesto *<input name="title" required [(ngModel)]="draft.title" (ngModelChange)="updateEstimate()" /></label>
+        <label>Empresa *<input name="company" required [(ngModel)]="draft.company" /></label>
+        <label>
+          Portal
+          <select name="portal" [(ngModel)]="draft.portal">
+            <option>LinkedIn</option>
+            <option>Tecnoempleo</option>
+            <option>Infojobs</option>
+            <option>Indeed</option>
+            <option>Web de empresa</option>
+            <option>Otro</option>
+          </select>
+        </label>
+        <label>Enlace<input name="url" type="url" placeholder="https://" [(ngModel)]="draft.url" /></label>
+        <label>Ubicación<input name="location" [(ngModel)]="draft.location" /></label>
+        <label>
+          Modalidad
+          <select name="modality" [(ngModel)]="draft.modality">
+            <option>Remoto 100%</option>
+            <option>Híbrido</option>
+            <option>Presencial</option>
+          </select>
+        </label>
+        <label>Salario<input name="salary" placeholder="30.000 – 36.000 €/año" [(ngModel)]="draft.salary" /></label>
+        <label>Experiencia<input name="exp" placeholder="1-2 años" [(ngModel)]="draft.experience_required" /></label>
+        <label class="wide">
+          Tecnologías obligatorias
+          <input
+            name="mand"
+            placeholder="Java, Spring Boot, Angular, Docker…"
+            [(ngModel)]="draft.mandatory_tech"
+            (ngModelChange)="updateEstimate()"
+          />
+        </label>
+        <label class="wide">
+          Tecnologías deseables
+          <input name="des" [(ngModel)]="draft.desirable_tech" (ngModelChange)="updateEstimate()" />
+        </label>
+        <label>
+          Compatibilidad (0 = automática)
+          <input name="compat" type="number" min="0" max="100" [(ngModel)]="draft.compatibility" />
+        </label>
+        <div class="estimate">
+          <span class="muted small">Estimación por palabras clave</span>
+          <span class="score" [class]="tone(estimate())">{{ estimate() }}%</span>
+        </div>
+      </div>
+      <div class="actions">
+        <button class="btn primary" type="submit" [disabled]="f.invalid"><app-icon name="check" /> Guardar</button>
+        <button class="btn" type="button" (click)="showForm.set(false)">Cancelar</button>
+      </div>
+    </form>
+  }
+
+  <section class="card filters no-print" aria-label="Filtros">
+    <label class="grow">
+      Buscar
+      <span class="searchbox">
+        <app-icon name="search" />
+        <input type="search" placeholder="Puesto, empresa o tecnología" [value]="query()" (input)="query.set($any($event.target).value)" />
+      </span>
+    </label>
+    <label>
+      Estado
+      <select [value]="statusFilter()" (change)="statusFilter.set($any($event.target).value)">
+        <option value="">Todos</option>
+        @for (s of statuses; track s) {
+          <option [value]="s">{{ s }}</option>
+        }
+      </select>
+    </label>
+    <label>
+      Prioridad
+      <select [value]="priorityFilter()" (change)="priorityFilter.set($any($event.target).value)">
+        <option value="">Todas</option>
+        <option>Alta</option>
+        <option>Secundaria</option>
+      </select>
+    </label>
+    <label>
+      Compat. mínima: {{ minCompat() }}%
+      <input type="range" min="0" max="95" step="5" [value]="minCompat()" (input)="minCompat.set(+$any($event.target).value)" />
+    </label>
+    <label>
+      Ordenar por
+      <select [value]="sort()" (change)="sort.set($any($event.target).value)">
+        <option value="compat">Compatibilidad</option>
+        <option value="fecha">Fecha</option>
+        <option value="empresa">Empresa</option>
+      </select>
+    </label>
+    <div class="seg" role="group" aria-label="Vista">
+      <button type="button" [class.on]="view() === 'tabla'" (click)="view.set('tabla')" aria-label="Vista tabla">
+        <app-icon name="list" />
+      </button>
+      <button type="button" [class.on]="view() === 'kanban'" (click)="view.set('kanban')" aria-label="Vista kanban">
+        <app-icon name="kanban" />
+      </button>
+    </div>
+  </section>
+
+  <p class="muted small" aria-live="polite">{{ filtered().length }} ofertas</p>
+
+  @if (filtered().length === 0) {
+    <div class="card empty">Ninguna oferta coincide con los filtros.</div>
+  } @else if (view() === 'tabla') {
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>%</th>
+            <th>Puesto</th>
+            <th>Tecnologías</th>
+            <th>Modalidad</th>
+            <th>Estado</th>
+            <th><span class="sr">Acciones</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (o of filtered(); track o.id) {
+            <tr>
+              <td><span class="score" [class]="tone(o.compatibility)">{{ o.compatibility }}%</span></td>
+              <td class="title">
+                <strong>{{ o.title }}</strong>
+                <span class="muted small">{{ o.company }} · {{ o.portal }} · {{ o.code }}</span>
+                @if (o.salary && o.salary !== 'No especificado') {
+                  <span class="small">{{ o.salary }}</span>
+                }
+              </td>
+              <td>
+                <div class="chips">
+                  @for (t of techList(o.mandatory_tech); track t) {
+                    <span class="chip">{{ t }}</span>
+                  }
+                </div>
+              </td>
+              <td class="small">{{ o.modality }}<br /><span class="muted">{{ o.location }}</span></td>
+              <td>
+                <select class="status" [value]="o.kanban_status" (change)="changeStatus(o, $any($event.target).value)" [attr.aria-label]="'Estado de ' + o.title">
+                  @for (s of statuses; track s) {
+                    <option [value]="s" [selected]="s === o.kanban_status">{{ s }}</option>
+                  }
+                </select>
+              </td>
+              <td class="row-actions">
+                <a class="btn" routerLink="/adaptar-cv" [queryParams]="{ oferta: o.id }" title="Adaptar CV"><app-icon name="file" /></a>
+                <a class="btn" routerLink="/carta" [queryParams]="{ oferta: o.id }" title="Carta de presentación"><app-icon name="mail" /></a>
+                @if (o.url) {
+                  <a class="btn" [href]="o.url" target="_blank" rel="noopener noreferrer" title="Abrir oferta"><app-icon name="link" /></a>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  } @else {
+    <div class="board">
+      @for (col of columns(); track col.status) {
+        <section
+          class="col"
+          (dragover)="$event.preventDefault()"
+          (drop)="onDrop(col.status, $event)"
+          [attr.aria-label]="col.status"
+        >
+          <h2>{{ col.status }} <span class="chip">{{ col.offers.length }}</span></h2>
+          @for (o of col.offers; track o.id) {
+            <article class="k-card" draggable="true" (dragstart)="draggingId.set(o.id)" (dragend)="draggingId.set(null)">
+              <div class="top">
+                <span class="score" [class]="tone(o.compatibility)">{{ o.compatibility }}%</span>
+                <span class="muted small">{{ o.code }}</span>
+              </div>
+              <strong>{{ o.title }}</strong>
+              <span class="muted small">{{ o.company }} · {{ o.modality }}</span>
+              <select class="status" [value]="o.kanban_status" (change)="changeStatus(o, $any($event.target).value)" [attr.aria-label]="'Mover ' + o.title">
+                @for (s of statuses; track s) {
+                  <option [value]="s" [selected]="s === o.kanban_status">{{ s }}</option>
+                }
+              </select>
+            </article>
+          }
+        </section>
+      }
+    </div>
+  }
+</div>

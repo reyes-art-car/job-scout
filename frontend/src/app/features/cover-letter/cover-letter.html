@@ -1,0 +1,72 @@
+<div class="page">
+  <header class="page-header">
+    <div>
+      <h1>Carta de presentación</h1>
+      <p>
+        Genera una carta a partir de la oferta y de tu perfil real. Puedes retocar el texto a mano antes de descargarla; si
+        cambias una opción, se vuelve a generar.
+      </p>
+    </div>
+  </header>
+
+  @if (offer(); as o) {
+    <div class="layout">
+      <section class="card opts">
+        <label>
+          Oferta
+          <select [value]="selectedId()" (change)="pick($any($event.target).value)">
+            @for (x of offers(); track x.id) {
+              <option [value]="x.id" [selected]="x.id === selectedId()">{{ x.title }} — {{ x.company }}</option>
+            }
+          </select>
+        </label>
+        <label>
+          Tono
+          <select [value]="tone()" (change)="tone.set($any($event.target).value)">
+            <option value="formal">Formal (consultoras, banca, grandes empresas)</option>
+            <option value="cercano">Cercano (startups, producto)</option>
+          </select>
+        </label>
+        <label>
+          Disponibilidad
+          <input [value]="availability()" (input)="availability.set($any($event.target).value)" />
+        </label>
+        <label>
+          Texto de la oferta (opcional)
+          <textarea rows="4" placeholder="Pega la descripción para afinar el contenido…" [value]="description()" (input)="description.set($any($event.target).value)"></textarea>
+        </label>
+        <label class="inline">
+          <input type="checkbox" [checked]="mentionGaps()" (change)="mentionGaps.set($any($event.target).checked)" />
+          Mencionar con honestidad lo que aún no he usado
+        </label>
+        @if (gaps().length > 0) {
+          <p class="small muted">
+            Si activas la opción, se citará: {{ gaps()[0].tech.name }}@if (gaps().length > 1) {, {{ gaps()[1].tech.name }}}.
+            Actívala solo si realmente estás aprendiéndolo.
+          </p>
+        }
+      </section>
+
+      <section class="editor">
+        <div class="actions">
+          <button class="btn" type="button" (click)="copy()">
+            <app-icon [name]="copied() ? 'check' : 'copy'" /> {{ copied() ? 'Copiado' : 'Copiar' }}
+          </button>
+          <button class="btn primary" type="button" (click)="downloadWord()">
+            <app-icon name="download" /> Descargar para Word
+          </button>
+          <span class="muted small">{{ words() }} palabras · ideal 200-300</span>
+        </div>
+        <textarea
+          class="letter"
+          rows="26"
+          [attr.aria-label]="'Carta para ' + o.company"
+          [value]="text()"
+          (input)="text.set($any($event.target).value)"
+        ></textarea>
+      </section>
+    </div>
+  } @else {
+    <div class="card empty">Añade una oferta en la sección «Ofertas» para generar la carta.</div>
+  }
+</div>

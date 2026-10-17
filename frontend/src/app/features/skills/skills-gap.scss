@@ -1,0 +1,45 @@
+.seg {
+  display: inline-flex;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  overflow: hidden;
+
+  button {
+    background: var(--surface);
+    border: 0;
+    padding: 8px 12px;
+    color: var(--muted);
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+    &.on {
+      background: var(--accent-soft);
+      color: var(--accent);
+    }
+  }
+}
+
+td strong {
+  display: block;
+}
+
+.bar {
+  height: 8px;
+  min-width: 120px;
+  border-radius: 99px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  overflow: hidden;
+  margin-bottom: 4px;
+
+  i {
+    display: block;
+    height: 100%;
+    background: var(--bad);
+    min-width: 2px;
+  }
+}
+
+.mt {
+  margin-top: 12px;
+}
