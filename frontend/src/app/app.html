@@ -47,6 +47,7 @@
   </aside>
 
   <main id="main-content" class="main" tabindex="-1">
+    @if (career.notice()) { <p class="card no-print" role="alert">{{ career.notice() }}</p> }
     <router-outlet />
   </main>
 </div>

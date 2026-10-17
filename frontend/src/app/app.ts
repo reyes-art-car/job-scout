@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { CareerService } from './core/career.service';
 import { AuthToken } from './core/auth';
 import { OfferStore } from './core/offer.store';
 import { ProfileService } from './core/profile.service';
@@ -20,6 +21,7 @@ interface NavItem {
 })
 export class App {
   protected readonly store = inject(OfferStore);
+  protected readonly career = inject(CareerService);
   private readonly auth = inject(AuthToken);
   protected readonly profile = inject(ProfileService).profile;
 
@@ -29,6 +31,8 @@ export class App {
     { path: 'adaptar-cv', label: 'Adaptar CV', icon: 'file' },
     { path: 'carta', label: 'Carta de presentación', icon: 'mail' },
     { path: 'skills', label: 'Brecha de skills', icon: 'target' },
+    { path: 'mi-perfil', label: 'Mi experiencia', icon: 'check' },
+    { path: 'candidaturas', label: 'Mi historial', icon: 'list' },
   ];
 
   protected async resetDemo(): Promise<void> {

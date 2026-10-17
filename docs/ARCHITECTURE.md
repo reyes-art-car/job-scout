@@ -98,3 +98,14 @@ Se programa con el Programador de tareas de Windows (`tarea_busqueda_ofertas.xml
 
 CI en GitHub Actions: `ci.yml` (todo lo anterior), `security.yml` (pip-audit, npm audit, gitleaks, semanal),
 `codeql.yml` y `pages.yml` (demo). Dependabot semanal. Detalle de la seguridad en [SECURITY.md](SECURITY.md).
+
+## Evidence-based search workspace
+
+The frontend adds a local career workspace: `core/career.ts` contains matching, evidence, preference,
+and date rules; `career-validation.ts` validates stored and imported data; `career.service.ts` owns
+persistence and immutable CV snapshots. `MatchReview` explains and corrects requirement origins.
+The profile, learning, CV, cover letter, dashboard, and application-history views share these rules.
+`OfferStore` records a status transition only after the active gateway accepts it.
+
+This workspace is browser-local and is not stored in SQLite or synchronized to the API. Demo and API
+offer records have distinct keys. See [workflow, calculations, and limits](EVIDENCE_BASED_SEARCH.md).

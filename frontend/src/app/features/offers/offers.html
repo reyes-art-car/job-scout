@@ -79,6 +79,8 @@
     </div>
   </section>
 
+  <label class="inline"><input type="checkbox" [checked]="hideExperienceMismatch()" (change)="hideExperienceMismatch.set(!hideExperienceMismatch())" /> Ocultar ofertas que piden más experiencia de la indicada</label>
+  <p class="small muted">La puntuación de búsqueda no es una probabilidad de entrevista. Revisa requisitos y evidencias desde «Adaptar CV».</p>
   <p class="muted small" aria-live="polite">{{ filtered().length }} ofertas</p>
 
   @if (filtered().length === 0) {
@@ -104,6 +106,7 @@
               </td>
               <td class="title">
                 <strong>{{ o.title }}</strong>
+                @for (warning of warnings(o); track warning.kind) { <span class="chip warn" [title]="warning.text">{{ warning.kind === 'experience' || warning.kind === 'seniority' ? 'Revisar experiencia' : warning.kind === 'location' ? 'Revisar ubicación' : warning.kind === 'remote' ? 'Revisar modalidad' : 'Experiencia sin confirmar' }}</span> }
                 <span class="muted small">{{ o.company }} · {{ o.portal }} · {{ o.code }}</span>
                 @if (o.salary && o.salary !== 'No especificado') {
                   <span class="small">{{ o.salary }}</span>
