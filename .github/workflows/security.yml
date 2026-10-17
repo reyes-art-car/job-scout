@@ -1,0 +1,42 @@
+name: Seguridad
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    - cron: "17 5 * * 1" # cada lunes: aparecen avisos nuevos aunque el código no cambie
+
+permissions:
+  contents: read
+
+jobs:
+  dependencias:
+    name: Vulnerabilidades en dependencias
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - run: pip install pip-audit
+      - run: pip-audit -r backend/requirements.txt
+      - run: pip-audit -r automation/requirements.txt
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      # Solo dependencias de producción: el aviso conocido de `braces` afecta a herramientas de desarrollo
+      # y no tiene versión corregida (ver docs/SECURITY.md).
+      - run: npm audit --omit=dev --audit-level=high
+        working-directory: frontend
+
+  secretos:
+    name: Búsqueda de secretos
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
