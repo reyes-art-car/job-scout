@@ -2,7 +2,7 @@
 # Imagen mínima y sin privilegios para la API. Construir desde la raíz del repositorio:
 #   docker build -f backend/Dockerfile -t job-hunter-api .
 
-FROM python:3.13-slim AS build
+FROM python:3.14-slim AS build
 ENV PIP_NO_CACHE_DIR=1 PIP_DISABLE_PIP_VERSION_CHECK=1
 WORKDIR /build
 RUN python -m venv /opt/venv
@@ -12,7 +12,7 @@ COPY backend/pyproject.toml ./
 COPY backend/src ./src
 RUN /opt/venv/bin/pip install --no-deps .
 
-FROM python:3.13-slim
+FROM python:3.14-slim
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
     PATH=/opt/venv/bin:$PATH \
