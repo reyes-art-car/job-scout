@@ -1,13 +1,29 @@
 <div class="page">
   <header class="page-header">
     <div>
-      <h1>Panel de búsqueda</h1>
-      <p>Resumen de tu pipeline: cuántas ofertas tienes, cómo avanzan y qué tecnologías piden más.</p>
+      <span class="eyebrow">Tu búsqueda, a tu ritmo</span>
+      <h1>Cada paso cuenta.</h1>
+      <p>Un lugar para ordenar tus oportunidades y decidir por dónde seguir.</p>
     </div>
-    <a class="btn primary" routerLink="/ofertas"><app-icon name="plus" /> Añadir oferta</a>
+    <a class="btn primary" routerLink="/ofertas"><app-icon name="briefcase" /> Ver mis ofertas</a>
   </header>
 
-  <section class="grid cols-4" aria-label="Indicadores">
+  <section class="search-note" aria-labelledby="focus-title">
+    <div class="note-copy">
+      <span class="eyebrow">POR DÓNDE EMPEZAR</span>
+      <h2 id="focus-title">Una buena oportunidad merece<br class="wide-only" /> una candidatura cuidada.</h2>
+      <p>Revisa las ofertas que encajan contigo, elige una y prepara tu CV para ese puesto. No hace falta hacerlo todo hoy.</p>
+      <a routerLink="/ofertas" class="note-link">Encontrar mi siguiente oportunidad <span aria-hidden="true">↗</span></a>
+    </div>
+    <div class="pending-note">
+      <app-icon name="briefcase" [size]="24" />
+      <strong>{{ stats().byStatus.Pendiente }}</strong>
+      <span>ofertas por revisar</span>
+      <small>Tu lista está aquí.<br />Tú eliges el siguiente paso.</small>
+    </div>
+  </section>
+
+  <section class="grid cols-4 metrics" aria-label="Indicadores">
     <article class="card kpi">
       <span class="muted small">Ofertas totales</span>
       <strong>{{ stats().total }}</strong>
@@ -32,7 +48,7 @@
 
   <div class="grid cols-2">
     <section class="card">
-      <h2>Embudo de candidaturas</h2>
+      <h2>Dónde estás en el proceso</h2>
       <ul class="funnel">
         @for (row of funnel(); track row.status) {
           <li>
@@ -47,7 +63,7 @@
     </section>
 
     <section class="card">
-      <h2>Distribución por compatibilidad</h2>
+      <h2>Cómo encajan tus oportunidades</h2>
       <div class="histo" role="img" aria-label="Número de ofertas por tramo de compatibilidad">
         @for (b of histogram(); track b.label) {
           <div class="col">
@@ -62,7 +78,7 @@
 
   <div class="grid cols-2">
     <section class="card">
-      <h2>Tecnologías más pedidas en tus ofertas</h2>
+      <h2>Lo que pide el mercado</h2>
       <ul class="demand">
         @for (d of demand(); track d.tech.id) {
           <li>
@@ -80,13 +96,13 @@
           </li>
         }
       </ul>
-      <a class="small" routerLink="/skills">Ver la brecha completa →</a>
+      <a class="small" routerLink="/skills">Elegir qué aprender después →</a>
     </section>
 
     <section class="card">
-      <h2>Siguientes acciones</h2>
+      <h2>Para tu próxima candidatura</h2>
       @if (next().length === 0) {
-        <p class="empty">No quedan ofertas pendientes.</p>
+        <p class="empty">Estás al día. Guarda una nueva oferta cuando encuentres algo que te interese.</p>
       } @else {
         <ul class="next">
           @for (o of next(); track o.id) {

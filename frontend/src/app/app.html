@@ -1,16 +1,18 @@
 <div class="shell">
+  <a class="skip-link" href="#main-content">Ir al contenido</a>
   <aside class="side no-print">
     <a class="brand" routerLink="/panel" aria-label="JobHunter, ir al panel">
       <span class="logo"><app-icon name="target" [size]="20" /></span>
       <span>
         <strong>JobHunter</strong>
-        <small>Búsqueda de empleo IT</small>
+        <small>Tu próximo paso, con calma.</small>
       </span>
     </a>
 
+    <span class="nav-label">MI ESPACIO DE BÚSQUEDA</span>
     <nav aria-label="Principal">
       @for (item of nav; track item.path) {
-        <a [routerLink]="item.path" routerLinkActive="active">
+        <a [routerLink]="item.path" routerLinkActive="active" ariaCurrentWhenActive="page">
           <app-icon [name]="item.icon" />
           <span>{{ item.label }}</span>
         </a>
@@ -20,10 +22,11 @@
     <div class="side-foot">
       @switch (store.mode()) {
         @case ('api') {
-          <span class="chip ok">API conectada</span>
+          <span class="chip ok">Datos sincronizados</span>
         }
         @case ('demo') {
-          <span class="chip warn" title="Sin backend: los cambios se guardan solo en este navegador">Modo demo</span>
+          <span class="chip warn" title="Los cambios se guardan solo en este navegador">Explorando la demo</span>
+          <p class="demo-note">Prueba con las ofertas de ejemplo. Puedes empezar de nuevo cuando quieras.</p>
           <button class="link" type="button" (click)="resetDemo()">Restablecer datos</button>
         }
         @default {
@@ -43,7 +46,7 @@
     </div>
   </aside>
 
-  <main class="main">
+  <main id="main-content" class="main" tabindex="-1">
     <router-outlet />
   </main>
 </div>
