@@ -1,5 +1,6 @@
 import { Offer, Profile } from './models';
-import { analyzeOffer, joinEs, topMatched } from './tailoring';
+import { analyzeOffer, topMatched } from './offer-analysis';
+import { joinEs, lowerFirst } from './text';
 
 export type Tone = 'formal' | 'cercano';
 
@@ -30,8 +31,6 @@ export const DEFAULT_LETTER_OPTIONS: LetterOptions = {
   mentionGaps: false,
   availability: 'de inmediato',
 };
-
-const lowerFirst = (text: string): string => text.charAt(0).toLowerCase() + text.slice(1);
 
 export function buildCoverLetter(
   profile: Profile,

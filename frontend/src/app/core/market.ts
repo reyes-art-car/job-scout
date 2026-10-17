@@ -1,5 +1,5 @@
 import { Offer } from './models';
-import { analyzeOffer } from './tailoring';
+import { analyzeOffer } from './offer-analysis';
 import { Tech } from './tech-catalog';
 
 export interface TechDemand {

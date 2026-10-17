@@ -1,0 +1,28 @@
+#!/bin/sh
+# Valida que el mensaje de commit siga la convención de CONTRIBUTING.md
+# tipo(ámbito): descripción breve en imperativo
+
+commit_msg_file="$1"
+first_line=$(head -n 1 "$commit_msg_file")
+
+# No valida merges ni reverts: los genera git automáticamente.
+case "$first_line" in
+  "Merge "*|"Revert "*) exit 0 ;;
+esac
+
+pattern='^(feat|fix|refactor|docs|style|test|chore|perf|build|ci|security)(\([a-zA-Z0-9_-]+\))?: .+'
+
+if ! echo "$first_line" | grep -qE "$pattern"; then
+  echo ""
+  echo "El mensaje de commit no sigue la convención:"
+  echo "  tipo(ámbito): descripción breve en imperativo"
+  echo ""
+  echo "Tipos válidos: feat, fix, refactor, docs, style, test, chore, perf, build, ci, security"
+  echo "Ejemplo: fix(api): corrige la validación del estado de una oferta"
+  echo ""
+  echo "Ver CONTRIBUTING.md para más detalle."
+  echo ""
+  exit 1
+fi
+
+exit 0

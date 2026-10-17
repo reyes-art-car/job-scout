@@ -1,8 +1,9 @@
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { techDemand } from '../../core/market';
-import { KANBAN_STATUSES, KanbanStatus } from '../../core/models';
+import { KANBAN_STATUSES } from '../../core/models';
 import { OfferStore } from '../../core/offer.store';
+import { scoreTone, statusChipClass } from '../../core/score';
 import { IconComponent } from '../../shared/icon.component';
 
 @Component({
@@ -16,6 +17,8 @@ export class Dashboard {
   private readonly store = inject(OfferStore);
 
   protected readonly stats = this.store.stats;
+  protected readonly tone = scoreTone;
+  protected readonly statusClass = statusChipClass;
   protected readonly statuses = KANBAN_STATUSES;
 
   protected readonly applied = computed(() => {
@@ -60,12 +63,4 @@ export class Dashboard {
       .sort((a, b) => b.compatibility - a.compatibility)
       .slice(0, 5),
   );
-
-  protected tone(score: number): string {
-    return score >= 80 ? 'high' : score >= 70 ? 'mid' : 'low';
-  }
-
-  protected statusClass(status: KanbanStatus): string {
-    return { Pendiente: '', Aplicado: 'info', Entrevista: 'accent', Oferta: 'ok', Rechazo: 'bad' }[status];
-  }
 }
