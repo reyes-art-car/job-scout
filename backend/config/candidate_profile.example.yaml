@@ -1,0 +1,85 @@
+# PLANTILLA del perfil maestro. Copia este archivo a candidate_profile.yaml (ignorado por git)
+# y rellénalo con tus datos reales. Si candidate_profile.yaml no existe, se usa esta plantilla.
+# (Perfil migrado desde busqueda_diaria.py)
+# (antes vivía hardcodeado en las constantes CANDIDATE_PROFILE / BULLETS / SKILLS).
+# Editar aquí no requiere tocar código: lo reutilizan el análisis de documentos,
+# la generación de CV adaptado y el chatbot de entrevistas.
+
+name: "MARÍA REYES ARTACHO CARRERO"
+title: "Junior Full-Stack Developer"
+location: "Sevilla, España"
+phone: "+34 600 000 000"
+email: "mariareyesartcar+github@gmail.com"
+contact_line: "Sevilla, España  |  (+34) 600 000 000  |  mariareyesartcar+github@gmail.com"
+
+summary_prompt_block: |
+  CANDIDATA: María Reyes Artacho Carrero
+  Título: Junior Full-Stack Developer
+  Ubicación: Sevilla, España
+  Teléfono: +34 600 000 000
+  Email: mariareyesartcar+github@gmail.com
+
+  EXPERIENCIA: Freelance (Marzo 2026 – Actualidad) — Desarrolladora Java/Angular
+    CRM comercial full-stack en producción (desarrollo individual):
+    - API REST con JWT, Spring Security y RBAC
+    - Spring Data JPA, Hibernate, MySQL y PostgreSQL
+    - Frontend Angular con TypeScript, Bootstrap, HTML5, CSS3
+    - JUnit, Mockito, OpenAPI/Swagger, Postman
+    - Docker, GitHub Actions, CI/CD, VPS IONOS, APK Android
+
+  FORMACIÓN: CFGS DAW — MEDAC Sevilla (2024-2026)
+  IDIOMAS: Inglés C1 — Cambridge
+
+  STACK TÉCNICO:
+    Backend: Java, Spring Boot, Spring Security, Spring Data JPA, Hibernate,
+             APIs REST, JWT, RBAC, Maven, Lombok, MapStruct
+    Frontend: Angular, TypeScript, JavaScript, Bootstrap, HTML5, CSS3
+    Datos: SQL, MySQL, PostgreSQL
+    Calidad: JUnit, Mockito, SOLID, Scrum, OpenAPI/Swagger
+    DevOps: Docker, GitHub Actions, CI/CD, VPS
+
+education: "Técnica Superior en Desarrollo de Aplicaciones Web (DAW) | MEDAC Sevilla | 2024-2026"
+languages: "Inglés C1 - acreditado por la Universidad de Cambridge"
+
+bullets:
+  - "Puse en producción y mantengo un CRM comercial desarrollado de forma individual, cubriendo arquitectura, backend, frontend, despliegue y evolución funcional según necesidades reales."
+  - "Protegí el acceso mediante 3 mecanismos complementarios: JWT, refresh tokens y autorización por roles (RBAC) con Spring Security."
+  - "Diseñé la persistencia con Java, Spring Data JPA, Hibernate y SQL, con compatibilidad para 2 motores: MySQL y PostgreSQL, aplicando arquitectura por capas y principios SOLID."
+  - "Construí una interfaz responsive con Angular, TypeScript, Bootstrap, HTML5 y CSS3, e integré el frontend con la API REST para gestionar la operativa comercial."
+  - "Habilité importación y exportación de datos en 2 formatos, Excel y CSV, para agilizar la carga y extracción de información."
+  - "Automaticé el ciclo de entrega con GitHub Actions y Docker, desplegué la aplicación en un VPS de IONOS y generé una APK Android."
+
+skills:
+  backend_first:
+    - label: "Backend"
+      content: "Java, programación orientada a objetos (POO), Spring Boot, Spring Security, Spring Data JPA, Hibernate, APIs REST, JWT, refresh tokens, RBAC, Maven, Lombok, MapStruct"
+    - label: "Datos"
+      content: "SQL, MySQL, PostgreSQL, Excel, CSV"
+    - label: "Calidad, arquitectura y metodología"
+      content: "JUnit, Mockito, SOLID, arquitectura por capas, Scrum, OpenAPI/Swagger, Postman, Bruno"
+    - label: "DevOps y herramientas"
+      content: "Git, GitHub, Docker, CI/CD, GitHub Actions, VPS IONOS, Railway, Render, Vercel, Neon"
+    - label: "Frontend"
+      content: "Angular, TypeScript, JavaScript, Bootstrap, HTML5, CSS3, diseño responsive, integración con APIs REST"
+  fullstack:
+    - label: "Backend"
+      content: "Java, programación orientada a objetos (POO), Spring Boot, Spring Security, Spring Data JPA, Hibernate, APIs REST, JWT, refresh tokens, RBAC, Maven, Lombok, MapStruct"
+    - label: "Frontend"
+      content: "Angular, TypeScript, JavaScript, Bootstrap, HTML5, CSS3, diseño responsive, integración con APIs REST"
+    - label: "Datos"
+      content: "SQL, MySQL, PostgreSQL, Excel, CSV"
+    - label: "Calidad, arquitectura y metodología"
+      content: "JUnit, Mockito, SOLID, arquitectura por capas, Scrum, OpenAPI/Swagger, Postman, Bruno"
+    - label: "DevOps y herramientas"
+      content: "Git, GitHub, Docker, CI/CD, GitHub Actions, VPS IONOS, Railway, Render, Vercel, Neon"
+  frontend_first:
+    - label: "Frontend"
+      content: "Angular, TypeScript, JavaScript, Bootstrap, HTML5, CSS3, diseño responsive, integración con APIs REST"
+    - label: "Backend"
+      content: "Java, programación orientada a objetos (POO), Spring Boot, Spring Security, Spring Data JPA, Hibernate, APIs REST, JWT, Maven"
+    - label: "Datos"
+      content: "SQL, MySQL, PostgreSQL"
+    - label: "Calidad, arquitectura y metodología"
+      content: "JUnit, Mockito, SOLID, arquitectura por capas, Scrum, OpenAPI/Swagger"
+    - label: "DevOps y herramientas"
+      content: "Git, GitHub, Docker, CI/CD, GitHub Actions, VPS IONOS"
