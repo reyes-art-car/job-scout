@@ -1,0 +1,101 @@
+<app-public-shell>
+  <section class="hero">
+    <div class="hero-text">
+      <span class="eyebrow">Para quien busca trabajo en IT</span>
+      <h1>Tu búsqueda de empleo, con un panel que entiende tu CV.</h1>
+      <p class="lead">
+        Sube tu currículum y descubre cuánto encajas con cada oferta, qué te falta y cómo adaptar el CV y la carta
+        a cada puesto. Todo en tu navegador: tu CV no sale de tu dispositivo.
+      </p>
+      <div class="actions">
+        <a class="btn primary big" routerLink="/importar-cv"><app-icon name="download" /> Subir mi CV</a>
+        <a class="btn big" routerLink="/panel">Ver la demo con datos de ejemplo</a>
+      </div>
+      <p class="small muted">Gratis · Sin registro · PDF, DOCX o TXT hasta 5 MB</p>
+    </div>
+    <img
+      class="hero-shot"
+      src="img/panel.png"
+      width="1440"
+      height="900"
+      alt="Panel de Job Hopper &amp; Learning con el embudo de candidaturas, la compatibilidad media y las tecnologías más pedidas"
+    />
+  </section>
+
+  <section id="como-funciona" class="band">
+    <h2>Cómo funciona</h2>
+    <ol class="steps">
+      @for (step of steps; track step.title; let i = $index) {
+        <li class="card">
+          <span class="num" aria-hidden="true">{{ i + 1 }}</span>
+          <h3>{{ step.title }}</h3>
+          <p class="muted">{{ step.text }}</p>
+        </li>
+      }
+    </ol>
+  </section>
+
+  <section class="band alt">
+    <h2>Qué puedes hacer</h2>
+    <div class="features">
+      @for (feature of features; track feature.title) {
+        <article class="card feature">
+          <span class="icon"><app-icon [name]="feature.icon" [size]="22" /></span>
+          <h3>{{ feature.title }}</h3>
+          <p class="muted">{{ feature.text }}</p>
+        </article>
+      }
+    </div>
+  </section>
+
+  <section class="band">
+    <h2>Así se ve</h2>
+    <div class="shots">
+      @for (shot of shots; track shot.file) {
+        <figure class="card shot">
+          <img [src]="'img/' + shot.file" width="1440" height="900" loading="lazy" [alt]="'Captura de la sección ' + shot.title" />
+          <figcaption>
+            <strong>{{ shot.title }}</strong>
+            <span class="muted">{{ shot.text }}</span>
+          </figcaption>
+        </figure>
+      }
+    </div>
+  </section>
+
+  <section class="band alt privacy">
+    <div>
+      <h2>Tus datos se quedan contigo</h2>
+      <p class="muted">
+        Job Hopper &amp; Learning funciona por completo en tu navegador. No hay servidor que reciba tu currículum, ni base de datos,
+        ni cuenta que crear.
+      </p>
+      <ul class="ticks">
+        @for (item of privacy; track item) {
+          <li><app-icon name="check" [size]="18" /> {{ item }}</li>
+        }
+      </ul>
+      <p class="small">
+        Más detalle en la <a routerLink="/privacidad">política de privacidad</a> y la
+        <a routerLink="/cookies">política de cookies</a>.
+      </p>
+    </div>
+    <aside class="card note">
+      <h3>Lo que conviene saber</h3>
+      <ul>
+        <li>Las ofertas que verás son de ejemplo. Las puntuamos con las tecnologías de tu CV, y puedes añadir las tuyas.</li>
+        <li>La lectura del CV es automática y puede equivocarse: siempre podrás revisarla y corregirla antes de guardar.</li>
+        <li>La búsqueda automática de ofertas con Claude Code solo está disponible instalando el proyecto en local.</li>
+      </ul>
+    </aside>
+  </section>
+
+  <section class="band final">
+    <h2>Empieza con tu propio CV</h2>
+    <p class="muted">Tarda menos de un minuto y puedes borrar todo cuando quieras.</p>
+    <div class="actions center">
+      <a class="btn primary big" routerLink="/importar-cv"><app-icon name="download" /> Subir mi CV</a>
+      <a class="btn big" href="https://github.com/reyes-art-car/job-scout" target="_blank" rel="noopener noreferrer">Ver el código</a>
+    </div>
+  </section>
+</app-public-shell>
