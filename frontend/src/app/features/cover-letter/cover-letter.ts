@@ -6,7 +6,8 @@ import { Tone, buildCoverLetter, letterToText } from '../../core/cover-letter';
 import { downloadFile, letterToWordHtml, slug } from '../../core/export';
 import { OfferStore } from '../../core/offer.store';
 import { ProfileService } from '../../core/profile.service';
-import { analyzeOffer } from '../../core/tailoring';
+import { analyzeOffer } from '../../core/offer-analysis';
+import { inputChecked, inputValue } from '../../shared/dom';
 import { IconComponent } from '../../shared/icon.component';
 
 const MONTHS = [
@@ -24,6 +25,9 @@ const MONTHS = [
 export class CoverLetter {
   private readonly store = inject(OfferStore);
   protected readonly profile = inject(ProfileService).profile;
+
+  protected readonly value = inputValue;
+  protected readonly checked = inputChecked;
 
   protected readonly offers = computed(() =>
     [...this.store.offers()].sort((a, b) => b.compatibility - a.compatibility),
@@ -67,6 +71,10 @@ export class CoverLetter {
   /** Texto editable: se regenera cuando cambian las opciones y se puede retocar a mano. */
   protected readonly text = linkedSignal(() => this.generated());
   protected readonly words = computed(() => this.text().trim().split(/\s+/).filter(Boolean).length);
+
+  protected setTone(raw: string): void {
+    if (raw === 'formal' || raw === 'cercano') this.tone.set(raw);
+  }
 
   protected pick(value: string): void {
     this.selectedId.set(Number(value));

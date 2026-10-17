@@ -1,0 +1,22 @@
+<div class="board">
+  @for (status of statuses; track status) {
+    <section class="col" (dragover)="$event.preventDefault()" (drop)="drop(status, $event)" [attr.aria-label]="status">
+      <h2>{{ status }} <span class="chip">{{ inColumn(status).length }}</span></h2>
+      @for (o of inColumn(status); track o.id) {
+        <article class="k-card" draggable="true" (dragstart)="dragging.set(o)" (dragend)="dragging.set(null)">
+          <div class="top">
+            <span class="score" [class]="tone(o.compatibility)">{{ o.compatibility }}%</span>
+            <span class="muted small">{{ o.code }}</span>
+          </div>
+          <strong>{{ o.title }}</strong>
+          <span class="muted small">{{ o.company }} · {{ o.modality }}</span>
+          <select class="status" [attr.aria-label]="'Mover ' + o.title" (change)="change(o, value($event))">
+            @for (s of statuses; track s) {
+              <option [value]="s" [selected]="s === o.kanban_status">{{ s }}</option>
+            }
+          </select>
+        </article>
+      }
+    </section>
+  }
+</div>

@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { TechDemand, techDemand } from '../../core/market';
 import { OfferStore } from '../../core/offer.store';
-import { analyzeOffer } from '../../core/tailoring';
+import { analyzeOffer } from '../../core/offer-analysis';
 
 type Filter = 'todas' | 'A' | 'B' | 'C';
 

@@ -1,24 +1,7 @@
-import { LEVEL_WEIGHT, Tech, detectTechs } from './tech-catalog';
-import { Offer, Profile, SkillGroup, SkillsOrder } from './models';
-
-export type Role = 'backend' | 'fullstack' | 'frontend';
-export type Origin = 'obligatoria' | 'deseable' | 'texto';
-
-export interface Requirement {
-  tech: Tech;
-  weight: number;
-  origin: Origin;
-}
-
-export interface OfferAnalysis {
-  requirements: Requirement[];
-  matched: Requirement[];
-  partial: Requirement[];
-  missing: Requirement[];
-  /** 0-100: peso de requisitos cubiertos (parcial cuenta 0,5) sobre el peso total. */
-  coverage: number;
-  role: Role;
-}
+import { Profile, SkillGroup, SkillsOrder } from './models';
+import { OfferAnalysis, OfferInput, Role, analyzeOffer, topMatched } from './offer-analysis';
+import { capitalize, joinEs } from './text';
+import { detectTechs } from './tech-catalog';
 
 export interface SkillItem {
   text: string;
@@ -45,90 +28,17 @@ export interface TailoredCv {
   groups: TailoredGroup[];
 }
 
-export type OfferInput = Pick<Offer, 'title' | 'mandatory_tech' | 'desirable_tech'> &
-  Partial<Pick<Offer, 'modality'>>;
-
-const WEIGHT: Record<Origin, number> = { obligatoria: 3, texto: 1.5, deseable: 1 };
 const ROLE_LABEL: Record<Role, string> = {
   backend: 'JAVA BACKEND DEVELOPER',
   fullstack: 'FULL STACK DEVELOPER',
   frontend: 'FRONTEND DEVELOPER',
 };
 
-export function extractRequirements(offer: OfferInput, description = ''): Requirement[] {
-  const found = new Map<string, Requirement>();
-  const add = (techs: Tech[], origin: Origin) => {
-    for (const tech of techs) {
-      const prev = found.get(tech.id);
-      if (!prev || WEIGHT[origin] > prev.weight) {
-        found.set(tech.id, { tech, weight: WEIGHT[origin], origin });
-      }
-    }
-  };
-  add(detectTechs(offer.desirable_tech), 'deseable');
-  add(detectTechs(description), 'texto');
-  add(detectTechs(offer.title), 'texto');
-  add(detectTechs(offer.mandatory_tech), 'obligatoria');
-  // «English» no distingue candidatos: se muestra, pero con peso mínimo.
-  const english = found.get('english');
-  if (english) found.set('english', { ...english, weight: 0.5 });
-  return [...found.values()].sort((a, b) => b.weight - a.weight);
-}
-
-function detectRole(offer: OfferInput, requirements: Requirement[]): Role {
-  const title = offer.title.toLowerCase();
-  if (/full\s*-?\s*stack/.test(title)) return 'fullstack';
-  if (/back\s*-?\s*end/.test(title)) return 'backend';
-  if (/front\s*-?\s*end/.test(title)) return 'frontend';
-  let front = 0;
-  let back = 0;
-  for (const r of requirements) {
-    if (r.tech.id === 'android') continue;
-    if (r.tech.category === 'Frontend') front += r.weight;
-    else if (r.tech.category === 'Backend') back += r.weight;
-  }
-  if (front + back === 0) return 'fullstack';
-  const ratio = front / (front + back);
-  if (ratio < 0.2) return 'backend';
-  if (ratio > 0.65) return 'frontend';
-  return 'fullstack';
-}
-
-export function analyzeOffer(offer: OfferInput, description = ''): OfferAnalysis {
-  const requirements = extractRequirements(offer, description);
-  const matched = requirements.filter((r) => r.tech.level === 'have');
-  const partial = requirements.filter((r) => r.tech.level === 'partial');
-  const missing = requirements.filter((r) => r.tech.level === 'gap');
-  const total = requirements.reduce((acc, r) => acc + r.weight, 0);
-  const covered = requirements.reduce((acc, r) => acc + r.weight * LEVEL_WEIGHT[r.tech.level], 0);
-  return {
-    requirements,
-    matched,
-    partial,
-    missing,
-    coverage: total === 0 ? 0 : Math.round((covered / total) * 100),
-    role: detectRole(offer, requirements),
-  };
-}
-
 const SKILLS_BY_ROLE: Record<Role, SkillsOrder> = {
   backend: 'backend_first',
   fullstack: 'fullstack',
   frontend: 'frontend_first',
 };
-
-export function joinEs(items: string[]): string {
-  if (items.length <= 1) return items.join('');
-  return `${items.slice(0, -1).join(', ')} y ${items[items.length - 1]}`;
-}
-
-export function topMatched(analysis: OfferAnalysis, count = 3): string[] {
-  const names = analysis.matched
-    .filter((r) => !['english', 'excel-csv', 'git'].includes(r.tech.id))
-    .slice(0, count)
-    .map((r) => r.tech.name);
-  return names.length > 0 ? names : ['Java', 'Spring Boot', 'Angular'].slice(0, count);
-}
 
 function buildSummary(analysis: OfferAnalysis): string {
   const has = (id: string) => analysis.requirements.some((r) => r.tech.id === id);
@@ -156,10 +66,6 @@ function buildSummary(analysis: OfferAnalysis): string {
   const s3 = extras.length > 0 ? `${capitalize(joinEs(extras))}. ` : '';
   const lang = 'Inglés C1 acreditado por la Universidad de Cambridge.';
   return `${s1} ${s2[analysis.role]} ${s3}${lang}`.replace(/\s+/g, ' ').trim();
-}
-
-function capitalize(text: string): string {
-  return text.charAt(0).toUpperCase() + text.slice(1);
 }
 
 export function tailorCv(profile: Profile, offer: OfferInput, description = ''): TailoredCv {

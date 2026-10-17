@@ -5,10 +5,11 @@ import {
   provideBrowserGlobalErrorListeners,
   provideZoneChangeDetection,
 } from '@angular/core';
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { provideRouter, withHashLocation } from '@angular/router';
 
 import { routes } from './app.routes';
+import { authInterceptor } from './core/auth';
 import { OfferStore } from './core/offer.store';
 import { ProfileService } from './core/profile.service';
 
@@ -18,7 +19,7 @@ export const appConfig: ApplicationConfig = {
     provideZoneChangeDetection({ eventCoalescing: true }),
     // Hash routing: funciona igual en `ng serve`, en el backend y en hostings estáticos (GitHub Pages).
     provideRouter(routes, withHashLocation()),
-    provideHttpClient(),
+    provideHttpClient(withInterceptors([authInterceptor])),
     provideAppInitializer(() => {
       const profile = inject(ProfileService);
       const store = inject(OfferStore);

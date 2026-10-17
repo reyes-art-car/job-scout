@@ -7,6 +7,7 @@ import { Offer } from '../../core/models';
 import { OfferStore } from '../../core/offer.store';
 import { ProfileService } from '../../core/profile.service';
 import { tailorCv } from '../../core/tailoring';
+import { inputValue } from '../../shared/dom';
 import { IconComponent } from '../../shared/icon.component';
 
 @Component({
@@ -19,6 +20,8 @@ import { IconComponent } from '../../shared/icon.component';
 export class CvAdapter {
   private readonly store = inject(OfferStore);
   protected readonly profile = inject(ProfileService).profile;
+
+  protected readonly value = inputValue;
 
   protected readonly offers = computed(() =>
     [...this.store.offers()].sort((a, b) => b.compatibility - a.compatibility),

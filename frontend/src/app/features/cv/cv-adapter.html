@@ -15,7 +15,7 @@
         <div class="card">
           <label>
             Oferta
-            <select [value]="selectedId()" (change)="pick($any($event.target).value)">
+            <select [value]="selectedId()" (change)="pick(value($event))">
               @for (o of offers(); track o.id) {
                 <option [value]="o.id" [selected]="o.id === selectedId()">{{ o.compatibility }}% · {{ o.title }} — {{ o.company }}</option>
               }
@@ -27,7 +27,7 @@
               rows="5"
               placeholder="Pega aquí la descripción completa para afinar las palabras clave…"
               [value]="description()"
-              (input)="description.set($any($event.target).value)"
+              (input)="description.set(value($event))"
             ></textarea>
           </label>
         </div>
@@ -72,11 +72,11 @@
           <h2>Titular y resumen</h2>
           <label>
             Titular
-            <input [value]="title()" (input)="title.set($any($event.target).value)" />
+            <input [value]="title()" (input)="title.set(value($event))" />
           </label>
           <label class="mt">
             Resumen profesional
-            <textarea rows="6" [value]="summary()" (input)="summary.set($any($event.target).value)"></textarea>
+            <textarea rows="6" [value]="summary()" (input)="summary.set(value($event))"></textarea>
           </label>
         </div>
       </section>
