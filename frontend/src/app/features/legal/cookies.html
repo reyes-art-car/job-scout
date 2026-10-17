@@ -1,0 +1,70 @@
+<app-public-shell>
+  <article class="doc">
+    <header>
+      <h1>Política de cookies</h1>
+      <p>Última actualización: {{ updated }}</p>
+    </header>
+
+    <section>
+      <h2>1. Qué usamos</h2>
+      <p>
+        Job Hopper &amp; Learning <strong>no utiliza cookies</strong>. Para recordar tu trabajo entre visitas usa el almacenamiento
+        local del navegador (<code>localStorage</code>), una tecnología equivalente que se rige por el mismo
+        marco normativo (art. 22.2 LSSI-CE). Todo lo que se guarda permanece en tu dispositivo y no se envía a
+        ningún servidor.
+      </p>
+    </section>
+
+    <section>
+      <h2>2. Detalle del almacenamiento</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Nombre</th><th>Tipo</th><th>Para qué sirve</th><th>Duración</th></tr>
+          </thead>
+          <tbody>
+            @for (item of items; track item.key) {
+              <tr>
+                <td><code>{{ item.key }}</code></td>
+                <td>{{ item.type }}</td>
+                <td>{{ item.purpose }}</td>
+                <td>{{ item.lifetime }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section>
+      <h2>3. Por qué no hay banner de cookies</h2>
+      <p>
+        El almacenamiento descrito es de uso estrictamente necesario para prestar la función que solicitas
+        expresamente (conservar tu CV y tus ofertas para que no tengas que subirlos cada vez). Esa finalidad está
+        exenta del deber de obtener consentimiento (art. 22.2 LSSI-CE y art. 5.3 de la Directiva ePrivacy).
+        Job Hopper &amp; Learning no instala cookies ni identificadores de analítica, publicidad, redes sociales o terceros, y
+        carga todos sus recursos desde el propio sitio. Si algún día se añadiera algo de ese tipo, se pediría tu
+        consentimiento antes y esta política se actualizaría.
+      </p>
+    </section>
+
+    <section>
+      <h2>4. Alojamiento</h2>
+      <p>
+        El proveedor de alojamiento del sitio puede registrar datos técnicos de la conexión (por ejemplo, la
+        dirección IP) en sus servidores. Se describe en la <a routerLink="/privacidad">política de privacidad</a>.
+      </p>
+    </section>
+
+    <section>
+      <h2>5. Cómo borrarlo</h2>
+      <ul>
+        <li>Desde la aplicación, con el botón <strong>«Borrar mis datos»</strong> del menú lateral.</li>
+        <li>Desde el navegador, eliminando los datos del sitio en su configuración de privacidad.</li>
+      </ul>
+      <p>Al borrarlo perderás tu CV importado, tus ofertas y tu progreso, y no podrá recuperarse.</p>
+    </section>
+
+    <p class="back"><a routerLink="/">← Volver al inicio</a></p>
+  </article>
+</app-public-shell>

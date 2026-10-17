@@ -1,10 +1,10 @@
 <div class="shell">
   <a class="skip-link" href="#main-content">Ir al contenido</a>
   <aside class="side no-print">
-    <a class="brand" routerLink="/panel" aria-label="JobHunter, ir al panel">
+    <a class="brand" routerLink="/panel" aria-label="Job Hopper &amp; Learning, ir al panel">
       <span class="logo"><app-icon name="target" [size]="20" /></span>
       <span>
-        <strong>JobHunter</strong>
+        <strong>Job Hopper &amp; Learning</strong>
         <small>Tu próximo paso, con calma.</small>
       </span>
     </a>
@@ -25,9 +25,17 @@
           <span class="chip ok">Datos sincronizados</span>
         }
         @case ('demo') {
-          <span class="chip warn" title="Los cambios se guardan solo en este navegador">Explorando la demo</span>
-          <p class="demo-note">Prueba con las ofertas de ejemplo. Puedes empezar de nuevo cuando quieras.</p>
-          <button class="link" type="button" (click)="resetDemo()">Restablecer datos</button>
+          @if (profileService.isCustom()) {
+            <span class="chip ok" title="Tu CV y tus cambios se guardan solo en este navegador">Tu CV · solo en este navegador</span>
+            <p class="demo-note">Las ofertas de ejemplo se puntúan con las tecnologías de tu CV.</p>
+            <a class="link" routerLink="/importar-cv">Cambiar de CV</a>
+            <button class="link" type="button" (click)="eraseMyData()">Borrar mis datos</button>
+          } @else {
+            <span class="chip warn" title="Los cambios se guardan solo en este navegador">Explorando la demo</span>
+            <p class="demo-note">Prueba con las ofertas de ejemplo. Puedes empezar de nuevo cuando quieras.</p>
+            <a class="link" routerLink="/importar-cv">Subir mi CV</a>
+            <button class="link" type="button" (click)="resetDemo()">Restablecer datos</button>
+          }
         }
         @default {
           <span class="chip">Cargando…</span>
@@ -42,7 +50,7 @@
           <button class="btn primary" type="submit">Conectar</button>
         </form>
       }
-      <p class="small muted">{{ profile.name }}<br />{{ profile.title }}</p>
+      <p class="small muted">{{ profileService.profile.name }}<br />{{ profileService.profile.title }}</p>
     </div>
   </aside>
 

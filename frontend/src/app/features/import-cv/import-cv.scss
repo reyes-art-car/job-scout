@@ -1,0 +1,20 @@
+:host { display: block; padding: clamp(24px, 5vw, 56px) clamp(16px, 4vw, 40px); }
+.wrap { max-width: 860px; margin-inline: auto; display: flex; flex-direction: column; gap: 20px; }
+.head { display: flex; flex-direction: column; gap: 8px; }
+.alert { padding: 12px 16px; border-radius: 10px; background: var(--bad-soft); color: var(--bad); font-weight: 600; }
+.drop {
+  position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
+  min-height: 220px; padding: 32px; text-align: center; cursor: pointer; color: var(--text); font-size: 1rem; font-weight: 500;
+  border: 2px dashed var(--border); border-radius: var(--radius); background: var(--surface);
+}
+.drop:hover, .drop.over, .drop:focus-within { border-color: var(--accent); background: var(--accent-soft); }
+.drop input { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; padding: 0; min-height: 0; }
+.alt-actions { display: flex; flex-wrap: wrap; gap: 12px; }
+.status { text-align: center; }
+.review { display: flex; flex-direction: column; gap: 22px; }
+.intro h2 { margin-bottom: 4px; }
+fieldset { border: 0; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+legend { font-weight: 650; font-size: 1rem; padding: 0; margin-bottom: 10px; }
+.cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); gap: 12px; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.actions { display: flex; flex-wrap: wrap; gap: 12px; }

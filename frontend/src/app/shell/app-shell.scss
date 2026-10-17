@@ -8,7 +8,7 @@
   --accent-strong: #e3eccf; --surface-2: #2b4b3c;
 }
 .brand { display: flex; align-items: center; gap: 12px; text-decoration: none; color: inherit; padding: 0 8px; }
-.brand strong { display: block; font-size: 1.35rem; letter-spacing: -0.05em; }
+.brand strong { display: block; font-size: 1.1rem; line-height: 1.15; letter-spacing: -0.03em; }
 .brand small { color: var(--muted); font-size: 0.72rem; }
 .logo { display: grid; place-items: center; width: 40px; height: 40px; border: 1px solid #799875; border-radius: 50%; color: #d5e5b6; }
 .nav-label { color: #a8c0ac; font-size: 0.62rem; letter-spacing: 0.13em; padding: 16px 12px 0; margin-bottom: -16px; }
@@ -19,7 +19,7 @@ nav a.active { background: #365441; border-left-color: #d5e5b6; color: #f5f8ec; 
 .side-foot { margin-top: auto; display: flex; flex-direction: column; align-items: flex-start; gap: 12px; padding: 20px 8px 0; border-top: 1px solid #48604e; }
 .side-foot .chip { color: #e1e9cf; background: #365441; border: 1px solid #68816a; font-size: 0.7rem; }
 .demo-note { font-size: 0.75rem; line-height: 1.65; color: #c0d0c1; }
-.link { background: none; border: 0; padding: 0; color: #e1e9cf; font: inherit; font-size: 0.75rem; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; min-height: 32px; }
+.link { display: inline-flex; align-items: center; background: none; border: 0; padding: 0; color: #e1e9cf; font: inherit; font-size: 0.75rem; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; min-height: 32px; }
 .side-foot > p:last-child { padding-top: 12px; font-size: 0.75rem; line-height: 1.6; }
 .main { padding: 42px clamp(20px, 4vw, 64px) 64px; max-width: 1500px; width: 100%; min-width: 0; }
 .token { display: flex; flex-direction: column; gap: 8px; width: 100%; }

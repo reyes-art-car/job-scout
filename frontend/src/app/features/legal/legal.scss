@@ -1,0 +1,14 @@
+:host { display: block; padding: clamp(24px, 5vw, 56px) clamp(16px, 4vw, 40px); }
+.doc { max-width: 780px; margin-inline: auto; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); padding: clamp(20px, 4vw, 44px); }
+header { margin-bottom: 28px; padding-bottom: 20px; border-bottom: 1px solid var(--border); }
+header p { margin-top: 6px; color: var(--muted); font-size: 0.85rem; }
+section { margin-top: 26px; }
+h2 { font-size: 1rem; margin-bottom: 8px; color: var(--accent-strong); }
+p + p, p + ul, ul + p { margin-top: 10px; }
+ul { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 6px; }
+table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.88rem; }
+th, td { text-align: left; vertical-align: top; padding: 8px 10px; border: 1px solid var(--border); }
+th { background: var(--surface-2); }
+code { font-family: ui-monospace, 'Cascadia Code', Consolas, monospace; font-size: 0.85em; word-break: break-all; }
+.back { margin-top: 32px; padding-top: 20px; border-top: 1px solid var(--border); }
+.table-wrap { overflow-x: auto; }
