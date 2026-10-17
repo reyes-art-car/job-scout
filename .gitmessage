@@ -1,0 +1,5 @@
+tipo(ámbito): descripción breve en imperativo
+
+# Tipos: feat, fix, refactor, docs, style, test, chore, perf, build, ci, security
+# Ámbitos habituales: backend, frontend, automation, docs, infra
+# Cuerpo opcional (tras una línea en blanco): qué cambia y por qué.
