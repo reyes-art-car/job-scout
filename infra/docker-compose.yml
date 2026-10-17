@@ -1,0 +1,42 @@
+# Despliegue de referencia: API + frontend con nginx. Desde la raíz del repositorio:
+#   cp backend/.env.example backend/.env      # y rellena API_TOKEN (mínimo 32 caracteres)
+#   docker compose -f infra/docker-compose.yml up --build
+# Abre http://localhost:8080 (en un servidor real, detrás de un proxy con HTTPS).
+
+services:
+  api:
+    build:
+      context: ..
+      dockerfile: backend/Dockerfile
+    env_file: ../backend/.env
+    environment:
+      APP_ENV: production
+      CORS_ORIGINS: http://localhost:8080
+      ALLOWED_HOSTS: localhost,127.0.0.1,api
+      TRUST_PROXY: "true"            # solo nginx puede llegar a la API: la IP real viene en X-Forwarded-For
+    volumes:
+      - api-data:/data
+    read_only: true                  # sistema de ficheros de solo lectura…
+    tmpfs: [/tmp]                    # …salvo /tmp y el volumen de datos
+    cap_drop: [ALL]                  # sin capacidades de Linux
+    security_opt: ["no-new-privileges:true"]
+    pids_limit: 200
+    mem_limit: 512m
+    restart: unless-stopped
+    expose: ["8000"]                 # no se publica en el host: solo es accesible desde nginx
+
+  web:
+    build:
+      context: ..
+      dockerfile: infra/web.Dockerfile
+    depends_on: [api]
+    ports:
+      - "127.0.0.1:8080:8080"        # solo en local; un proxy con TLS debe ir delante
+    read_only: true
+    tmpfs: [/tmp]
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    restart: unless-stopped
+
+volumes:
+  api-data:
