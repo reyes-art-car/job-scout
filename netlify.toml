@@ -1,7 +1,8 @@
 [build]
   base = "frontend"
   command = "npm ci && npx ng build"
-  publish = "frontend/dist/job-hunter/browser"
+  # Relative to the base directory above.
+  publish = "dist/job-hunter/browser"
 
 [build.environment]
   NODE_VERSION = "22"
