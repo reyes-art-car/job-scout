@@ -1,0 +1,13 @@
+[build]
+  base = "frontend"
+  command = "npm ci && npx ng build"
+  publish = "frontend/dist/job-hunter/browser"
+
+[build.environment]
+  NODE_VERSION = "22"
+
+# Fallback de SPA: las rutas de Angular (/ofertas, /carta...) se resuelven en el cliente.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
