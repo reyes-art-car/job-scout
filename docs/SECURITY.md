@@ -5,7 +5,7 @@ informar de una vulnerabilidad está en [SECURITY.md](../SECURITY.md).
 
 ## Qué hay que proteger
 
-JobHunter maneja datos personales de una candidatura (currículums, cartas, teléfono, correo, la evaluación de cada
+Job Hopping & Learning maneja datos personales de una candidatura (currículums, cartas, teléfono, correo, la evaluación de cada
 oferta) y ejecuta contenido que **no controla**: anuncios de empleo leídos de internet, salida de un modelo de
 lenguaje y ficheros Excel importados.
 

@@ -1,0 +1,122 @@
+<app-public-shell>
+  <div class="wrap">
+    <header class="head">
+      <h1>Sube tu currículum</h1>
+      <p class="muted">
+        Lo leemos en tu navegador para proponerte un perfil. El archivo no se envía a ningún servidor y no se guarda:
+        solo se guarda lo que revises y confirmes, en tu dispositivo.
+      </p>
+    </header>
+
+    @if (error()) {
+      <p class="alert" role="alert">{{ error() }}</p>
+    }
+
+    @switch (step()) {
+      @case ('upload') {
+        <label
+          class="drop"
+          [class.over]="dragging()"
+          (dragover)="onDragOver($event)"
+          (dragleave)="dragging.set(false)"
+          (drop)="onDrop($event)"
+        >
+          <app-icon name="download" [size]="32" />
+          <strong>Arrastra tu CV aquí o pulsa para elegirlo</strong>
+          <span class="muted small">PDF, DOCX o TXT · hasta {{ maxMb }} MB · con texto seleccionable</span>
+          <input type="file" accept=".pdf,.docx,.txt,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain" (change)="onPick($event)" />
+        </label>
+
+        <p class="small muted note">
+          Evita subir documentos con datos que no necesitas para buscar empleo (DNI, fecha de nacimiento, foto). Más
+          información en la <a routerLink="/privacidad">política de privacidad</a>.
+        </p>
+
+        <div class="alt-actions">
+          @if (isCustom()) {
+            <a class="btn" routerLink="/panel">Seguir con mi CV actual</a>
+          }
+          <a class="btn" routerLink="/panel">Prefiero ver la demo</a>
+        </div>
+      }
+      @case ('reading') {
+        <p class="card status" role="status">Leyendo «{{ fileName() }}»…</p>
+      }
+      @case ('review') {
+        <form class="card review" (ngSubmit)="save()" #form="ngForm">
+          <div class="intro">
+            <h2>Revisa lo que hemos detectado</h2>
+            <p class="muted small">
+              La lectura es automática y puede equivocarse. Corrige lo que haga falta: es lo que usarán el panel, el
+              CV adaptado y las cartas.
+            </p>
+          </div>
+
+          <fieldset>
+            <legend>Datos básicos</legend>
+            <div class="cols">
+              <label>Nombre completo<input name="name" maxlength="160" required [(ngModel)]="draft.name" autocomplete="off" /></label>
+              <label>Titular profesional<input name="title" maxlength="160" [(ngModel)]="draft.title" placeholder="Junior Full-Stack Developer" /></label>
+              <label>Localidad<input name="location" maxlength="160" [(ngModel)]="draft.location" /></label>
+              <label>Correo electrónico<input name="email" type="email" maxlength="160" [(ngModel)]="draft.email" autocomplete="off" /></label>
+              <label>LinkedIn<input name="linkedin" maxlength="300" [(ngModel)]="draft.linkedin" placeholder="https://www.linkedin.com/in/…" /></label>
+              <label>GitHub<input name="github" maxlength="300" [(ngModel)]="draft.github" placeholder="https://github.com/…" /></label>
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend>Experiencia más reciente</legend>
+            <div class="cols">
+              <label>Puesto<input name="role" maxlength="160" [(ngModel)]="draft.role" /></label>
+              <label>Empresa<input name="company" maxlength="160" [(ngModel)]="draft.company" /></label>
+              <label>Periodo<input name="period" maxlength="160" [(ngModel)]="draft.period" placeholder="Marzo 2026 - Actualidad" /></label>
+              <label>Proyecto o descripción<input name="project" maxlength="600" [(ngModel)]="draft.project" /></label>
+            </div>
+            <label>
+              Logros (uno por línea)
+              <textarea name="bullets" rows="7" [(ngModel)]="bulletsText"></textarea>
+            </label>
+          </fieldset>
+
+          <fieldset>
+            <legend>Tecnologías</legend>
+            @if (detected().length) {
+              <p class="small muted">Detectadas en tu CV:</p>
+              <div class="chips">
+                @for (name of detected(); track name) {
+                  <span class="chip accent">{{ name }}</span>
+                }
+              </div>
+            } @else {
+              <p class="small muted">No hemos reconocido tecnologías del catálogo. Puedes añadirlas abajo.</p>
+            }
+            <label>
+              Competencias (una línea por grupo, con el formato «Categoría: tecnología, tecnología»)
+              <textarea name="skills" rows="5" [(ngModel)]="skillsText" (ngModelChange)="skillsEdited = true"></textarea>
+            </label>
+          </fieldset>
+
+          <fieldset>
+            <legend>Formación e idiomas</legend>
+            <div class="cols">
+              <label>Titulación<input name="degree" maxlength="160" [(ngModel)]="draft.education.degree" /></label>
+              <label>Centro<input name="school" maxlength="160" [(ngModel)]="draft.education.school" /></label>
+              <label>Años<input name="years" maxlength="40" [(ngModel)]="draft.education.years" /></label>
+              <label>Idiomas<input name="language" maxlength="160" [(ngModel)]="draft.languages.name" placeholder="Inglés B2" /></label>
+            </div>
+          </fieldset>
+
+          <p class="small muted">
+            Al guardar, estos datos se almacenan solo en este navegador. Puedes borrarlos cuando quieras con «Borrar
+            mis datos».
+          </p>
+
+          <div class="actions">
+            <button class="btn primary" type="submit" [disabled]="form.invalid">Guardar y ver mi panel</button>
+            <button class="btn" type="button" (click)="step.set('upload')">Subir otro archivo</button>
+          </div>
+        </form>
+      }
+    }
+  </div>
+</app-public-shell>

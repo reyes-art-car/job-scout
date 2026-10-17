@@ -2,7 +2,10 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import { KanbanStatus, NewOffer, Offer, priorityFor } from '../models';
+import { CareerService } from '../career.service';
 import { parseOffers } from '../offer-validation';
+import { ProfileService } from '../profile.service';
+import { rescoreSeed } from '../seed-rescoring';
 import { OfferGateway } from './offer-gateway';
 import { OfferStorage } from './offer-storage';
 
@@ -11,6 +14,8 @@ import { OfferStorage } from './offer-storage';
 export class DemoOfferGateway extends OfferGateway {
   private readonly http = inject(HttpClient);
   private readonly storage = inject(OfferStorage);
+  private readonly profiles = inject(ProfileService);
+  private readonly career = inject(CareerService);
   private offers: Offer[] = [];
 
   async list(): Promise<Offer[]> {
@@ -54,6 +59,8 @@ export class DemoOfferGateway extends OfferGateway {
   }
 
   private async loadSeed(): Promise<Offer[]> {
-    return parseOffers(await firstValueFrom(this.http.get<unknown>('demo/offers.json'))) ?? [];
+    const seed = parseOffers(await firstValueFrom(this.http.get<unknown>('demo/offers.json'))) ?? [];
+    // Con un CV importado, las ofertas de ejemplo se puntúan con el perfil de esa persona.
+    return this.profiles.isCustom() ? rescoreSeed(seed, this.profiles.profile, this.career.data()) : seed;
   }
 }

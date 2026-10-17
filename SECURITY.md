@@ -2,7 +2,7 @@
 
 ## Cómo informar de una vulnerabilidad
 
-Escribe a **mariareyesartcar@gmail.com** con el asunto «Seguridad · JobHunter». Por favor, **no abras un issue
+Escribe a **mariareyesartcar@gmail.com** con el asunto «Seguridad · Job Hopping & Learning». Por favor, **no abras un issue
 público** hasta que esté corregida.
 
 Incluye, si puedes: qué has encontrado, cómo reproducirlo, qué impacto tiene y la versión o *commit* afectado.
