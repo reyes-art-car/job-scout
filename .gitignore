@@ -1,0 +1,52 @@
+# Herramientas de asistencia IA: no deben verse en el repo publicado
+.claude/
+.claude*/
+CLAUDE.md
+**/CLAUDE.md
+.mcp.json
+.cursor/
+.cursorrules
+.windsurfrules
+.github/copilot-instructions.md
+
+# ── Datos personales y de candidaturas (nunca se publican) ──────────────────────
+# Currículums, cartas y ofertas con su evaluación viven solo en local.
+CV_adaptados/
+CV_*.pdf
+CV_*.docx
+Ofertas_*.xlsx
+Ofertas_*.ods
+Posibles_Ofertas_*.xlsx
+private/
+logs/
+backend/config/candidate_profile.yaml
+backend/data/uploads/
+*.db
+*.sqlite3
+
+# Entornos y dependencias
+__pycache__/
+*.pyc
+.pytest_cache/
+.pytest-tmp*/
+.ruff_cache/
+.venv/
+venv/
+env/
+node_modules/
+.angular/
+dist/
+build/
+*.egg-info/
+
+# Variables de entorno y secretos
+.env
+.env.*
+!.env.example
+*.key
+
+# Temporales y sistema
+*.log
+.~lock.*#
+.DS_Store
+Thumbs.db
