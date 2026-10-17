@@ -1,0 +1,106 @@
+<div class="page">
+  <header class="page-header">
+    <div>
+      <h1>Panel de búsqueda</h1>
+      <p>Resumen de tu pipeline: cuántas ofertas tienes, cómo avanzan y qué tecnologías piden más.</p>
+    </div>
+    <a class="btn primary" routerLink="/ofertas"><app-icon name="plus" /> Añadir oferta</a>
+  </header>
+
+  <section class="grid cols-4" aria-label="Indicadores">
+    <article class="card kpi">
+      <span class="muted small">Ofertas totales</span>
+      <strong>{{ stats().total }}</strong>
+    </article>
+    <article class="card kpi">
+      <span class="muted small">Prioridad alta</span>
+      <strong>{{ stats().high }}</strong>
+    </article>
+    <article class="card kpi">
+      <span class="muted small">Compatibilidad media</span>
+      <strong>{{ stats().avgCompatibility }}%</strong>
+    </article>
+    <article class="card kpi">
+      <span class="muted small">Candidaturas enviadas</span>
+      <strong>{{ applied() }}</strong>
+    </article>
+    <article class="card kpi">
+      <span class="muted small">En entrevista</span>
+      <strong>{{ stats().byStatus.Entrevista }}</strong>
+    </article>
+  </section>
+
+  <div class="grid cols-2">
+    <section class="card">
+      <h2>Embudo de candidaturas</h2>
+      <ul class="funnel">
+        @for (row of funnel(); track row.status) {
+          <li>
+            <span class="chip" [class]="statusClass(row.status)">{{ row.status }}</span>
+            <div class="bar" role="img" [attr.aria-label]="row.status + ': ' + row.count">
+              <i [style.width.%]="row.pct"></i>
+            </div>
+            <b>{{ row.count }}</b>
+          </li>
+        }
+      </ul>
+    </section>
+
+    <section class="card">
+      <h2>Distribución por compatibilidad</h2>
+      <div class="histo" role="img" aria-label="Número de ofertas por tramo de compatibilidad">
+        @for (b of histogram(); track b.label) {
+          <div class="col">
+            <b>{{ b.count }}</b>
+            <div class="stick"><i [style.height.%]="b.height"></i></div>
+            <span class="small muted">{{ b.label }}</span>
+          </div>
+        }
+      </div>
+    </section>
+  </div>
+
+  <div class="grid cols-2">
+    <section class="card">
+      <h2>Tecnologías más pedidas en tus ofertas</h2>
+      <ul class="demand">
+        @for (d of demand(); track d.tech.id) {
+          <li>
+            <span class="name">{{ d.tech.name }}</span>
+            <div class="bar"><i [style.width.%]="d.share" [class]="d.tech.level"></i></div>
+            <span class="small muted">{{ d.share }}%</span>
+            <span
+              class="chip"
+              [class.ok]="d.tech.level === 'have'"
+              [class.warn]="d.tech.level === 'partial'"
+              [class.bad]="d.tech.level === 'gap'"
+            >
+              {{ d.tech.level === 'have' ? 'La tienes' : d.tech.level === 'partial' ? 'Parcial' : 'Te falta' }}
+            </span>
+          </li>
+        }
+      </ul>
+      <a class="small" routerLink="/skills">Ver la brecha completa →</a>
+    </section>
+
+    <section class="card">
+      <h2>Siguientes acciones</h2>
+      @if (next().length === 0) {
+        <p class="empty">No quedan ofertas pendientes.</p>
+      } @else {
+        <ul class="next">
+          @for (o of next(); track o.id) {
+            <li>
+              <span class="score" [class]="tone(o.compatibility)">{{ o.compatibility }}%</span>
+              <div>
+                <strong>{{ o.title }}</strong>
+                <span class="muted small">{{ o.company }} · {{ o.modality }}</span>
+              </div>
+              <a class="btn" routerLink="/adaptar-cv" [queryParams]="{ oferta: o.id }">Adaptar CV</a>
+            </li>
+          }
+        </ul>
+      }
+    </section>
+  </div>
+</div>

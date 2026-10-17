@@ -1,0 +1,143 @@
+<div class="page">
+  <header class="page-header no-print">
+    <div>
+      <h1>Adaptar currículum a la oferta</h1>
+      <p>
+        Elige una oferta: la app detecta sus tecnologías, reordena tus logros, prioriza las competencias que piden y propone un
+        titular y un resumen con sus mismas palabras clave. Solo usa lo que ya puedes demostrar.
+      </p>
+    </div>
+  </header>
+
+  @if (tailored(); as cv) {
+    <div class="layout">
+      <section class="side-col no-print">
+        <div class="card">
+          <label>
+            Oferta
+            <select [value]="selectedId()" (change)="pick($any($event.target).value)">
+              @for (o of offers(); track o.id) {
+                <option [value]="o.id" [selected]="o.id === selectedId()">{{ o.compatibility }}% · {{ o.title }} — {{ o.company }}</option>
+              }
+            </select>
+          </label>
+          <label class="mt">
+            Texto de la oferta (opcional)
+            <textarea
+              rows="5"
+              placeholder="Pega aquí la descripción completa para afinar las palabras clave…"
+              [value]="description()"
+              (input)="description.set($any($event.target).value)"
+            ></textarea>
+          </label>
+        </div>
+
+        <div class="card">
+          <h2>Cobertura de palabras clave</h2>
+          <div class="meter" role="img" [attr.aria-label]="'Cobertura ' + cv.analysis.coverage + '%'">
+            <i [style.width.%]="cv.analysis.coverage"></i>
+          </div>
+          <p class="small muted">
+            <b>{{ cv.analysis.coverage }}%</b> de lo que pide la oferta (ponderado) está acreditado en tu perfil · rol detectado:
+            <b>{{ cv.analysis.role }}</b>
+          </p>
+
+          @if (cv.analysis.matched.length > 0) {
+            <h3>Las tienes</h3>
+            <div class="chips">
+              @for (r of cv.analysis.matched; track r.tech.id) {
+                <span class="chip ok" [title]="r.origin">✓ {{ r.tech.name }}</span>
+              }
+            </div>
+          }
+          @if (cv.analysis.partial.length > 0) {
+            <h3>Parcial: sácalas a la luz</h3>
+            <div class="chips">
+              @for (r of cv.analysis.partial; track r.tech.id) {
+                <span class="chip warn" [title]="r.origin">◐ {{ r.tech.name }}</span>
+              }
+            </div>
+          }
+          @if (cv.analysis.missing.length > 0) {
+            <h3>Te faltan: no las añadas al CV</h3>
+            <div class="chips">
+              @for (r of cv.analysis.missing; track r.tech.id) {
+                <span class="chip bad" [title]="r.origin">✕ {{ r.tech.name }}</span>
+              }
+            </div>
+          }
+        </div>
+
+        <div class="card">
+          <h2>Titular y resumen</h2>
+          <label>
+            Titular
+            <input [value]="title()" (input)="title.set($any($event.target).value)" />
+          </label>
+          <label class="mt">
+            Resumen profesional
+            <textarea rows="6" [value]="summary()" (input)="summary.set($any($event.target).value)"></textarea>
+          </label>
+        </div>
+      </section>
+
+      <section class="paper-col">
+        <div class="actions no-print">
+          <button class="btn" type="button" (click)="copy()">
+            <app-icon [name]="copied() ? 'check' : 'copy'" /> {{ copied() ? 'Copiado' : 'Copiar texto' }}
+          </button>
+          <button class="btn" type="button" (click)="downloadWord()"><app-icon name="download" /> Descargar para Word</button>
+          <button class="btn primary" type="button" (click)="print()"><app-icon name="print" /> Imprimir / PDF</button>
+        </div>
+
+        <article class="paper" aria-label="Vista previa del currículum">
+          <header>
+            <h1>{{ profile.name.toUpperCase() }}</h1>
+            <p class="role">{{ title() }}</p>
+            <p class="contact">{{ profile.location }} | {{ profile.email }}</p>
+          </header>
+
+          <h2>PERFIL PROFESIONAL</h2>
+          <p>{{ summary() }}</p>
+
+          <h2>EXPERIENCIA Y PROYECTOS</h2>
+          <p class="job">
+            <b>{{ profile.company.toUpperCase() }} | {{ profile.role }}</b>
+            <span>{{ profile.period }}</span>
+          </p>
+          <p class="proj">{{ profile.project }}</p>
+          <ul>
+            @for (b of cv.bullets; track b.originalIndex) {
+              <li [class.rel]="b.score > 0">{{ b.text }}</li>
+            }
+          </ul>
+
+          <h2>COMPETENCIAS TÉCNICAS</h2>
+          @for (g of cv.groups; track g.label) {
+            <p>
+              <b>{{ g.label }}: </b>
+              @for (item of g.items; track item.text; let last = $last) {
+                <span [class.hit]="item.hit">{{ item.text }}</span>{{ last ? '' : ', ' }}
+              }
+            </p>
+          }
+
+          <h2>FORMACIÓN</h2>
+          <p>
+            <b>{{ profile.education.degree }}</b> | {{ profile.education.school }} | {{ profile.education.years }}
+          </p>
+
+          <h2>IDIOMAS</h2>
+          <p>
+            <b>{{ profile.languages.name }}</b> — {{ profile.languages.detail }}
+          </p>
+        </article>
+        <p class="small muted no-print">
+          Las competencias resaltadas son las que pide la oferta y suben dentro de su bloque; al imprimir se quita el resaltado.
+        </p>
+      </section>
+    </div>
+  } @else {
+    <div class="card empty">Añade una oferta en la sección «Ofertas» para poder adaptar tu currículum.</div>
+  }
+</div>

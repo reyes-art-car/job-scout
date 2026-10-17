@@ -1,0 +1,79 @@
+<div class="page">
+  <header class="page-header">
+    <div>
+      <h1>Brecha de skills</h1>
+      <p>
+        Qué piden tus {{ total() }} ofertas y qué no figura en tu currículum. «Desbloquea» cuenta las ofertas en las que esa
+        tecnología es la única obligatoria que te falta.
+      </p>
+    </div>
+    <div class="seg" role="group" aria-label="Filtrar por prioridad">
+      @for (f of filters; track f) {
+        <button type="button" [class.on]="filter() === f" (click)="filter.set(f)">
+          {{ f === 'todas' ? 'Todas' : 'Prioridad ' + f }}
+        </button>
+      }
+    </div>
+  </header>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Tecnología</th>
+          <th>Ofertas</th>
+          <th>Obligatoria</th>
+          <th>Desbloquea</th>
+          <th>Prioridad</th>
+          <th>Cómo acreditarla</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (g of visible(); track g.tech.id) {
+          <tr>
+            <td>
+              <strong>{{ g.tech.name }}</strong>
+              <span class="chip" [class.warn]="g.tech.level === 'partial'" [class.bad]="g.tech.level === 'gap'">
+                {{ g.tech.level === 'partial' ? 'Parcial' : 'Falta' }}
+              </span>
+            </td>
+            <td>
+              <div class="bar"><i [style.width.%]="g.share"></i></div>
+              <span class="small muted">{{ g.offers }} de {{ total() }} ({{ g.share }}%)</span>
+            </td>
+            <td>{{ g.mandatory }}</td>
+            <td>
+              @if (g.unlocks > 0) {
+                <span class="chip accent">+{{ g.unlocks }}</span>
+              } @else {
+                <span class="muted">—</span>
+              }
+            </td>
+            <td>
+              @if (g.tech.priority) {
+                <span class="chip" [class.bad]="g.tech.priority === 'A'" [class.warn]="g.tech.priority === 'B'">{{ g.tech.priority }}</span>
+              }
+            </td>
+            <td class="small">{{ g.tech.plan ?? 'Aprender solo si una oferta concreta lo exige.' }}</td>
+          </tr>
+        } @empty {
+          <tr>
+            <td colspan="6" class="empty">Sin brechas en esta categoría.</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  <section class="card">
+    <h2>Lo que ya tienes y el mercado confirma</h2>
+    <div class="chips">
+      @for (s of strengths(); track s.tech.id) {
+        <span class="chip ok">✓ {{ s.tech.name }} · {{ s.share }}%</span>
+      }
+    </div>
+    <p class="small muted mt">
+      El informe completo, con el plan de 8 semanas y las certificaciones sugeridas, está en <code>docs/SKILLS_GAP.md</code>.
+    </p>
+  </section>
+</div>

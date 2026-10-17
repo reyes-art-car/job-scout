@@ -1,0 +1,140 @@
+.layout {
+  display: grid;
+  grid-template-columns: minmax(300px, 380px) 1fr;
+  gap: 20px;
+  align-items: start;
+}
+
+.side-col {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+h3 {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  margin: 14px 0 6px;
+}
+
+.mt {
+  margin-top: 12px;
+}
+
+.meter {
+  height: 10px;
+  border-radius: 99px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  overflow: hidden;
+  margin-bottom: 8px;
+
+  i {
+    display: block;
+    height: 100%;
+    background: linear-gradient(90deg, var(--warn), var(--ok));
+  }
+}
+
+.paper-col {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+
+// La vista previa imita la hoja A4 del CV real y mantiene colores propios en modo oscuro.
+.paper {
+  background: #fff;
+  color: #222;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  box-shadow: var(--shadow);
+  padding: 28px 32px;
+  font-family: Calibri, 'Segoe UI', Arial, sans-serif;
+  font-size: 0.82rem;
+  line-height: 1.45;
+
+  header {
+    background: #1a6870;
+    color: #fff;
+    margin: -28px -32px 14px;
+    padding: 16px 32px;
+
+    h1 {
+      font-size: 1.5rem;
+      color: #fff;
+    }
+    .role {
+      margin-top: 4px;
+      font-size: 0.9rem;
+    }
+    .contact {
+      font-size: 0.78rem;
+      opacity: 0.9;
+      margin-top: 6px;
+    }
+  }
+
+  h2 {
+    font-size: 0.78rem;
+    color: #1a6870;
+    border-bottom: 1px solid #1a6870;
+    padding-bottom: 2px;
+    margin: 14px 0 6px;
+  }
+
+  p {
+    margin: 3px 0;
+  }
+  .job {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .proj {
+    font-style: italic;
+    color: #1a6870;
+  }
+  ul {
+    margin: 4px 0 0;
+    padding-left: 18px;
+  }
+  li {
+    margin: 3px 0;
+  }
+  .hit {
+    background: #fff1b8;
+    border-radius: 3px;
+    padding: 0 2px;
+  }
+}
+
+@media (max-width: 1000px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media print {
+  .layout {
+    display: block;
+  }
+  .paper {
+    border: 0;
+    box-shadow: none;
+    padding: 0;
+    font-size: 10pt;
+
+    header {
+      margin: 0 0 10px;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    .hit {
+      background: none;
+    }
+  }
+}

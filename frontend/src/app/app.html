@@ -1,0 +1,40 @@
+<div class="shell">
+  <aside class="side no-print">
+    <a class="brand" routerLink="/panel" aria-label="JobHunter, ir al panel">
+      <span class="logo"><app-icon name="target" [size]="20" /></span>
+      <span>
+        <strong>JobHunter</strong>
+        <small>Búsqueda de empleo IT</small>
+      </span>
+    </a>
+
+    <nav aria-label="Principal">
+      @for (item of nav; track item.path) {
+        <a [routerLink]="item.path" routerLinkActive="active">
+          <app-icon [name]="item.icon" />
+          <span>{{ item.label }}</span>
+        </a>
+      }
+    </nav>
+
+    <div class="side-foot">
+      @switch (store.mode()) {
+        @case ('api') {
+          <span class="chip ok">API conectada</span>
+        }
+        @case ('demo') {
+          <span class="chip warn" title="Sin backend: los cambios se guardan solo en este navegador">Modo demo</span>
+          <button class="link" type="button" (click)="resetDemo()">Restablecer datos</button>
+        }
+        @default {
+          <span class="chip">Cargando…</span>
+        }
+      }
+      <p class="small muted">{{ profile.name }}<br />{{ profile.title }}</p>
+    </div>
+  </aside>
+
+  <main class="main">
+    <router-outlet />
+  </main>
+</div>
