@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { AuthToken } from './core/auth';
 import { OfferStore } from './core/offer.store';
 import { ProfileService } from './core/profile.service';
 import { IconComponent } from './shared/icon.component';
@@ -19,6 +20,7 @@ interface NavItem {
 })
 export class App {
   protected readonly store = inject(OfferStore);
+  private readonly auth = inject(AuthToken);
   protected readonly profile = inject(ProfileService).profile;
 
   protected readonly nav: NavItem[] = [
@@ -31,5 +33,11 @@ export class App {
 
   protected async resetDemo(): Promise<void> {
     await this.store.resetDemo();
+  }
+
+  protected async connect(event: Event, token: string): Promise<void> {
+    event.preventDefault();
+    this.auth.set(token);
+    await this.store.load();
   }
 }

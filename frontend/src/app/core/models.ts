@@ -10,6 +10,12 @@ export const KANBAN_STATUSES: readonly KanbanStatus[] = [
   'Rechazo',
 ] as const;
 
+/** Umbral de la rúbrica de búsqueda: ≥ 75 % → prioridad alta (igual que el backend). */
+export const HIGH_PRIORITY_THRESHOLD = 75;
+
+export const priorityFor = (compatibility: number): Priority =>
+  compatibility >= HIGH_PRIORITY_THRESHOLD ? 'Alta' : 'Secundaria';
+
 /** Misma forma que `OfferOut` del backend (snake_case) para poder usar la API o el modo demo sin mapeos. */
 export interface Offer {
   id: number;

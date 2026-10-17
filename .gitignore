@@ -50,3 +50,8 @@ build/
 .~lock.*#
 .DS_Store
 Thumbs.db
+
+# Cobertura y caches de herramientas
+.coverage
+htmlcov/
+.mypy_cache/
