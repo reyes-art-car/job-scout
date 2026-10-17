@@ -6,7 +6,7 @@ Angular 20 con componentes standalone, signals y carga diferida por ruta. Ver [d
 npm ci
 npm start                                                    # http://localhost:4200 · /api → localhost:8000
 npm run build                                                # dist/job-hunter/browser
-npx ng test --watch=false --browsers=ChromeHeadless          # 51 pruebas (necesita Chrome)
+npx ng test --watch=false --browsers=ChromeHeadless          # 70 pruebas (necesita Chrome)
 npx ng lint                                                  # ESLint con reglas de código limpio y seguridad
 ```
 
