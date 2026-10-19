@@ -8,7 +8,7 @@
 interface Context {
   next(): Promise<Response>;
 }
-declare const Netlify: { env: { get(name: string): string | undefined } };
+declare const Netlify: { env: { get(name: string): string | undefined; toObject?(): Record<string, string> } };
 
 const encoder = new TextEncoder();
 
@@ -41,6 +41,8 @@ const HEADERS = { 'Cache-Control': 'no-store', 'X-Robots-Tag': 'noindex, nofollo
 export default async function gate(request: Request, context: Context): Promise<Response> {
   const expected = Netlify.env.get('SITE_PASSWORD');
   if (!expected) {
+    // Solo nombres de variables (nunca valores) para diagnosticar una configuración incompleta.
+    console.error('SITE_PASSWORD no definida. Variables visibles:', Object.keys(Netlify.env.toObject?.() ?? {}).join(', '));
     return new Response('Sitio no configurado.', { status: 503, headers: HEADERS });
   }
   const supplied = passwordFrom(request.headers.get('authorization'));
