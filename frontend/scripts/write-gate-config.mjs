@@ -3,13 +3,16 @@
 import { createHash } from 'node:crypto';
 import { writeFileSync } from 'node:fs';
 
+// SHA-256 solo es seguro para secretos de alta entropía (aquí, una contraseña aleatoria de ≥ 24 caracteres), no para
+// contraseñas de personas; un hash lento (PBKDF2/scrypt) no cabe en el límite de CPU de 50 ms de las Edge Functions.
+const MIN_LENGTH = 24;
 const password = process.env.SITE_PASSWORD ?? '';
-const hash = password ? createHash('sha256').update(password, 'utf8').digest('hex') : '';
+const strong = password.length >= MIN_LENGTH;
+// codeql[js/insufficient-password-hash]: secreto aleatorio largo, ver comentario anterior.
+const hash = strong ? createHash('sha256').update(password, 'utf8').digest('hex') : '';
 const target = new URL('../netlify/edge-functions/lib/gate-config.ts', import.meta.url);
 
 writeFileSync(target, `// Generado en el build. No editar.\nexport const PASSWORD_HASH = '${hash}';\n`);
-console.log(
-  hash
-    ? 'gate: hash de SITE_PASSWORD escrito.'
-    : 'gate: SITE_PASSWORD no está definida en el build; el sitio responderá 503.',
-);
+if (hash) console.log('gate: hash de SITE_PASSWORD escrito.');
+else if (password) console.error(`gate: SITE_PASSWORD tiene menos de ${MIN_LENGTH} caracteres; el sitio responderá 503.`);
+else console.error('gate: SITE_PASSWORD no está definida en el build; el sitio responderá 503.');
