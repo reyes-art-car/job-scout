@@ -1,0 +1,6 @@
+# Excluye solo el script que guarda el hash de SITE_PASSWORD para la Edge Function de Netlify.
+# CodeQL (js/insufficient-password-hash) pide un hash lento para contraseñas, pero ese secreto es aleatorio de
+# al menos 24 caracteres (el script lo exige) y un hash lento no cabe en los 50 ms de CPU de una Edge Function.
+# Ver docs/SECURITY.md. El resto del repositorio sigue analizándose con todas las consultas.
+paths-ignore:
+  - frontend/scripts/write-gate-config.mjs

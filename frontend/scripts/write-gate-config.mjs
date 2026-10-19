@@ -8,7 +8,7 @@ import { writeFileSync } from 'node:fs';
 const MIN_LENGTH = 24;
 const password = process.env.SITE_PASSWORD ?? '';
 const strong = password.length >= MIN_LENGTH;
-// codeql[js/insufficient-password-hash]: secreto aleatorio largo, ver comentario anterior.
+// Este fichero está excluido de CodeQL en .github/codeql/codeql-config.yml por el motivo anterior.
 const hash = strong ? createHash('sha256').update(password, 'utf8').digest('hex') : '';
 const target = new URL('../netlify/edge-functions/lib/gate-config.ts', import.meta.url);
 
