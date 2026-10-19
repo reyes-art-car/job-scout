@@ -144,14 +144,18 @@ Lo siguiente **no** está resuelto, y conviene saberlo antes de exponer la aplic
 
 Netlify solo sirve el frontend estático (no hay API detrás), así que la clave de la API no basta. La Edge Function
 `frontend/netlify/edge-functions/gate.ts` pide contraseña (HTTP Basic, cualquier usuario) antes de servir **cualquier**
-fichero, incluido el código de la aplicación. Falla cerrado: sin `SITE_PASSWORD` el sitio responde 503.
+fichero, incluido el código de la aplicación.
 
-1. Genera una contraseña: `python -c "import secrets; print(secrets.token_urlsafe(24))"`.
-2. Netlify → Site configuration → Environment variables → añade `SITE_PASSWORD` (ámbito: Functions/Runtime; marca
-   «Contains secret values»). Después, **Deploys → Trigger deploy** para que la tome.
-3. Comprueba en el log de despliegue que aparece la Edge Function `gate`, y abre el sitio en una ventana privada:
-   debe pedir contraseña.
-4. Reparte la contraseña solo a quien deba entrar; para revocarla, cámbiala y vuelve a desplegar.
+Las Edge Functions de Netlify **no ven las variables definidas en el panel** (solo las que inyecta Netlify), pero el
+build sí. Por eso el build ejecuta `scripts/write-gate-config.mjs`, que guarda el SHA-256 de `SITE_PASSWORD` en la
+función; la contraseña en claro no se almacena. Falla cerrado: sin `SITE_PASSWORD` durante el build el sitio responde 503.
 
-Pruebas de la función: `deno test --allow-env frontend/netlify/tests/gate.test.ts` (Deno no está en el CI).
+1. Genera una contraseña larga: `python -c "import secrets; print(secrets.token_urlsafe(24))"`.
+2. Netlify → Project configuration → Environment variables → `SITE_PASSWORD` con esa contraseña, con valor en todos los
+   contextos (Production, Deploy Previews, Branch deploys). Con el plan gratuito vale el ámbito por defecto.
+3. Lanza un deploy nuevo (*Deploys → Trigger deploy → Clear cache and deploy site*). En su log de build debe verse
+   `gate: hash de SITE_PASSWORD escrito.`
+4. Abre el sitio en una ventana privada: debe pedir contraseña. Para cambiarla, edita la variable y redespliega.
+
+Pruebas de la función: `deno test frontend/netlify/tests/gate.test.ts` (Deno no está en el CI).
 La demo de GitHub Pages (`.github/workflows/pages.yml`) sigue siendo pública: desactívala si no quieres ese acceso.
