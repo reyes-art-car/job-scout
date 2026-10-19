@@ -184,4 +184,4 @@ The public demo includes sample job offers and the author's professional profile
 
 [LinkedIn](https://www.linkedin.com/in/maria-reyes-a-carrero/) · [Email](mailto:mariareyesartcar+github@gmail.com)
 
-Licensed under the [MIT License](LICENSE).
+Software propietario: todos los derechos reservados. Consulta [LICENSE](LICENSE).

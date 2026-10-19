@@ -128,3 +128,14 @@ Lo siguiente **no** está resuelto, y conviene saberlo antes de exponer la aplic
    alcance de este repositorio.
 9. **Imágenes Docker sin probar en esta revisión**: el demonio de Docker no estaba disponible. Los ficheros siguen
    las prácticas habituales, pero ejecuta `docker compose up --build` y comprueba `/api/health` antes de fiarte.
+
+## Protección del proyecto contra copias
+
+- **Licencia propietaria** (`LICENSE`): todos los derechos reservados. Es lo que da base legal para reclamar una copia.
+  La licencia MIT anterior ya se concedió a quien clonó el repositorio antes del cambio y no se puede retirar.
+- **Clave de acceso** (`API_TOKEN`, ≥ 32 caracteres en producción): sin ella la API devuelve 401 y la aplicación
+  muestra la pantalla `/acceso`. Es una clave compartida: sirve hasta que haya cuentas de usuario.
+- **Límite real:** el código del frontend viaja al navegador y no se puede ocultar. Lo que sí se protege es la API, los
+  datos y, cuando se implemente, la lógica con LLM, que debe vivir solo en el servidor tras la clave o la cuenta.
+- **Pendiente (decisión tuya):** pasar el repositorio a privado y retirar la demo de GitHub Pages, que publica todo el
+  frontend; y añadir cuentas con usuario y contraseña (ver `docs/PRICING.md` para los planes).
