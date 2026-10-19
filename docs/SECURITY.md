@@ -139,3 +139,19 @@ Lo siguiente **no** está resuelto, y conviene saberlo antes de exponer la aplic
   datos y, cuando se implemente, la lógica con LLM, que debe vivir solo en el servidor tras la clave o la cuenta.
 - **Pendiente (decisión tuya):** pasar el repositorio a privado y retirar la demo de GitHub Pages, que publica todo el
   frontend; y añadir cuentas con usuario y contraseña (ver `docs/PRICING.md` para los planes).
+
+## Despliegue en Netlify: contraseña del sitio
+
+Netlify solo sirve el frontend estático (no hay API detrás), así que la clave de la API no basta. La Edge Function
+`frontend/netlify/edge-functions/gate.ts` pide contraseña (HTTP Basic, cualquier usuario) antes de servir **cualquier**
+fichero, incluido el código de la aplicación. Falla cerrado: sin `SITE_PASSWORD` el sitio responde 503.
+
+1. Genera una contraseña: `python -c "import secrets; print(secrets.token_urlsafe(24))"`.
+2. Netlify → Site configuration → Environment variables → añade `SITE_PASSWORD` (ámbito: Functions/Runtime; marca
+   «Contains secret values»). Después, **Deploys → Trigger deploy** para que la tome.
+3. Comprueba en el log de despliegue que aparece la Edge Function `gate`, y abre el sitio en una ventana privada:
+   debe pedir contraseña.
+4. Reparte la contraseña solo a quien deba entrar; para revocarla, cámbiala y vuelve a desplegar.
+
+Pruebas de la función: `deno test --allow-env frontend/netlify/edge-functions/gate.test.ts` (Deno no está en el CI).
+La demo de GitHub Pages (`.github/workflows/pages.yml`) sigue siendo pública: desactívala si no quieres ese acceso.
