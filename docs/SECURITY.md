@@ -153,5 +153,5 @@ fichero, incluido el código de la aplicación. Falla cerrado: sin `SITE_PASSWOR
    debe pedir contraseña.
 4. Reparte la contraseña solo a quien deba entrar; para revocarla, cámbiala y vuelve a desplegar.
 
-Pruebas de la función: `deno test --allow-env frontend/netlify/edge-functions/gate.test.ts` (Deno no está en el CI).
+Pruebas de la función: `deno test --allow-env frontend/netlify/tests/gate.test.ts` (Deno no está en el CI).
 La demo de GitHub Pages (`.github/workflows/pages.yml`) sigue siendo pública: desactívala si no quieres ese acceso.
