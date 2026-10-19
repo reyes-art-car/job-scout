@@ -150,7 +150,9 @@ Las Edge Functions de Netlify **no ven las variables definidas en el panel** (so
 build sí. Por eso el build ejecuta `scripts/write-gate-config.mjs`, que guarda el SHA-256 de `SITE_PASSWORD` en la
 función; la contraseña en claro no se almacena. Falla cerrado: sin `SITE_PASSWORD` durante el build el sitio responde 503.
 
-1. Genera una contraseña larga: `python -c "import secrets; print(secrets.token_urlsafe(24))"`.
+1. Genera una contraseña aleatoria de al menos 24 caracteres: `python -c "import secrets; print(secrets.token_urlsafe(24))"`
+   (32 caracteres). Con menos de 24 el build no escribe el hash y el sitio responde 503: SHA-256 solo es aceptable para
+   secretos de alta entropía, y un hash lento (PBKDF2) no cabe en los 50 ms de CPU de una Edge Function.
 2. Netlify → Project configuration → Environment variables → `SITE_PASSWORD` con esa contraseña, con valor en todos los
    contextos (Production, Deploy Previews, Branch deploys). Con el plan gratuito vale el ámbito por defecto.
 3. Lanza un deploy nuevo (*Deploys → Trigger deploy → Clear cache and deploy site*). En su log de build debe verse
