@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { accessGuard } from './core/access.guard';
 
 const SITE = 'Job Hopping & Learning';
 
@@ -13,6 +14,11 @@ export const routes: Routes = [
     path: 'importar-cv',
     title: `Subir mi CV · ${SITE}`,
     loadComponent: () => import('./features/import-cv/import-cv').then((m) => m.ImportCv),
+  },
+  {
+    path: 'acceso',
+    title: `Acceso · ${SITE}`,
+    loadComponent: () => import('./features/access/access').then((m) => m.Access),
   },
   {
     path: 'aviso-legal',
@@ -36,6 +42,7 @@ export const routes: Routes = [
   },
   {
     path: '',
+    canActivate: [accessGuard],
     loadComponent: () => import('./shell/app-shell').then((m) => m.AppShell),
     children: [
       {
