@@ -3,6 +3,8 @@
   command = "npm ci && npx ng build"
   # Relative to the base directory above.
   publish = "dist/job-hunter/browser"
+  # Edge Function que pide contraseña antes de servir el sitio (relative to base). Ver docs/SECURITY.md.
+  edge_functions = "netlify/edge-functions"
 
 [build.environment]
   NODE_VERSION = "22"
