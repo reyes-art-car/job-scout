@@ -1,10 +1,11 @@
 [build]
   base = "frontend"
-  command = "npm ci && npx ng build"
+  command = "node scripts/write-gate-config.mjs && npm ci && npx ng build"
   # Relative to the base directory above.
   publish = "dist/job-hunter/browser"
   # La Edge Function de contraseña se detecta sola en frontend/netlify/edge-functions (carpeta por defecto
-  # dentro de `base`). Ahí solo debe haber funciones: las pruebas viven en frontend/netlify/tests.
+  # dentro de `base`). Las Edge Functions no ven las variables del panel: el primer comando del build escribe
+  # el hash de SITE_PASSWORD en la función. Las pruebas viven en frontend/netlify/tests.
 
 [build.environment]
   NODE_VERSION = "22"

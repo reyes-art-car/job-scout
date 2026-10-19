@@ -1,45 +1,48 @@
-// Ejecutar con: deno test --allow-env netlify/tests/gate.test.ts
+// Ejecutar con: deno test netlify/tests/gate.test.ts
 import { assertEquals } from 'jsr:@std/assert@1';
+import { createGate, matchesHash, passwordFrom, sha256Hex } from '../edge-functions/gate.ts';
 
-let password: string | undefined = 'clave-de-prueba';
-// deno-lint-ignore no-explicit-any
-(globalThis as any).Netlify = { env: { get: () => password } };
-const { default: gate, passwordFrom, samePassword } = await import('../edge-functions/gate.ts');
-
+const PASSWORD = 'clave-de-prueba';
+const hash = await sha256Hex(PASSWORD);
 const basic = (user: string, pass: string) => `Basic ${btoa(`${user}:${pass}`)}`;
 const next = { next: () => Promise.resolve(new Response('contenido')) };
-const call = (auth?: string) =>
-  // deno-lint-ignore no-explicit-any
-  gate(new Request('https://x.test/', { headers: auth ? { authorization: auth } : {} }), next as any);
+const call = (gate: ReturnType<typeof createGate>, auth?: string) =>
+  gate(new Request('https://x.test/', { headers: auth ? { authorization: auth } : {} }), next);
 
 Deno.test('sin credenciales responde 401 con desafío Basic', async () => {
-  const response = await call();
+  const response = await call(createGate(hash));
   assertEquals(response.status, 401);
   assertEquals(response.headers.get('www-authenticate')?.startsWith('Basic'), true);
 });
 
 Deno.test('contraseña incorrecta o cabecera mal formada: 401', async () => {
-  for (const auth of [basic('a', 'mal'), 'Basic ???', 'Bearer clave-de-prueba', basic('a', '')]) {
-    assertEquals((await call(auth)).status, 401);
+  const gate = createGate(hash);
+  for (const auth of [basic('a', 'mal'), 'Basic ???', `Bearer ${PASSWORD}`, basic('a', '')]) {
+    assertEquals((await call(gate, auth)).status, 401);
   }
 });
 
-Deno.test('contraseña correcta sirve el contenido, con cualquier usuario y con ":" en la clave', async () => {
-  assertEquals(await (await call(basic('cualquiera', 'clave-de-prueba'))).text(), 'contenido');
-  password = 'a:b';
-  assertEquals((await call(basic('u', 'a:b'))).status, 200);
-  password = 'clave-de-prueba';
+Deno.test('contraseña correcta sirve el contenido, con cualquier usuario, ":" y acentos', async () => {
+  assertEquals(await (await call(createGate(hash), basic('cualquiera', PASSWORD))).text(), 'contenido');
+  const special = 'a:ñ€';
+  const bytes = new TextEncoder().encode(`u:${special}`);
+  const header = `Basic ${btoa(String.fromCharCode(...bytes))}`;
+  assertEquals((await call(createGate(await sha256Hex(special)), header)).status, 200);
 });
 
-Deno.test('sin SITE_PASSWORD falla cerrado (503)', async () => {
-  password = undefined;
-  assertEquals((await call(basic('u', 'x'))).status, 503);
-  password = 'clave-de-prueba';
+Deno.test('sin hash válido falla cerrado (503), incluso con credenciales', async () => {
+  for (const bad of ['', 'no-es-un-hash']) {
+    assertEquals((await call(createGate(bad), basic('u', PASSWORD))).status, 503);
+  }
 });
 
 Deno.test('utilidades', async () => {
   assertEquals(passwordFrom(null), null);
   assertEquals(passwordFrom(basic('u', 'p')), 'p');
-  assertEquals(await samePassword('a', 'a'), true);
-  assertEquals(await samePassword('a', 'b'), false);
+  assertEquals(await matchesHash('a', await sha256Hex('a')), true);
+  assertEquals(await matchesHash('a', await sha256Hex('b')), false);
+  assertEquals(
+    await sha256Hex('abc'),
+    'ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad',
+  );
 });
