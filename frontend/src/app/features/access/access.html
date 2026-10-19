@@ -1,0 +1,13 @@
+<main class="gate" id="main-content">
+  <form class="card" (submit)="submit($event, key.value)">
+    <h1>Acceso privado</h1>
+    <p class="muted">Introduce la clave de acceso para entrar. Si no la tienes, solicítala a la persona que te invitó.</p>
+    <label>
+      Clave de acceso
+      <input #key type="password" autocomplete="current-password" maxlength="200" required autofocus [attr.aria-invalid]="error() ? 'true' : null" aria-describedby="access-error" />
+    </label>
+    <p id="access-error" class="error" role="alert">{{ error() }}</p>
+    <button class="btn primary" type="submit" [disabled]="busy()">{{ busy() ? 'Comprobando…' : 'Entrar' }}</button>
+    <a class="link" routerLink="/">Volver al inicio</a>
+  </form>
+</main>

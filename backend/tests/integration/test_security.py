@@ -19,6 +19,12 @@ def test_health_is_public_but_offers_require_token(secured_client: TestClient) -
     assert response.headers["www-authenticate"] == "Bearer"
 
 
+def test_access_check_only_accepts_the_right_key(secured_client: TestClient) -> None:
+    assert secured_client.get("/api/auth/check").status_code == 401
+    assert secured_client.get("/api/auth/check", headers={"Authorization": "Bearer wrong"}).status_code == 401
+    assert secured_client.get("/api/auth/check", headers=AUTH).status_code == 204
+
+
 @pytest.mark.parametrize("header", ["Bearer wrong", "Bearer ", "Basic abc", "", f"bearer{TEST_TOKEN}"])
 def test_invalid_credentials_are_rejected(secured_client: TestClient, header: str) -> None:
     assert secured_client.get("/api/offers", headers={"Authorization": header}).status_code == 401

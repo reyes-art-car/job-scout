@@ -7,7 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.trustedhost import TrustedHostMiddleware
 
 from job_tracker.api.error_handlers import UnhandledErrorMiddleware, register_error_handlers
-from job_tracker.api.routers import health, offers
+from job_tracker.api.routers import auth, health, offers
 from job_tracker.api.security.auth import require_api_token
 from job_tracker.api.security.body_limit import BodySizeLimitMiddleware
 from job_tracker.api.security.headers import SecurityHeadersMiddleware
@@ -77,6 +77,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
 
     app.include_router(health.router)
     # Todo lo demás exige token: denegado por defecto, solo /api/health es público.
+    app.include_router(auth.router, dependencies=[Depends(require_api_token)])
     app.include_router(offers.router, dependencies=[Depends(require_api_token)])
     return app
 
