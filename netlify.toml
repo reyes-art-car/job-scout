@@ -3,8 +3,8 @@
   command = "npm ci && npx ng build"
   # Relative to the base directory above.
   publish = "dist/job-hunter/browser"
-  # Edge Function que pide contraseña antes de servir el sitio (relative to base). Ver docs/SECURITY.md.
-  edge_functions = "netlify/edge-functions"
+  # La Edge Function de contraseña se detecta sola en frontend/netlify/edge-functions (carpeta por defecto
+  # dentro de `base`). Ahí solo debe haber funciones: las pruebas viven en frontend/netlify/tests.
 
 [build.environment]
   NODE_VERSION = "22"

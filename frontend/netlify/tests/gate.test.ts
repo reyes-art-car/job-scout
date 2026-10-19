@@ -1,10 +1,10 @@
-// Ejecutar con: deno test --allow-env netlify/edge-functions/gate.test.ts
+// Ejecutar con: deno test --allow-env netlify/tests/gate.test.ts
 import { assertEquals } from 'jsr:@std/assert@1';
 
 let password: string | undefined = 'clave-de-prueba';
 // deno-lint-ignore no-explicit-any
 (globalThis as any).Netlify = { env: { get: () => password } };
-const { default: gate, passwordFrom, samePassword } = await import('./gate.ts');
+const { default: gate, passwordFrom, samePassword } = await import('../edge-functions/gate.ts');
 
 const basic = (user: string, pass: string) => `Basic ${btoa(`${user}:${pass}`)}`;
 const next = { next: () => Promise.resolve(new Response('contenido')) };
