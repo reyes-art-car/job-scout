@@ -4,7 +4,7 @@
     <p class="muted">Introduce la clave de acceso para entrar. Si no la tienes, solicítala a la persona que te invitó.</p>
     <label>
       Clave de acceso
-      <input #key type="password" autocomplete="current-password" maxlength="200" required autofocus [attr.aria-invalid]="error() ? 'true' : null" aria-describedby="access-error" />
+      <input #key type="password" autocomplete="current-password" maxlength="200" required [attr.aria-invalid]="error() ? 'true' : null" aria-describedby="access-error" />
     </label>
     <p id="access-error" class="error" role="alert">{{ error() }}</p>
     <button class="btn primary" type="submit" [disabled]="busy()">{{ busy() ? 'Comprobando…' : 'Entrar' }}</button>
