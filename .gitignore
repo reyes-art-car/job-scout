@@ -15,6 +15,9 @@ CV_adaptados/
 CV_*.pdf
 CV_*.docx
 Ofertas_*.xlsx
+# Informes de búsqueda y análisis de huecos: describen tu proceso de selección real (empresas, estado, notas).
+docs/BUSQUEDA_*.md
+docs/SKILLS_GAP.md
 Ofertas_*.ods
 Posibles_Ofertas_*.xlsx
 private/

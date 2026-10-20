@@ -12,7 +12,17 @@
 
 ![Job search dashboard](docs/screenshots/panel.png)
 
-**Bring your own CV.** The landing page lets anyone upload a PDF, DOCX or TXT résumé. It is read in the browser (`pdfjs-dist`, `fflate`), turned into an editable profile and stored in `localStorage`; the sample offers are re-scored against that profile. Nothing is sent to a server, so there are no accounts. A "Borrar mis datos" button erases everything, and the app ships Spanish legal pages (aviso legal, privacidad, cookies, condiciones de uso).
+**Bring your own CV.** The landing page lets anyone upload a PDF, DOCX or TXT résumé. It is read in the browser (`pdfjs-dist`, `fflate`), turned into an editable profile and stored in `localStorage`; the sample offers are re-scored against that profile. In this local mode nothing is sent to a server, so no account is needed (the optional hosted mode adds accounts for automatic offer search, see [docs/MULTIUSER.md](docs/MULTIUSER.md)). A "Borrar mis datos" button erases everything, and the app ships Spanish legal pages (aviso legal, privacidad, cookies, condiciones de uso).
+
+## What makes it different
+
+Most job tools are feeds: they show you more offers. This one is built around what you do between one application and the next.
+
+- **A growth plan, not just a feed.** Every offer explains *why* it scores what it scores, and the skills gap turns the offers you have seen into what to learn next.
+- **Evidence over promises.** A competency only moves up when you back it with a project, course or certificate. CVs and cover letters never claim what your profile cannot support.
+- **You stay in control.** Nothing is applied for, sent or scheduled on your behalf.
+- **Private by default.** In local mode the CV is read in the browser and never leaves your device.
+- **Explainable scoring.** The rules (mandatory = 3, desirable = 1, gaps count zero) are documented in [docs/EVIDENCE_BASED_SEARCH.md](docs/EVIDENCE_BASED_SEARCH.md); there is no opaque "match %". The code is source-available (all rights reserved).
 
 ## Features
 
@@ -165,12 +175,12 @@ Most detailed guides are currently in Spanish.
 
 - [Architecture and SOLID principles](docs/ARCHITECTURE.md)
 - [Security controls and limitations](docs/SECURITY.md)
+- [Multi-user accounts, email and pricing](docs/MULTIUSER.md)
+- [Publishing this repository safely](docs/PUBLIC_REPO.md)
 - [Vulnerability disclosure policy](SECURITY.md)
 - [Contributing](CONTRIBUTING.md)
 - [Branch organization and development workflow](docs/DEVELOPMENT_WORKFLOW.md)
 - [Roadmap and suggested improvements](docs/ROADMAP.md)
-- [Skills gap and market analysis](docs/SKILLS_GAP.md)
-- [Job search report — October 17, 2026](docs/BUSQUEDA_2026-10-17.md)
 
 ## Data and privacy
 
