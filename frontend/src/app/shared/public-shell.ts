@@ -11,7 +11,7 @@ import { IconComponent } from './icon.component';
     <a class="skip-link" href="#public-content">Ir al contenido</a>
     <header class="top">
       <a class="brand" routerLink="/" aria-label="Job Hopping &amp; Learning, inicio">
-        <span class="logo"><app-icon name="target" [size]="18" /></span>
+        <span class="logo"><app-icon name="steps" [size]="18" /></span>
         <span><strong>Job Hopping</strong><small>&amp; Learning</small></span>
       </a>
       <nav aria-label="Principal">

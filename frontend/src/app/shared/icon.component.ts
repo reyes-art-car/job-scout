@@ -16,6 +16,7 @@ const PATHS: Record<string, string> = {
   kanban: 'M4 4h5v16H4zM10 4h5v10h-5zM16 4h4v13h-4z',
   list: 'M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01',
   link: 'M10 14a5 5 0 007 0l3-3a5 5 0 00-7-7l-1 1M14 10a5 5 0 00-7 0l-3 3a5 5 0 007 7l1-1',
+  steps: 'M3 20h18M5 20v-5h4v5M10 20v-9h4v9M15 20V6h4v14',
   target: 'M12 3a9 9 0 100 18 9 9 0 000-18zM12 8a4 4 0 100 8 4 4 0 000-8zM12 12h.01',
   alert: 'M12 3l10 18H2zM12 10v5M12 18h.01',
   sparkle: 'M12 3l2 6 6 2-6 2-2 6-2-6-6-2 6-2zM19 3v4M17 5h4',

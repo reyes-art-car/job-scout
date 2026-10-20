@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { AccountService } from '../core/account.service';
 import { AuthToken } from '../core/auth';
 import { CareerService } from '../core/career.service';
 import { LocalDataService } from '../core/local-data.service';
@@ -26,16 +27,17 @@ export class AppShell {
   protected readonly career = inject(CareerService);
   protected readonly profileService = inject(ProfileService);
   private readonly auth = inject(AuthToken);
+  private readonly accounts = inject(AccountService);
   private readonly router = inject(Router);
   private readonly localData = inject(LocalDataService);
 
   protected readonly nav: NavItem[] = [
-    { path: '/buscar', label: 'Buscar ofertas', icon: 'target' },
+    { path: '/buscar', label: 'Buscar ofertas', icon: 'search' },
     { path: '/panel', label: 'Panel', icon: 'grid' },
     { path: '/ofertas', label: 'Ofertas', icon: 'briefcase' },
     { path: '/adaptar-cv', label: 'Adaptar CV', icon: 'file' },
     { path: '/carta', label: 'Carta de presentación', icon: 'mail' },
-    { path: '/skills', label: 'Brecha de skills', icon: 'target' },
+    { path: '/skills', label: 'Brecha de skills', icon: 'steps' },
     { path: '/mi-perfil', label: 'Mi experiencia', icon: 'check' },
     { path: '/candidaturas', label: 'Mi historial', icon: 'list' },
   ];
@@ -55,6 +57,11 @@ export class AppShell {
   protected readonly loggedIn = this.auth.token;
 
   protected async logout(): Promise<void> {
+    try {
+      await this.accounts.logout(); // invalida el token en el servidor, no solo en este navegador
+    } catch {
+      // sin conexión o sesión ya caducada: se cierra igualmente en local
+    }
     this.auth.set('');
     await this.router.navigateByUrl('/acceso');
   }

@@ -4,6 +4,7 @@
     <p class="muted">
       {{ mode() === 'login' ? 'Entra para ver tus ofertas y lanzar búsquedas.' : 'Crea tu cuenta para guardar tu perfil y buscar ofertas a tu medida.' }}
     </p>
+    @if (notice()) { <p class="ok" role="status">{{ notice() }}</p> }
     <label>
       Email
       <input #email type="email" autocomplete="email" maxlength="254" required />
@@ -26,6 +27,7 @@
       {{ busy() ? 'Un momento…' : mode() === 'login' ? 'Entrar' : 'Crear cuenta' }}
     </button>
     @if (mode() === 'login') {
+      <a class="link" routerLink="/recuperar">He olvidado mi contraseña</a>
       <button class="link" type="button" (click)="switchTo('register')">No tengo cuenta · Crear una</button>
     } @else {
       <button class="link" type="button" (click)="switchTo('login')">Ya tengo cuenta · Iniciar sesión</button>

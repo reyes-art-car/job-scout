@@ -27,7 +27,7 @@ const CSV_COLUMNS: { header: string; value: (o: Offer) => string | number | null
 function csvCell(value: string | number | null): string {
   const text = value === null || value === undefined ? '' : String(value);
   // Evita la inyección de fórmulas al abrir el CSV en Excel.
-  const safe = /^[=+\-@]/.test(text) ? `'${text}` : text;
+  const safe = /^[=+\-@\t\r]/.test(text) ? `'${text}` : text;
   return `"${safe.replace(/"/g, '""')}"`;
 }
 

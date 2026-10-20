@@ -17,3 +17,9 @@ section.card { margin-bottom: 16px; }
 
 .ok { color: var(--ok, #1a7f4b); font-weight: 600; }
 .error { color: var(--bad); font-weight: 600; }
+
+.account details { margin-top: 12px; }
+.account summary { cursor: pointer; font-weight: 600; color: var(--bad); }
+.delete { display: flex; flex-direction: column; gap: 12px; max-width: 420px; margin-top: 12px; }
+.delete label { display: flex; flex-direction: column; gap: 6px; font-weight: 600; }
+.btn.danger { background: var(--bad); color: #fff; border-color: var(--bad); align-self: flex-start; }

@@ -10,5 +10,5 @@ import { PublicShell } from '../../shared/public-shell';
   styleUrl: './legal.scss',
 })
 export class Privacidad {
-  protected readonly updated = '17 de octubre de 2026';
+  protected readonly updated = '20 de octubre de 2026';
 }

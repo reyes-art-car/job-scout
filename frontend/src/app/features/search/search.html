@@ -23,6 +23,15 @@
     </section>
   }
 
+  @if (account(); as acc) {
+    @if (!acc.email_verified) {
+      <section class="card" role="status">
+        <p><strong>Confirma tu email para poder buscar.</strong> Te enviamos un enlace a {{ acc.email }}.</p>
+        <button class="btn" type="button" [disabled]="resending()" (click)="resend()">{{ resending() ? 'Enviando…' : 'Reenviar el enlace' }}</button>
+      </section>
+    }
+  }
+
   @if (message()) { <p class="ok" role="status">{{ message() }}</p> }
   @if (error()) { <p class="error" role="alert">{{ error() }}</p> }
 
@@ -90,13 +99,34 @@
     } @else {
       <div class="launch">
         @for (key of ['general', 'linkedin', 'europa']; track key) {
-          <button class="btn" type="button" [disabled]="starting() || busy || (account()?.quota?.remaining ?? 0) === 0" (click)="startSearch(key)">
+          <button class="btn" type="button" [disabled]="starting() || busy() || !(account()?.email_verified) || (account()?.quota?.remaining ?? 0) === 0" (click)="startSearch(key)">
             {{ strategyLabel(key) }}
           </button>
         }
       </div>
       <p class="muted small">Una búsqueda tarda unos minutos. Puedes seguir usando la aplicación mientras tanto.</p>
     }
+  </section>
+
+  <section class="card account" aria-labelledby="account-title">
+    <h2 id="account-title">Mi cuenta y mis datos</h2>
+    <p class="muted">Puedes llevarte todo lo que guardamos de ti o borrar la cuenta cuando quieras.</p>
+    <div class="launch">
+      <button class="btn" type="button" [disabled]="exporting()" (click)="downloadMyData()">
+        {{ exporting() ? 'Preparando…' : 'Descargar mis datos (JSON)' }}
+      </button>
+    </div>
+    <details>
+      <summary>Eliminar mi cuenta</summary>
+      <form class="delete" (submit)="deleteAccount($event)">
+        <p class="muted">Se borran tu cuenta, tu perfil, tus ofertas y tu historial de búsquedas. No se puede deshacer.</p>
+        <label>
+          Confirma con tu contraseña
+          <input name="password" type="password" autocomplete="current-password" maxlength="128" required />
+        </label>
+        <button class="btn danger" type="submit" [disabled]="deleting()">{{ deleting() ? 'Borrando…' : 'Eliminar mi cuenta para siempre' }}</button>
+      </form>
+    </details>
   </section>
 
   @if (jobs().length > 0) {

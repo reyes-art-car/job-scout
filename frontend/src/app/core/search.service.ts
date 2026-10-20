@@ -31,12 +31,6 @@ export interface SearchJob {
   error: string | null;
 }
 
-export interface Account {
-  email: string;
-  plan: 'free' | 'pro';
-  quota: { limit: number; used: number; remaining: number };
-}
-
 const REQUEST_TIMEOUT_MS = 8000;
 const STATUSES: readonly SearchStatus[] = ['queued', 'running', 'done', 'failed'];
 
@@ -63,16 +57,6 @@ export function parseJob(raw: unknown): SearchJob | null {
   };
 }
 
-export function parseAccount(raw: unknown): Account | null {
-  if (!isRecord(raw) || typeof raw['email'] !== 'string' || !isRecord(raw['quota'])) return null;
-  const quota = raw['quota'];
-  return {
-    email: raw['email'],
-    plan: raw['plan'] === 'pro' ? 'pro' : 'free',
-    quota: { limit: int(quota['limit']), used: int(quota['used']), remaining: int(quota['remaining']) },
-  };
-}
-
 function parseProfile(raw: unknown): SearchProfile | null {
   if (!isRecord(raw) || typeof raw['headline'] !== 'string' || typeof raw['summary'] !== 'string') return null;
   const list = (key: string): string[] =>
@@ -93,22 +77,10 @@ function parseProfile(raw: unknown): SearchProfile | null {
   };
 }
 
-/** Cuenta, perfil de búsqueda y búsquedas de ofertas contra la API. */
+/** Perfil de búsqueda y búsquedas de ofertas contra la API. */
 @Injectable({ providedIn: 'root' })
 export class SearchService {
   private readonly http = inject(HttpClient);
-
-  async register(email: string, password: string): Promise<string> {
-    return this.session('/api/auth/register', email, password);
-  }
-
-  async login(email: string, password: string): Promise<string> {
-    return this.session('/api/auth/login', email, password);
-  }
-
-  async account(): Promise<Account | null> {
-    return parseAccount(await this.get('/api/auth/me'));
-  }
 
   async profile(): Promise<SearchProfile | null> {
     return parseProfile(await this.get('/api/profile'));
@@ -133,13 +105,6 @@ export class SearchService {
     const job = parseJob(await firstValueFrom(this.http.post<unknown>('/api/searches', { strategy }).pipe(timeout(REQUEST_TIMEOUT_MS))));
     if (!job) throw new Error('Respuesta de la API no válida');
     return job;
-  }
-
-  private async session(url: string, email: string, password: string): Promise<string> {
-    const raw = await firstValueFrom(this.http.post<unknown>(url, { email, password }).pipe(timeout(REQUEST_TIMEOUT_MS)));
-    const token = isRecord(raw) ? raw['access_token'] : null;
-    if (typeof token !== 'string' || !token) throw new Error('Respuesta de la API no válida');
-    return token;
   }
 
   private get(url: string): Promise<unknown> {

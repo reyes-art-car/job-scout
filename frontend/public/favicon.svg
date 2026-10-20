@@ -1,7 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Job Hopping &amp; Learning">
-  <rect width="64" height="64" rx="14" fill="#203d31"/>
-  <circle cx="32" cy="32" r="19" fill="none" stroke="#d5e5b6" stroke-width="4"/>
-  <circle cx="32" cy="32" r="9" fill="none" stroke="#d5e5b6" stroke-width="4"/>
-  <circle cx="32" cy="32" r="3.5" fill="#d5e5b6"/>
-  <path d="M32 6v10M32 48v10M6 32h10M48 32h10" stroke="#d5e5b6" stroke-width="4" stroke-linecap="round"/>
+  <rect width="64" height="64" rx="14" fill="#2f1b2a"/>
+  <rect x="12" y="38" width="11" height="14" rx="3" fill="#ecc3df"/>
+  <rect x="26.5" y="27" width="11" height="25" rx="3" fill="#d98bc0"/>
+  <rect x="41" y="14" width="11" height="38" rx="3" fill="#b8579a"/>
 </svg>

@@ -7,11 +7,23 @@
 
     <section>
       <h2>1. En resumen</h2>
+      <p>Job Hopping &amp; Learning funciona de dos maneras, y el tratamiento de tus datos es distinto en cada una:</p>
       <ul>
-        <li>Job Hopping &amp; Learning no tiene cuentas, ni base de datos, ni servidor que reciba tu currículum.</li>
-        <li>El archivo que subes se lee en tu navegador y se descarta; solo se guardan los campos que revisas y confirmas.</li>
-        <li>Lo que guardas se queda en tu dispositivo y puedes borrarlo en cualquier momento.</li>
+        <li>
+          <strong>Modo local (por defecto, sin cuenta):</strong> tu currículum se lee en tu navegador y todo lo que
+          guardas se queda en tu dispositivo. El titular no recibe nada.
+        </li>
+        <li>
+          <strong>Cuenta (opcional, solo para la búsqueda automática de ofertas):</strong> tu email, tu contraseña
+          (solo en forma de huella cifrada), tu perfil de búsqueda, tus ofertas y tu historial de búsquedas se guardan en el
+          servidor. Para buscar ofertas, tu perfil de búsqueda se envía a un proveedor de inteligencia artificial
+          (Anthropic).
+        </li>
         <li>No usamos analítica, publicidad ni herramientas de terceros que te rastreen.</li>
+        <li>
+          Puedes descargar todos tus datos y borrar tu cuenta cuando quieras, desde la propia aplicación y sin pedirnos
+          permiso.
+        </li>
       </ul>
     </section>
 
@@ -25,6 +37,7 @@
 
     <section>
       <h2>3. Qué datos se tratan y dónde</h2>
+      <h3>3.1 En modo local (sin cuenta)</h3>
       <p>Al usar Job Hopping &amp; Learning con tu propio currículum, los datos que introduces son:</p>
       <ul>
         <li>
@@ -35,13 +48,31 @@
       </ul>
       <p>
         Todo ello se procesa y se guarda <strong>únicamente en tu navegador</strong> (almacenamiento local). No se
-        envía al titular ni a ningún tercero. Por eso el titular no tiene acceso a tus datos y no puede recuperarlos
+        envía al titular ni a ningún tercero. Por eso el titular no tiene acceso a esos datos y no puede recuperarlos
         si los borras o cambias de dispositivo.
       </p>
+
+      <h3>3.2 Si creas una cuenta</h3>
+      <p>Además de lo anterior, que sigue siendo local, el servidor guarda:</p>
+      <ul>
+        <li>
+          <strong>Datos de la cuenta:</strong> tu email, la fecha de alta, tu plan y si has confirmado el email. Tu contraseña
+          <strong>no se guarda</strong>: solo una huella cifrada (scrypt) con la que se puede comprobar, pero no recuperar.
+        </li>
+        <li>
+          <strong>Tu perfil de búsqueda:</strong> lo que escribes en la pantalla «Buscar ofertas» (titular, nivel, resumen,
+          tecnologías, puestos que buscas, país, ciudades donde aceptas presencial, idiomas y preferencias).
+        </li>
+        <li><strong>Tus ofertas:</strong> las que encuentra la búsqueda y las que añades, con su estado y tus notas.</li>
+        <li>
+          <strong>Tu historial de búsquedas:</strong> fecha, tipo, estado, número de ofertas encontradas y el consumo técnico
+          de cada búsqueda (se usa para controlar el cupo y el coste del servicio).
+        </li>
+      </ul>
       <p>
-        Te recomendamos no subir datos innecesarios para buscar trabajo, como DNI, fecha de nacimiento, estado civil
-        o fotografía. La aplicación no los necesita y, si aparecen en el texto, no se guardan salvo que los
-        escribas tú en un campo del formulario de revisión.
+        Te recomendamos no escribir en el perfil de búsqueda datos que no sean necesarios para buscar trabajo, como DNI, fecha
+        de nacimiento, estado civil o fotografía, ni categorías especiales de datos (salud, ideología, etc.). La aplicación
+        no los necesita.
       </p>
     </section>
 
@@ -50,64 +81,108 @@
       <p>
         El PDF, DOCX o TXT se abre en tu navegador mediante código que se ejecuta en tu dispositivo. El texto
         extraído se analiza para proponerte un perfil y se descarta al terminar. No se almacena el archivo ni su
-        texto completo, y no se envía a ningún servicio de inteligencia artificial ni de terceros.
+        texto completo, y <strong>tampoco se envía al servidor ni a ningún servicio de inteligencia artificial, ni siquiera
+        si tienes cuenta</strong>. Si creas una cuenta, el perfil de búsqueda lo escribes tú.
       </p>
     </section>
 
     <section>
       <h2>5. Finalidad y base jurídica</h2>
+      <ul>
+        <li>
+          <strong>Modo local:</strong> la finalidad es que puedas usar las funciones de la aplicación (puntuar ofertas,
+          adaptar tu CV, generar cartas y detectar carencias). Tratas tus propios datos en tu dispositivo, por iniciativa
+          propia y bajo tu control.
+        </li>
+        <li>
+          <strong>Cuenta:</strong> prestarte el servicio que solicitas al crearla: guardar tu perfil, buscar y puntuar ofertas
+          y enviarte los correos de confirmación y de recuperación de contraseña (art. 6.1.b RGPD, ejecución del servicio
+          solicitado).
+        </li>
+        <li>
+          <strong>Seguridad y control de uso:</strong> limitar intentos de acceso, evitar abusos y controlar el coste del
+          servicio, con base en el interés legítimo de mantenerlo seguro y en funcionamiento (art. 6.1.f RGPD).
+        </li>
+      </ul>
       <p>
-        La finalidad es que puedas usar las funciones de la aplicación (puntuar ofertas, adaptar tu CV, generar
-        cartas y detectar carencias). Cuando tratas tus propios datos en tu dispositivo, lo haces por iniciativa
-        propia y bajo tu control. Para el sitio web en sí, el único tratamiento que realiza el titular es el
-        registro técnico descrito en el apartado siguiente, basado en el interés legítimo de mantener el sitio
-        seguro y en funcionamiento (art. 6.1.f RGPD).
+        La puntuación de las ofertas es una ayuda orientativa para ti. No se toman decisiones automatizadas sobre ti con
+        efectos jurídicos ni que te afecten de modo similar significativamente: tú decides siempre a qué ofertas aplicas y
+        qué envías.
       </p>
     </section>
 
     <section>
-      <h2>6. Alojamiento y registros técnicos</h2>
+      <h2>6. Destinatarios y proveedores</h2>
+      <p>En modo local no se cede ningún dato porque el titular no los recibe. Si creas una cuenta intervienen estos proveedores:</p>
+      <ul>
+        <li>
+          <strong>Anthropic (API de Claude), proveedor de inteligencia artificial.</strong> Para buscar ofertas se le envía el
+          contenido de tu perfil de búsqueda y las direcciones de las ofertas que ya tenías, para no repetirlas. <em>No</em> se
+          le envían tu email, tu contraseña ni el archivo de tu CV. Anthropic puede tratar esos datos fuera del Espacio
+          Económico Europeo (por ejemplo, en Estados Unidos) con las garantías que establezca la normativa y conforme a su
+          propia política de privacidad. La búsqueda lee, además, páginas públicas de empleo.
+        </li>
+        <li>
+          <strong>Proveedor de correo electrónico transaccional,</strong> que recibe tu email y el texto del mensaje para
+          entregarte la confirmación de la cuenta y los enlaces de recuperación de contraseña.
+        </li>
+        <li><strong>Proveedor de alojamiento,</strong> que aloja el servidor y la base de datos (ver apartado siguiente).</li>
+      </ul>
+      <p>Si exportas o imprimes un CV o una carta, el archivo se genera en tu dispositivo y tú decides con quién lo compartes.</p>
+    </section>
+
+    <section>
+      <h2>7. Alojamiento y registros técnicos</h2>
       <p>
-        El sitio se sirve desde un proveedor de alojamiento web. Como en cualquier sitio web, al cargarlo el
-        proveedor puede registrar de forma automática datos técnicos de la conexión, como la dirección IP, la fecha
-        y hora, la página solicitada y el navegador, con fines de seguridad y funcionamiento. El titular no accede
-        a esos registros con fines de seguimiento ni los cruza con ningún dato de tu CV, que nunca llega al
-        proveedor. El proveedor actúa con su propia política de privacidad y puede tratar esos datos fuera del
-        Espacio Económico Europeo con las garantías que establezca la normativa.
+        El sitio se sirve desde un proveedor de alojamiento. Como en cualquier sitio web, al cargarlo el proveedor y el
+        servidor pueden registrar de forma automática datos técnicos de la conexión, como la dirección IP, la fecha y hora,
+        la página solicitada y el navegador, con fines de seguridad y funcionamiento. El titular no los usa para hacerte
+        seguimiento ni los cruza con el contenido de tu CV. El proveedor actúa con su propia política de privacidad y puede
+        tratar esos datos fuera del Espacio Económico Europeo con las garantías que establezca la normativa.
       </p>
     </section>
 
     <section>
-      <h2>7. Conservación</h2>
-      <p>
-        Lo que guardas permanece en tu navegador hasta que lo borres tú: con el botón «Borrar mis datos» de la
-        aplicación, limpiando los datos del sitio desde la configuración del navegador o desinstalando el navegador.
-        El titular no conserva ninguna copia.
-      </p>
-    </section>
-
-    <section>
-      <h2>8. Destinatarios</h2>
-      <p>
-        No se ceden datos a terceros porque el titular no los recibe. Si decides exportar o imprimir un CV o una
-        carta, el archivo se genera en tu dispositivo y tú decides con quién lo compartes.
-      </p>
+      <h2>8. Conservación</h2>
+      <ul>
+        <li>
+          <strong>Modo local:</strong> lo que guardas permanece en tu navegador hasta que lo borres tú: con el botón «Borrar mis
+          datos», limpiando los datos del sitio desde el navegador o desinstalándolo. El titular no conserva ninguna copia.
+        </li>
+        <li>
+          <strong>Cuenta:</strong> tus datos se conservan mientras mantengas la cuenta. Al eliminarla desde la aplicación se borran
+          de inmediato la cuenta, el perfil, las ofertas y el historial de búsquedas. Los registros técnicos se conservan solo
+          el tiempo mínimo necesario para la seguridad del servicio.
+        </li>
+        <li>
+          Los enlaces de confirmación y de recuperación de contraseña caducan por sí solos (a las pocas horas el de
+          confirmación y a los 30 minutos el de recuperación) y el de recuperación solo se puede usar una vez.
+        </li>
+      </ul>
     </section>
 
     <section>
       <h2>9. Tus derechos</h2>
-      <p>
-        Como no almacenamos tus datos, puedes ejercer tú mismo la mayoría de los derechos desde la aplicación:
-      </p>
+      <p>Puedes ejercer la mayoría de los derechos tú mismo desde la aplicación:</p>
       <ul>
-        <li><strong>Acceso y portabilidad:</strong> puedes exportar tus datos desde «Mi experiencia» y las ofertas a CSV.</li>
-        <li><strong>Rectificación:</strong> puedes volver a subir tu CV o editar tu perfil cuando quieras.</li>
-        <li><strong>Supresión:</strong> el botón «Borrar mis datos» elimina todo lo guardado en este navegador.</li>
+        <li>
+          <strong>Acceso y portabilidad:</strong> en modo local, exporta tus datos desde «Mi experiencia» y las ofertas a CSV. Con
+          cuenta, el botón «Descargar mis datos» de la pantalla «Buscar ofertas» te da en un archivo JSON todo lo que el
+          servidor guarda de ti.
+        </li>
+        <li><strong>Rectificación:</strong> edita tu perfil cuando quieras, o vuelve a subir tu CV en modo local.</li>
+        <li>
+          <strong>Supresión:</strong> «Borrar mis datos» elimina todo lo guardado en este navegador, y «Eliminar mi cuenta» borra
+          todo lo que el servidor guarda de ti (te pedirá tu contraseña para confirmarlo).
+        </li>
+        <li>
+          <strong>Contraseña y sesiones:</strong> puedes restablecerla desde la pantalla de acceso; al hacerlo se cierran todas
+          tus sesiones abiertas.
+        </li>
       </ul>
       <p>
-        Respecto a los registros técnicos del proveedor de alojamiento, puedes escribir a
-        mariareyesartcar+github&#64;gmail.com y te orientaremos sobre cómo ejercer tus derechos de acceso, rectificación,
-        supresión, limitación, oposición y portabilidad. También puedes presentar una reclamación ante la
+        Para limitación, oposición o cualquier duda, o respecto a los registros técnicos del proveedor de alojamiento,
+        escribe a mariareyesartcar+github&#64;gmail.com y te atenderemos. También puedes presentar una reclamación ante la
         <a href="https://www.aepd.es" target="_blank" rel="noopener noreferrer">Agencia Española de Protección de Datos</a>.
       </p>
     </section>
@@ -120,10 +195,11 @@
     <section>
       <h2>11. Seguridad</h2>
       <p>
-        Los datos guardados en el navegador se validan al leerlos y el sitio aplica una política de seguridad de
-        contenidos restrictiva que impide cargar código de terceros. Aun así, quien tenga acceso a tu dispositivo o
-        a tu sesión de navegador podría ver lo que has guardado: no uses Job Hopping &amp; Learning en equipos compartidos sin
-        borrar tus datos al terminar.
+        Los datos guardados en el navegador se validan al leerlos y el sitio aplica una política de seguridad de contenidos
+        restrictiva que impide cargar código de terceros. En el servidor, las contraseñas se guardan solo como huella cifrada,
+        la sesión usa un token que caduca, hay límites de intentos de acceso y cada cuenta solo puede ver sus propios datos.
+        Aun así, quien tenga acceso a tu dispositivo o a tu sesión de navegador podría ver lo que has guardado: no uses Job
+        Hopping &amp; Learning en equipos compartidos sin cerrar sesión y borrar tus datos locales al terminar.
       </p>
     </section>
 
