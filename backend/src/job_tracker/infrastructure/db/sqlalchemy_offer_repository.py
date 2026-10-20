@@ -85,13 +85,30 @@ def _apply_entity_to_row(offer: Offer, row: OfferModel) -> None:
 
 
 class SqlAlchemyOfferRepository:
-    """Adaptador de infraestructura: implementa el puerto OfferRepository con SQLAlchemy."""
+    """Adaptador de infraestructura: implementa el puerto OfferRepository con SQLAlchemy.
 
-    def __init__(self, session: Session):
+    Está acotado a un usuario: todas las consultas filtran por `user_id` y una fila ajena se trata
+    como inexistente, de modo que ningún caso de uso puede ver ni modificar ofertas de otra persona.
+    """
+
+    def __init__(self, session: Session, user_id: int):
         self._session = session
+        self._user_id = user_id
+
+    def _own(self, row: OfferModel | None) -> OfferModel | None:
+        return row if row is not None and row.user_id == self._user_id else None
+
+    def known_urls(self, limit: int) -> list[str]:
+        stmt = (
+            select(OfferModel.url)
+            .where(OfferModel.user_id == self._user_id, OfferModel.url.is_not(None))
+            .order_by(OfferModel.id.desc())
+            .limit(limit)
+        )
+        return [url for url in self._session.scalars(stmt) if url]
 
     def list(self, filters: OfferFilters) -> tuple[list[Offer], int]:
-        stmt = select(OfferModel)
+        stmt = select(OfferModel).where(OfferModel.user_id == self._user_id)
         if filters.priority is not None:
             stmt = stmt.where(OfferModel.priority == filters.priority.value)
         if filters.kanban_status is not None:
@@ -122,21 +139,24 @@ class SqlAlchemyOfferRepository:
         return [_to_entity(r) for r in rows], total
 
     def get(self, offer_id: int) -> Offer | None:
-        row = self._session.get(OfferModel, offer_id)
+        row = self._own(self._session.get(OfferModel, offer_id))
         return _to_entity(row) if row else None
 
     def get_by_code(self, code: str) -> Offer | None:
-        row = self._session.scalar(select(OfferModel).where(OfferModel.code == code))
+        row = self._session.scalar(
+            select(OfferModel).where(OfferModel.user_id == self._user_id, OfferModel.code == code)
+        )
         return _to_entity(row) if row else None
 
     def exists_by_code_or_url(self, code: str, url: str | None) -> bool:
-        stmt = select(OfferModel.id).where(OfferModel.code == code)
+        match = OfferModel.code == code
         if url:
-            stmt = select(OfferModel.id).where(or_(OfferModel.code == code, OfferModel.url == url))
+            match = or_(match, OfferModel.url == url)
+        stmt = select(OfferModel.id).where(OfferModel.user_id == self._user_id, match)
         return self._session.scalar(stmt) is not None
 
     def add(self, offer: Offer) -> Offer:
-        row = OfferModel()
+        row = OfferModel(user_id=self._user_id)
         _apply_entity_to_row(offer, row)
         self._session.add(row)
         self._session.commit()
@@ -144,7 +164,7 @@ class SqlAlchemyOfferRepository:
         return _to_entity(row)
 
     def update(self, offer: Offer) -> Offer:
-        row = self._session.get(OfferModel, offer.id)
+        row = self._own(self._session.get(OfferModel, offer.id))
         if row is None:
             raise OfferNotFoundError(offer.id or -1)
         _apply_entity_to_row(offer, row)
@@ -153,7 +173,7 @@ class SqlAlchemyOfferRepository:
         return _to_entity(row)
 
     def update_status(self, offer_id: int, status: KanbanStatus) -> Offer:
-        row = self._session.get(OfferModel, offer_id)
+        row = self._own(self._session.get(OfferModel, offer_id))
         if row is None:
             raise OfferNotFoundError(offer_id)
         row.kanban_status = status.value
@@ -162,7 +182,7 @@ class SqlAlchemyOfferRepository:
         return _to_entity(row)
 
     def next_code(self) -> str:
-        codes = self._session.scalars(select(OfferModel.code)).all()
+        codes = self._session.scalars(select(OfferModel.code).where(OfferModel.user_id == self._user_id)).all()
         last_num = 0
         for code in codes:
             try:
@@ -172,15 +192,16 @@ class SqlAlchemyOfferRepository:
         return f"OF{last_num + 1:03d}"
 
     def stats(self) -> OfferStats:
-        total = self._session.scalar(select(func.count()).select_from(OfferModel)) or 0
+        mine = OfferModel.user_id == self._user_id
+        total = self._session.scalar(select(func.count()).select_from(OfferModel).where(mine)) or 0
         high_priority = (
             self._session.scalar(
-                select(func.count()).select_from(OfferModel).where(OfferModel.priority == Priority.ALTA.value)
+                select(func.count()).select_from(OfferModel).where(mine, OfferModel.priority == Priority.ALTA.value)
             )
             or 0
         )
         rows = self._session.execute(
-            select(OfferModel.kanban_status, func.count()).group_by(OfferModel.kanban_status)
+            select(OfferModel.kanban_status, func.count()).where(mine).group_by(OfferModel.kanban_status)
         ).all()
         by_status = {status: count for status, count in rows}  # noqa: C416  (Row no es una tupla simple)
         return OfferStats(total=total, high_priority=high_priority, by_status=by_status)

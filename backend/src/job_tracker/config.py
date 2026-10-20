@@ -1,3 +1,4 @@
+import secrets
 from functools import lru_cache
 from pathlib import Path
 from typing import Literal, Self
@@ -7,7 +8,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 BACKEND_DIR = Path(__file__).resolve().parent.parent.parent
 
-MIN_API_TOKEN_LENGTH = 32
+MIN_JWT_SECRET_LENGTH = 32
 
 
 class Settings(BaseSettings):
@@ -17,11 +18,28 @@ class Settings(BaseSettings):
 
     app_env: Literal["development", "production"] = "development"
 
-    # Autenticación: token Bearer estático (aplicación de un solo usuario). Obligatorio en producción.
-    api_token: SecretStr | None = None
+    # Cuentas de usuario: JWT firmado con este secreto. Obligatorio en producción; en desarrollo, si falta,
+    # se genera uno aleatorio al arrancar (las sesiones dejan de valer al reiniciar).
+    jwt_secret: SecretStr | None = None
+    access_token_minutes: int = Field(default=720, gt=0)
+    registration_open: bool = True
 
     anthropic_api_key: SecretStr = SecretStr("")
     anthropic_model: str = "claude-opus-5-5"
+
+    # Búsqueda de ofertas con la API de Claude. El modelo de búsqueda es independiente del resto.
+    search_model: str = "claude-sonnet-5-5"
+    search_max_tokens: int = Field(default=16_000, gt=0)
+    search_max_web_searches: int = Field(default=20, gt=0)
+    search_max_web_fetches: int = Field(default=20, gt=0)
+    search_timeout_seconds: int = Field(default=900, gt=0)
+    worker_poll_seconds: float = Field(default=5.0, gt=0)
+    # Un trabajo «en curso» más antiguo que esto se da por muerto (el worker se cayó) y se marca como fallido.
+    stale_job_minutes: int = Field(default=30, gt=0)
+
+    # Búsquedas incluidas por mes natural según el plan. La pasarela de pago (futuro) solo cambia el plan.
+    free_searches_per_month: int = Field(default=1, ge=0)
+    pro_searches_per_month: int = Field(default=30, ge=0)
 
     database_url: str = "sqlite:///./job_tracker.db"
     cors_origins: str = "http://localhost:4200"
@@ -35,6 +53,7 @@ class Settings(BaseSettings):
     rate_limit_per_minute: int = Field(default=120, gt=0)
     rate_limit_writes_per_minute: int = Field(default=30, gt=0)
     rate_limit_exports_per_minute: int = Field(default=6, gt=0)
+    rate_limit_auth_per_minute: int = Field(default=10, gt=0)
 
     legacy_excel_path: Path = BACKEND_DIR / ".." / "Ofertas_Maria_Reyes.xlsx"
     cv_output_dir: Path = BACKEND_DIR / ".." / "CV_adaptados"
@@ -42,24 +61,31 @@ class Settings(BaseSettings):
     candidate_profile_path: Path = BACKEND_DIR / "config" / "candidate_profile.yaml"
     knowledge_base_dir: Path = BACKEND_DIR / "knowledge_base"
 
-    @field_validator("api_token", mode="before")
+    @field_validator("jwt_secret", mode="before")
     @classmethod
-    def _blank_token_means_none(cls, value: object) -> object:
-        """`API_TOKEN=` vacío en el .env equivale a «sin token», nunca a un token vacío que cualquiera cumple."""
+    def _blank_secret_means_none(cls, value: object) -> object:
+        """`JWT_SECRET=` vacío en el .env equivale a «sin secreto», nunca a un secreto vacío que cualquiera cumple."""
         return None if isinstance(value, str) and not value.strip() else value
 
     @model_validator(mode="after")
     def _reject_insecure_production(self) -> Self:
         if self.app_env != "production":
+            if self.jwt_secret is None:
+                self.jwt_secret = SecretStr(secrets.token_urlsafe(48))
             return self
-        token = self.api_token.get_secret_value() if self.api_token else ""
-        if len(token) < MIN_API_TOKEN_LENGTH:
+        secret = self.jwt_secret.get_secret_value() if self.jwt_secret else ""
+        if len(secret) < MIN_JWT_SECRET_LENGTH:
             raise ValueError(
-                f"En producción API_TOKEN es obligatorio y debe tener al menos {MIN_API_TOKEN_LENGTH} caracteres."
+                f"En producción JWT_SECRET es obligatorio y debe tener al menos {MIN_JWT_SECRET_LENGTH} caracteres."
             )
+        if not self.anthropic_api_key.get_secret_value():
+            raise ValueError("En producción ANTHROPIC_API_KEY es obligatoria (la búsqueda usa la API de Claude).")
         if "*" in self.cors_origins_list:
             raise ValueError("CORS_ORIGINS no puede contener '*' en producción.")
         return self
+
+    def searches_per_month(self, plan: str) -> int:
+        return self.pro_searches_per_month if plan == "pro" else self.free_searches_per_month
 
     @property
     def docs_enabled(self) -> bool:

@@ -8,3 +8,5 @@ sqlalchemy==2.1.5
 openpyxl==3.1.5
 PyYAML==6.0.3
 nh3==0.3.7
+anthropic==0.120.2
+PyJWT==2.15.1

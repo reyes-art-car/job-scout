@@ -135,26 +135,40 @@ def _settings(**kwargs: object) -> Settings:
     return Settings(_env_file=None, **kwargs)  # type: ignore[arg-type]
 
 
-def test_production_requires_a_strong_token() -> None:
-    with pytest.raises(ValidationError, match="API_TOKEN"):
-        _settings(app_env="production")
-    with pytest.raises(ValidationError, match="API_TOKEN"):
-        _settings(app_env="production", api_token="corto")
-    assert _settings(app_env="production", api_token="x" * 32).docs_enabled is False
+PROD = {"app_env": "production", "anthropic_api_key": "sk-ant-test"}
+
+
+def test_production_requires_a_strong_jwt_secret() -> None:
+    with pytest.raises(ValidationError, match="JWT_SECRET"):
+        _settings(**PROD)
+    with pytest.raises(ValidationError, match="JWT_SECRET"):
+        _settings(**PROD, jwt_secret="corto")
+    assert _settings(**PROD, jwt_secret="x" * 32).docs_enabled is False
+
+
+def test_production_requires_the_anthropic_key() -> None:
+    with pytest.raises(ValidationError, match="ANTHROPIC_API_KEY"):
+        _settings(app_env="production", jwt_secret="x" * 32)
+
+
+def test_development_generates_a_random_secret_when_missing() -> None:
+    first, second = _settings(), _settings()
+    assert first.jwt_secret is not None and len(first.jwt_secret.get_secret_value()) >= 32
+    assert first.jwt_secret.get_secret_value() != second.jwt_secret.get_secret_value()  # type: ignore[union-attr]
 
 
 def test_production_rejects_wildcard_cors() -> None:
     with pytest.raises(ValidationError, match="CORS"):
-        _settings(app_env="production", api_token="x" * 32, cors_origins="*")
+        _settings(**PROD, jwt_secret="x" * 32, cors_origins="*")
 
 
 def test_secrets_are_not_printed() -> None:
-    settings = _settings(api_token="s3cr3t-" + "x" * 30, anthropic_api_key="sk-ant-123")
+    settings = _settings(jwt_secret="s3cr3t-" + "x" * 30, anthropic_api_key="sk-ant-123")
     assert "s3cr3t" not in repr(settings) and "sk-ant-123" not in repr(settings)
 
 
-def test_blank_token_is_treated_as_no_token() -> None:
-    assert _settings(api_token="").api_token is None
-    assert _settings(api_token="   ").api_token is None
-    with pytest.raises(ValidationError, match="API_TOKEN"):
-        _settings(app_env="production", api_token="")
+def test_blank_secret_is_treated_as_missing() -> None:
+    # En desarrollo se sustituye por uno aleatorio; en producción se rechaza (nunca un secreto vacío).
+    assert _settings(jwt_secret="   ").jwt_secret.get_secret_value() != "   "  # type: ignore[union-attr]
+    with pytest.raises(ValidationError, match="JWT_SECRET"):
+        _settings(**PROD, jwt_secret="")

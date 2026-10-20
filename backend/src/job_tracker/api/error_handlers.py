@@ -12,10 +12,22 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from starlette.types import ASGIApp, Message, Receive, Scope, Send
 
+from job_tracker.application.search.start_search import UnknownStrategyError
 from job_tracker.domain.offer.exceptions import (
     CvNotAvailableError,
     DuplicateOfferError,
     OfferNotFoundError,
+)
+from job_tracker.domain.search.exceptions import (
+    ProfileRequiredError,
+    SearchAlreadyRunningError,
+    SearchJobNotFoundError,
+    SearchQuotaExceededError,
+)
+from job_tracker.domain.user.exceptions import (
+    EmailAlreadyRegisteredError,
+    InvalidCredentialsError,
+    RegistrationClosedError,
 )
 
 logger = logging.getLogger("job_tracker.errors")
@@ -37,6 +49,40 @@ def register_error_handlers(app: FastAPI) -> None:
     @app.exception_handler(DuplicateOfferError)
     async def _duplicate(_: Request, __: DuplicateOfferError) -> JSONResponse:
         return _error(409, "Ya existe una oferta con esa URL")
+
+    @app.exception_handler(EmailAlreadyRegisteredError)
+    async def _email_taken(_: Request, __: EmailAlreadyRegisteredError) -> JSONResponse:
+        return _error(409, "Ya existe una cuenta con ese email")
+
+    @app.exception_handler(InvalidCredentialsError)
+    async def _bad_credentials(_: Request, __: InvalidCredentialsError) -> JSONResponse:
+        response = _error(401, "Email o contraseña incorrectos")
+        response.headers["WWW-Authenticate"] = "Bearer"
+        return response
+
+    @app.exception_handler(RegistrationClosedError)
+    async def _registration_closed(_: Request, __: RegistrationClosedError) -> JSONResponse:
+        return _error(403, "El registro de nuevas cuentas está cerrado por ahora")
+
+    @app.exception_handler(ProfileRequiredError)
+    async def _profile_required(_: Request, __: ProfileRequiredError) -> JSONResponse:
+        return _error(409, "Completa tu perfil de búsqueda antes de buscar ofertas")
+
+    @app.exception_handler(SearchAlreadyRunningError)
+    async def _search_running(_: Request, __: SearchAlreadyRunningError) -> JSONResponse:
+        return _error(409, "Ya tienes una búsqueda en curso")
+
+    @app.exception_handler(SearchQuotaExceededError)
+    async def _quota(_: Request, exc: SearchQuotaExceededError) -> JSONResponse:
+        return _error(402, "Has agotado las búsquedas de tu plan este mes", limit=exc.limit)
+
+    @app.exception_handler(SearchJobNotFoundError)
+    async def _search_missing(_: Request, __: SearchJobNotFoundError) -> JSONResponse:
+        return _error(404, "Búsqueda no encontrada")
+
+    @app.exception_handler(UnknownStrategyError)
+    async def _bad_strategy(_: Request, __: UnknownStrategyError) -> JSONResponse:
+        return _error(422, "Tipo de búsqueda no válido")
 
     @app.exception_handler(RequestValidationError)
     async def _validation(_: Request, exc: RequestValidationError) -> JSONResponse:

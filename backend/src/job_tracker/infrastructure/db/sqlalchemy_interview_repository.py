@@ -29,11 +29,14 @@ def _session_to_entity(row: InterviewSessionModel) -> InterviewSession:
 class SqlAlchemyInterviewRepository:
     """Adaptador de infraestructura: implementa el puerto InterviewRepository."""
 
-    def __init__(self, session: Session):
+    def __init__(self, session: Session, user_id: int):
         self._session = session
+        self._user_id = user_id
 
     def create_session(self, session: InterviewSession) -> InterviewSession:
-        row = InterviewSessionModel(mode=session.mode.value, offer_id=session.offer_id, title=session.title)
+        row = InterviewSessionModel(
+            user_id=self._user_id, mode=session.mode.value, offer_id=session.offer_id, title=session.title
+        )
         self._session.add(row)
         self._session.commit()
         self._session.refresh(row)
@@ -43,7 +46,7 @@ class SqlAlchemyInterviewRepository:
         stmt = (
             select(InterviewSessionModel)
             .options(selectinload(InterviewSessionModel.messages))
-            .where(InterviewSessionModel.id == session_id)
+            .where(InterviewSessionModel.id == session_id, InterviewSessionModel.user_id == self._user_id)
         )
         row = self._session.scalar(stmt)
         return _session_to_entity(row) if row else None
@@ -52,12 +55,18 @@ class SqlAlchemyInterviewRepository:
         stmt = (
             select(InterviewSessionModel)
             .options(selectinload(InterviewSessionModel.messages))
+            .where(InterviewSessionModel.user_id == self._user_id)
             .order_by(InterviewSessionModel.created_at.desc())
         )
         rows = self._session.scalars(stmt).all()
         return [_session_to_entity(r) for r in rows]
 
     def add_message(self, message: ChatMessage) -> ChatMessage:
+        owner = self._session.scalar(
+            select(InterviewSessionModel.user_id).where(InterviewSessionModel.id == message.session_id)
+        )
+        if owner != self._user_id:
+            raise LookupError("Sesión de entrevista no encontrada")
         row = ChatMessageModel(session_id=message.session_id, role=message.role.value, content=message.content)
         self._session.add(row)
         self._session.commit()

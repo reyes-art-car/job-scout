@@ -4,50 +4,147 @@ import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
-from tests.conftest import TEST_TOKEN
-
-AUTH = {"Authorization": f"Bearer {TEST_TOKEN}"}
-
+from tests.conftest import TEST_JWT_SECRET, register
 
 # ── Autenticación ────────────────────────────────────────────────────────────────
 
+PROD = {
+    "app_env": "production",
+    "anthropic_api_key": "sk-ant-test",
+    "cors_origins": "https://example.com",
+}
+PUBLIC = {"/api/health", "/api/auth/register", "/api/auth/login"}
 
-def test_health_is_public_but_offers_require_token(secured_client: TestClient) -> None:
-    assert secured_client.get("/api/health").status_code == 200
-    response = secured_client.get("/api/offers")
+
+def test_health_is_public_but_offers_require_a_session(anon_client: TestClient) -> None:
+    assert anon_client.get("/api/health").status_code == 200
+    response = anon_client.get("/api/offers")
     assert response.status_code == 401
     assert response.headers["www-authenticate"] == "Bearer"
 
 
-def test_access_check_only_accepts_the_right_key(secured_client: TestClient) -> None:
-    assert secured_client.get("/api/auth/check").status_code == 401
-    assert secured_client.get("/api/auth/check", headers={"Authorization": "Bearer wrong"}).status_code == 401
-    assert secured_client.get("/api/auth/check", headers=AUTH).status_code == 204
+@pytest.mark.parametrize("header", ["Bearer wrong", "Bearer ", "Basic abc", "", "bearer"])
+def test_invalid_credentials_are_rejected(anon_client: TestClient, header: str) -> None:
+    assert anon_client.get("/api/offers", headers={"Authorization": header}).status_code == 401
 
 
-@pytest.mark.parametrize("header", ["Bearer wrong", "Bearer ", "Basic abc", "", f"bearer{TEST_TOKEN}"])
-def test_invalid_credentials_are_rejected(secured_client: TestClient, header: str) -> None:
-    assert secured_client.get("/api/offers", headers={"Authorization": header}).status_code == 401
+def test_valid_session_grants_access_to_every_offer_route(client: TestClient) -> None:
+    assert client.get("/api/offers").status_code == 200
+    assert client.get("/api/offers/stats").status_code == 200
+    assert client.get("/api/offers/export.csv").status_code == 200
+    assert client.post("/api/offers", json={}).status_code == 422  # autenticada pero inválida
 
 
-def test_valid_token_grants_access_to_every_offer_route(secured_client: TestClient) -> None:
-    assert secured_client.get("/api/offers", headers=AUTH).status_code == 200
-    assert secured_client.get("/api/offers/stats", headers=AUTH).status_code == 200
-    assert secured_client.get("/api/offers/export.csv", headers=AUTH).status_code == 200
-    assert secured_client.post("/api/offers", json={}, headers=AUTH).status_code == 422  # autenticada pero inválida
-
-
-def test_every_non_public_route_is_protected(secured_client: TestClient) -> None:
-    """Denegado por defecto: cualquier ruta nueva fuera de la lista pública debe exigir token."""
-    public = {"/api/health"}
-    for route in secured_client.app.routes:  # type: ignore[attr-defined]
+def test_every_non_public_route_is_protected(anon_client: TestClient) -> None:
+    """Denegado por defecto: cualquier ruta nueva fuera de la lista pública debe exigir sesión."""
+    for route in anon_client.app.routes:  # type: ignore[attr-defined]
         path = getattr(route, "path", "")
-        if not path.startswith("/api") or path in public:
+        if not path.startswith("/api") or path in PUBLIC:
             continue
-        concrete = path.replace("{offer_id}", "1")
+        concrete = path.replace("{offer_id}", "1").replace("{job_id}", "1")
         for method in getattr(route, "methods", set()) - {"HEAD", "OPTIONS"}:
-            response = secured_client.request(method, concrete)
+            response = anon_client.request(method, concrete)
             assert response.status_code == 401, f"{method} {path} no exige autenticación"
+
+
+def test_token_signed_with_another_secret_is_rejected(anon_client: TestClient, client: TestClient) -> None:
+    from job_tracker.infrastructure.security.tokens import create_access_token
+
+    forged = create_access_token(1, secret="otro-secreto-" + "x" * 30, minutes=5)
+    assert anon_client.get("/api/offers", headers={"Authorization": f"Bearer {forged}"}).status_code == 401
+
+
+def test_expired_token_is_rejected(anon_client: TestClient, client: TestClient) -> None:
+    from job_tracker.infrastructure.security.tokens import create_access_token
+
+    expired = create_access_token(1, secret=TEST_JWT_SECRET, minutes=-1)
+    assert anon_client.get("/api/offers", headers={"Authorization": f"Bearer {expired}"}).status_code == 401
+
+
+def test_token_of_a_deleted_user_is_rejected(anon_client: TestClient) -> None:
+    from job_tracker.infrastructure.security.tokens import create_access_token
+
+    token = create_access_token(999, secret=TEST_JWT_SECRET, minutes=5)  # ese usuario no existe
+    assert anon_client.get("/api/offers", headers={"Authorization": f"Bearer {token}"}).status_code == 401
+
+
+def test_unsigned_alg_none_token_is_rejected(anon_client: TestClient, client: TestClient) -> None:
+    import base64
+    import json
+
+    def part(data: dict) -> str:
+        return base64.urlsafe_b64encode(json.dumps(data).encode()).rstrip(b"=").decode()
+
+    forged = f"{part({'alg': 'none', 'typ': 'JWT'})}.{part({'sub': '1', 'exp': 9999999999})}."
+    assert anon_client.get("/api/offers", headers={"Authorization": f"Bearer {forged}"}).status_code == 401
+
+
+def test_register_login_and_me(anon_client: TestClient) -> None:
+    headers = register(anon_client, "Ana@Example.com")  # el email se normaliza a minúsculas
+    me = anon_client.get("/api/auth/me", headers=headers).json()
+    assert me["email"] == "ana@example.com" and me["plan"] == "free"
+    assert me["quota"] == {"limit": 1, "used": 0, "remaining": 1}
+    login = anon_client.post("/api/auth/login", json={"email": "ANA@example.com", "password": "contraseña-de-prueba-1"})
+    assert login.status_code == 200 and login.json()["access_token"]
+
+
+def test_login_does_not_reveal_which_part_was_wrong(anon_client: TestClient) -> None:
+    register(anon_client)
+    wrong_password = anon_client.post("/api/auth/login", json={"email": "ana@example.com", "password": "mal"})
+    unknown_email = anon_client.post("/api/auth/login", json={"email": "nadie@example.com", "password": "mal"})
+    assert wrong_password.status_code == unknown_email.status_code == 401
+    assert wrong_password.json() == unknown_email.json()
+
+
+def test_duplicate_email_and_weak_password_are_rejected(anon_client: TestClient) -> None:
+    register(anon_client)
+    again = anon_client.post("/api/auth/register", json={"email": "ana@example.com", "password": "x" * 12})
+    assert again.status_code == 409
+    short = anon_client.post("/api/auth/register", json={"email": "b@example.com", "password": "corta"})
+    assert short.status_code == 422
+    bad_email = anon_client.post("/api/auth/register", json={"email": "no-es-email", "password": "x" * 12})
+    assert bad_email.status_code == 422
+
+
+def test_passwords_are_never_stored_or_returned_in_clear(anon_client: TestClient, session) -> None:
+    from job_tracker.infrastructure.db.models import UserModel
+
+    response = anon_client.post("/api/auth/register", json={"email": "ana@example.com", "password": "secreto-12345"})
+    assert "secreto-12345" not in response.text
+    stored = session.query(UserModel).one().password_hash
+    assert stored.startswith("scrypt$") and "secreto-12345" not in stored
+
+
+def test_registration_can_be_closed(make_app: Callable[..., FastAPI]) -> None:
+    client = TestClient(make_app(registration_open=False))
+    response = client.post("/api/auth/register", json={"email": "ana@example.com", "password": "x" * 12})
+    assert response.status_code == 403
+
+
+def test_auth_endpoints_have_a_strict_rate_limit(make_app: Callable[..., FastAPI]) -> None:
+    client = TestClient(make_app(rate_limit_auth_per_minute=3))
+    codes = [
+        client.post("/api/auth/login", json={"email": "a@example.com", "password": "mal"}).status_code for _ in range(5)
+    ]
+    assert codes == [401, 401, 401, 429, 429]
+
+
+def test_users_cannot_see_or_touch_each_others_offers(
+    make_client: Callable[..., TestClient], offer_payload: dict
+) -> None:
+    ana = make_client("ana@example.com")
+    created = ana.post("/api/offers", json=offer_payload).json()
+    bea = TestClient(ana.app, raise_server_exceptions=False)
+    bea.headers.update(register(bea, "bea@example.com"))
+
+    assert bea.get("/api/offers").json()["total"] == 0
+    assert bea.get(f"/api/offers/{created['id']}").status_code == 404
+    assert bea.patch(f"/api/offers/{created['id']}", json={"notes": "mío"}).status_code == 404
+    assert bea.patch(f"/api/offers/{created['id']}/status", json={"status": "Aplicado"}).status_code == 404
+    assert bea.get("/api/offers/stats").json()["total"] == 0
+    # La misma URL y el mismo código OF001 son válidos para otro usuario: la unicidad es por cuenta.
+    assert bea.post("/api/offers", json=offer_payload).json()["code"] == "OF001"
+    assert ana.get(f"/api/offers/{created['id']}").json()["notes"] is None
 
 
 # ── Cabeceras y exposición ───────────────────────────────────────────────────────
@@ -64,13 +161,13 @@ def test_security_headers_are_present(client: TestClient) -> None:
 
 
 def test_hsts_is_sent_in_production(make_app: Callable[..., FastAPI]) -> None:
-    app = make_app(app_env="production", api_token=TEST_TOKEN, cors_origins="https://example.com")
+    app = make_app(**PROD)
     response = TestClient(app).get("/api/health")
     assert "max-age=31536000" in response.headers["strict-transport-security"]
 
 
 def test_docs_are_hidden_in_production(make_app: Callable[..., FastAPI]) -> None:
-    app = make_app(app_env="production", api_token=TEST_TOKEN, cors_origins="https://example.com")
+    app = make_app(**PROD)
     prod = TestClient(app)
     assert prod.get("/docs").status_code == 404
     assert prod.get("/openapi.json").status_code == 404
@@ -93,8 +190,8 @@ def test_cors_only_allows_configured_origins(client: TestClient) -> None:
 # ── Límites ──────────────────────────────────────────────────────────────────────
 
 
-def test_rate_limit_returns_429_with_retry_after(make_app: Callable[..., FastAPI]) -> None:
-    client = TestClient(make_app(rate_limit_per_minute=3))
+def test_rate_limit_returns_429_with_retry_after(make_client: Callable[..., TestClient]) -> None:
+    client = make_client(rate_limit_per_minute=3)
     codes = [client.get("/api/offers/stats").status_code for _ in range(5)]
     assert codes == [200, 200, 200, 429, 429]
     blocked = client.get("/api/offers/stats")
@@ -102,8 +199,10 @@ def test_rate_limit_returns_429_with_retry_after(make_app: Callable[..., FastAPI
     assert client.get("/api/health").status_code == 200  # el health check nunca se limita
 
 
-def test_write_and_export_have_their_own_stricter_limits(make_app: Callable[..., FastAPI], offer_payload: dict) -> None:
-    client = TestClient(make_app(rate_limit_writes_per_minute=2, rate_limit_exports_per_minute=1))
+def test_write_and_export_have_their_own_stricter_limits(
+    make_client: Callable[..., TestClient], offer_payload: dict
+) -> None:
+    client = make_client(rate_limit_writes_per_minute=2, rate_limit_exports_per_minute=1)
     posts = [
         client.post("/api/offers", json={**offer_payload, "url": f"https://e.com/{i}"}).status_code for i in range(3)
     ]
@@ -111,8 +210,8 @@ def test_write_and_export_have_their_own_stricter_limits(make_app: Callable[...,
     assert [client.get("/api/offers/export.csv").status_code for _ in range(2)] == [200, 429]
 
 
-def test_oversized_body_is_rejected(make_app: Callable[..., FastAPI]) -> None:
-    client = TestClient(make_app(max_body_bytes=200))
+def test_oversized_body_is_rejected(make_client: Callable[..., TestClient]) -> None:
+    client = make_client(max_body_bytes=200)
     response = client.post("/api/offers", content=b"x" * 500, headers={"Content-Type": "application/json"})
     assert response.status_code == 413
 
@@ -203,7 +302,7 @@ def test_unexpected_errors_do_not_leak_internals(make_app: Callable[..., FastAPI
 
 
 def test_cv_download_is_confined_to_the_cv_directory(
-    make_app: Callable[..., FastAPI], session, tmp_path, offer_payload: dict
+    make_client: Callable[..., TestClient], session, tmp_path, offer_payload: dict
 ) -> None:
     from job_tracker.domain.offer.entities import KanbanStatus, Offer, OfferSource, Priority
     from job_tracker.infrastructure.db.sqlalchemy_offer_repository import SqlAlchemyOfferRepository
@@ -213,7 +312,8 @@ def test_cv_download_is_confined_to_the_cv_directory(
     (cvs / "ok.docx").write_bytes(b"cv")
     (tmp_path / "secreto.txt").write_text("no debe salir")
 
-    repo = SqlAlchemyOfferRepository(session)
+    client = make_client()
+    repo = SqlAlchemyOfferRepository(session, 1)  # el primer usuario registrado
     for i, filename in enumerate(["ok.docx", "../secreto.txt", "..\\secreto.txt", "/etc/passwd"]):
         repo.add(
             Offer(
@@ -243,7 +343,6 @@ def test_cv_download_is_confined_to_the_cv_directory(
             )
         )
 
-    client = TestClient(make_app(), raise_server_exceptions=False)
     assert client.get("/api/offers/1/cv").content == b"cv"
     for offer_id in (2, 3, 4):
         response = client.get(f"/api/offers/{offer_id}/cv")

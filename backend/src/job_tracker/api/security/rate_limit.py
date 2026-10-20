@@ -10,6 +10,7 @@ from starlette.types import ASGIApp, Receive, Scope, Send
 WINDOW_SECONDS = 60.0
 _WRITE_METHODS = frozenset({"POST", "PUT", "PATCH", "DELETE"})
 _EXEMPT_PATHS = frozenset({"/api/health"})
+_AUTH_PATHS = frozenset({"/api/auth/login", "/api/auth/register"})
 
 
 @dataclass(frozen=True)
@@ -19,6 +20,7 @@ class Limits:
     reads: int
     writes: int
     exports: int
+    auth: int = 10  # intentos de registro/login por IP y minuto: frena la fuerza bruta de contraseñas
 
 
 class SlidingWindowLimiter:
@@ -80,6 +82,8 @@ class RateLimitMiddleware:
     def _bucket(self, method: str, path: str) -> tuple[str, int] | None:
         if path in _EXEMPT_PATHS or method == "OPTIONS":
             return None
+        if path in _AUTH_PATHS:
+            return "auth", self._limits.auth
         if path.endswith("/export.csv"):
             return "export", self._limits.exports
         if method in _WRITE_METHODS:

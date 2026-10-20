@@ -51,6 +51,10 @@ class OfferWriter(Protocol):
 class OfferIdentity(Protocol):
     def exists_by_code_or_url(self, code: str, url: str | None) -> bool: ...
 
+    def known_urls(self, limit: int) -> list[str]:
+        """URLs ya guardadas del usuario (las más recientes primero), para que el buscador no las repita."""
+        ...
+
     def next_code(self) -> str:
         """Siguiente ID secuencial tipo OF037, igual que get_existing_urls_and_last_id() del buscador."""
         ...
