@@ -42,4 +42,4 @@ Inglés C1 acreditado por la Universidad de Cambridge
 
 ---
 
-📫 [mariareyesartcar@gmail.com](mailto:mariareyesartcar@gmail.com) · [LinkedIn](https://www.linkedin.com/in/maria-reyes-a-carrero/) · [Portfolio](https://github.com/reyes-art-car/reyes-portfolio)
+📫 [mariareyesartcar+github@gmail.com](mailto:mariareyesartcar+github@gmail.com) · [LinkedIn](https://www.linkedin.com/in/maria-reyes-a-carrero/) · [Portfolio](https://github.com/reyes-art-car/reyes-portfolio)
