@@ -91,9 +91,9 @@ uvicorn job_tracker.main:app --reload
 
 On Linux or macOS, activate the environment with `source .venv/bin/activate` and copy the configuration with `cp .env.example .env`.
 
-The development API runs at `http://localhost:8000`, with interactive documentation at `http://localhost:8000/docs`. To import your own spreadsheet, run `python scripts/seed.py --excel path/to/Offers.xlsx` from `backend/`.
+The development API runs at `http://localhost:8000`, with interactive documentation at `http://localhost:8000/docs`. To import your own spreadsheet, run `python scripts/seed.py --email you@example.com --excel path/to/Offers.xlsx` from `backend/`.
 
-Local development can run without an API token. If `API_TOKEN` is configured, enter it in the frontend sidebar; it is stored in `sessionStorage` and sent only to `/api/` requests. Production requires `APP_ENV=production` and an API token of at least 32 characters.
+The API has user accounts: register or sign in from the frontend, and every user only sees their own offers, profile and searches. The session token is stored in `sessionStorage` and sent only to `/api/` requests. Searches run in a separate worker (`python -m job_tracker.worker`) that calls the Claude API. Production requires `APP_ENV=production`, a `JWT_SECRET` of at least 32 characters and an `ANTHROPIC_API_KEY`. See [docs/MULTIUSER.md](docs/MULTIUSER.md), including how to migrate an existing single-user database and how to price the plan from measured usage.
 
 ### Frontend
 

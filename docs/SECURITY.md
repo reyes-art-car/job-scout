@@ -24,8 +24,8 @@ lenguaje y ficheros Excel importados.
 | Amenaza | Control | Código | Prueba |
 |---|---|---|---|
 | Acceso sin autorización | Token Bearer, **denegado por defecto**: solo `/api/health` es público. Comparación de tiempo constante (`hmac.compare_digest`) | `api/security/auth.py` | `test_every_non_public_route_is_protected` recorre las rutas y falla si alguna nueva no exige token |
-| Configuración insegura en producción | La app **no arranca** sin `API_TOKEN` de 32+ caracteres ni con CORS `*` | `config.py` | `test_production_requires_a_strong_token` |
-| Token vacío = acceso abierto | Un `API_TOKEN=` vacío se interpreta como «sin token», nunca como token vacío válido | `config.py` | `test_blank_token_is_treated_as_no_token` |
+| Configuración insegura en producción | La app **no arranca** sin `JWT_SECRET` de 32+ caracteres, sin `ANTHROPIC_API_KEY` ni con CORS `*` | `config.py` | `test_production_requires_a_strong_jwt_secret` |
+| Secreto vacío = sesiones falsificables | Un `JWT_SECRET=` vacío se rechaza en producción y se sustituye por uno aleatorio en desarrollo | `config.py` | `test_blank_secret_is_treated_as_missing` |
 | Fuerza bruta y abuso | Límite por IP y minuto (lectura 120 · escritura 30 · exportación 6), ventana deslizante con memoria acotada, `429` con `Retry-After` | `api/security/rate_limit.py` | `test_rate_limit_*`, `test_limiter_*` |
 | Suplantación de IP | `X-Forwarded-For` solo se usa con `TRUST_PROXY=true` y se toma el **último** valor (el que añade nuestro proxy) | `rate_limit.client_ip` | `test_client_ip_ignores_forwarded_header…` |
 | Cuerpos enormes | Máximo 1 MB por `Content-Length` y también en transferencias por fragmentos | `api/security/body_limit.py` | `test_oversized_body_is_rejected` |
@@ -83,12 +83,13 @@ La respuesta del modelo se trata como **entrada no confiable** (un anuncio puede
 ## Puesta en producción
 
 ```bash
-python -c "import secrets; print(secrets.token_urlsafe(48))"   # → API_TOKEN
+python -c "import secrets; print(secrets.token_urlsafe(48))"   # → JWT_SECRET
 ```
 
 ```ini
 APP_ENV=production
-API_TOKEN=<token generado>
+JWT_SECRET=<secreto generado>
+ANTHROPIC_API_KEY=<tu clave de la API de Claude>
 CORS_ORIGINS=https://tu-dominio
 ALLOWED_HOSTS=tu-dominio
 TRUST_PROXY=true        # solo si hay nginx delante
@@ -133,8 +134,8 @@ Lo siguiente **no** está resuelto, y conviene saberlo antes de exponer la aplic
 
 - **Licencia propietaria** (`LICENSE`): todos los derechos reservados. Es lo que da base legal para reclamar una copia.
   La licencia MIT anterior ya se concedió a quien clonó el repositorio antes del cambio y no se puede retirar.
-- **Clave de acceso** (`API_TOKEN`, ≥ 32 caracteres en producción): sin ella la API devuelve 401 y la aplicación
-  muestra la pantalla `/acceso`. Es una clave compartida: sirve hasta que haya cuentas de usuario.
+- **Cuentas de usuario** (JWT firmado con `JWT_SECRET`, ≥ 32 caracteres en producción): sin sesión válida la API
+  devuelve 401. Cada usuario solo ve sus propias ofertas, perfil y búsquedas. Ver [MULTIUSER.md](MULTIUSER.md).
 - **Límite real:** el código del frontend viaja al navegador y no se puede ocultar. Lo que sí se protege es la API, los
   datos y, cuando se implemente, la lógica con LLM, que debe vivir solo en el servidor tras la clave o la cuenta.
 - **Pendiente (decisión tuya):** pasar el repositorio a privado y retirar la demo de GitHub Pages, que publica todo el
