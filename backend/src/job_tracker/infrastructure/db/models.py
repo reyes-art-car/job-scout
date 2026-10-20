@@ -1,14 +1,12 @@
-from datetime import UTC, date, datetime
+from datetime import date, datetime
 
-from sqlalchemy import Date, DateTime, ForeignKey, Integer, String, Text, UniqueConstraint
+from sqlalchemy import Boolean, Date, DateTime, ForeignKey, Integer, String, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from job_tracker.infrastructure.db.base import Base
+from job_tracker.shared.clock import utc_now
 
-
-def _utcnow() -> datetime:
-    """UTC sin zona horaria (equivale al antiguo datetime.utcnow, ya obsoleto)."""
-    return datetime.now(UTC).replace(tzinfo=None)
+_utcnow = utc_now
 
 
 class UserModel(Base):
@@ -18,6 +16,8 @@ class UserModel(Base):
     email: Mapped[str] = mapped_column(String(255), unique=True, index=True)
     password_hash: Mapped[str] = mapped_column(String(255))
     plan: Mapped[str] = mapped_column(String(20), default="free")
+    email_verified: Mapped[bool] = mapped_column(Boolean, default=False)
+    token_version: Mapped[int] = mapped_column(Integer, default=0)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)
 
 

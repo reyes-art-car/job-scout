@@ -23,6 +23,22 @@ class Settings(BaseSettings):
     jwt_secret: SecretStr | None = None
     access_token_minutes: int = Field(default=720, gt=0)
     registration_open: bool = True
+    # Vida de los enlaces enviados por correo. El de restablecer contraseña es corto a propósito.
+    verify_link_hours: int = Field(default=48, gt=0)
+    reset_link_minutes: int = Field(default=30, gt=0)
+    # Correos de cuenta (confirmación, restablecer clave) por dirección y hora: evita inundar el buzón de un tercero.
+    emails_per_address_per_hour: int = Field(default=3, gt=0)
+    # Dirección pública del frontend, para construir los enlaces de los correos.
+    app_base_url: str = "http://localhost:4200"
+
+    # Correo saliente. «console» solo en desarrollo (escribe el correo en el log); producción exige SMTP.
+    email_backend: Literal["console", "smtp"] = "console"
+    smtp_host: str = ""
+    smtp_port: int = Field(default=587, gt=0)
+    smtp_security: Literal["starttls", "ssl", "none"] = "starttls"
+    smtp_username: str = ""
+    smtp_password: SecretStr = SecretStr("")
+    email_from: str = ""
 
     anthropic_api_key: SecretStr = SecretStr("")
     anthropic_model: str = "claude-opus-5-5"
@@ -38,6 +54,9 @@ class Settings(BaseSettings):
     stale_job_minutes: int = Field(default=30, gt=0)
 
     # Búsquedas incluidas por mes natural según el plan. La pasarela de pago (futuro) solo cambia el plan.
+    # Freno global de coste: máximo de búsquedas aceptadas en 24 h entre TODOS los usuarios. Evita que
+    # muchas cuentas gratuitas recién creadas agoten el presupuesto de la API de Claude.
+    max_searches_per_day: int = Field(default=200, gt=0)
     free_searches_per_month: int = Field(default=1, ge=0)
     pro_searches_per_month: int = Field(default=30, ge=0)
 
@@ -54,6 +73,9 @@ class Settings(BaseSettings):
     rate_limit_writes_per_minute: int = Field(default=30, gt=0)
     rate_limit_exports_per_minute: int = Field(default=6, gt=0)
     rate_limit_auth_per_minute: int = Field(default=10, gt=0)
+    # Intentos de login fallidos por cuenta antes de bloquearla temporalmente (además del límite por IP).
+    login_failures_per_window: int = Field(default=10, gt=0)
+    login_window_minutes: int = Field(default=15, gt=0)
 
     legacy_excel_path: Path = BACKEND_DIR / ".." / "Ofertas_Maria_Reyes.xlsx"
     cv_output_dir: Path = BACKEND_DIR / ".." / "CV_adaptados"
@@ -80,6 +102,10 @@ class Settings(BaseSettings):
             )
         if not self.anthropic_api_key.get_secret_value():
             raise ValueError("En producción ANTHROPIC_API_KEY es obligatoria (la búsqueda usa la API de Claude).")
+        if self.email_backend != "smtp" or not self.smtp_host or not self.email_from:
+            raise ValueError("En producción EMAIL_BACKEND=smtp, SMTP_HOST y EMAIL_FROM son obligatorios.")
+        if not self.app_base_url.startswith("https://"):
+            raise ValueError("En producción APP_BASE_URL debe ser https:// (los correos llevan enlaces con tokens).")
         if "*" in self.cors_origins_list:
             raise ValueError("CORS_ORIGINS no puede contener '*' en producción.")
         return self

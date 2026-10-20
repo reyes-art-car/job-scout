@@ -16,7 +16,6 @@ from datetime import timedelta
 from sqlalchemy.orm import Session
 
 from job_tracker.application.search.run_search_job import RunSearchJob
-from job_tracker.application.search.start_search import utc_now
 from job_tracker.config import Settings, get_settings
 from job_tracker.domain.search.llm import SearchLlm
 from job_tracker.infrastructure.db.base import SessionLocal
@@ -24,6 +23,7 @@ from job_tracker.infrastructure.db.sqlalchemy_offer_repository import SqlAlchemy
 from job_tracker.infrastructure.db.sqlalchemy_search_job_repository import SqlAlchemySearchJobRepository
 from job_tracker.infrastructure.db.sqlalchemy_search_profile_repository import SqlAlchemySearchProfileRepository
 from job_tracker.infrastructure.llm.anthropic_search import AnthropicSearchLlm
+from job_tracker.shared.clock import utc_now
 
 logger = logging.getLogger("job_tracker.worker")
 

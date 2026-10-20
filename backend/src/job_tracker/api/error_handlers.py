@@ -21,13 +21,18 @@ from job_tracker.domain.offer.exceptions import (
 from job_tracker.domain.search.exceptions import (
     ProfileRequiredError,
     SearchAlreadyRunningError,
+    SearchCapacityError,
     SearchJobNotFoundError,
     SearchQuotaExceededError,
 )
 from job_tracker.domain.user.exceptions import (
     EmailAlreadyRegisteredError,
+    EmailNotVerifiedError,
+    InvalidActionTokenError,
     InvalidCredentialsError,
     RegistrationClosedError,
+    TooManyAttemptsError,
+    WrongPasswordError,
 )
 
 logger = logging.getLogger("job_tracker.errors")
@@ -60,6 +65,10 @@ def register_error_handlers(app: FastAPI) -> None:
         response.headers["WWW-Authenticate"] = "Bearer"
         return response
 
+    @app.exception_handler(WrongPasswordError)
+    async def _wrong_password(_: Request, __: WrongPasswordError) -> JSONResponse:
+        return _error(403, "La contraseña no es correcta")
+
     @app.exception_handler(RegistrationClosedError)
     async def _registration_closed(_: Request, __: RegistrationClosedError) -> JSONResponse:
         return _error(403, "El registro de nuevas cuentas está cerrado por ahora")
@@ -75,6 +84,24 @@ def register_error_handlers(app: FastAPI) -> None:
     @app.exception_handler(SearchQuotaExceededError)
     async def _quota(_: Request, exc: SearchQuotaExceededError) -> JSONResponse:
         return _error(402, "Has agotado las búsquedas de tu plan este mes", limit=exc.limit)
+
+    @app.exception_handler(InvalidActionTokenError)
+    async def _bad_link(_: Request, __: InvalidActionTokenError) -> JSONResponse:
+        return _error(400, "El enlace no es válido o ha caducado. Pide uno nuevo.")
+
+    @app.exception_handler(EmailNotVerifiedError)
+    async def _unverified(_: Request, __: EmailNotVerifiedError) -> JSONResponse:
+        return _error(403, "Confirma tu email antes de buscar ofertas. Te hemos enviado un enlace.")
+
+    @app.exception_handler(SearchCapacityError)
+    async def _capacity(_: Request, __: SearchCapacityError) -> JSONResponse:
+        return _error(503, "El servicio de búsqueda ha alcanzado su límite de hoy. Inténtalo de nuevo mañana.")
+
+    @app.exception_handler(TooManyAttemptsError)
+    async def _too_many_attempts(_: Request, exc: TooManyAttemptsError) -> JSONResponse:
+        response = _error(429, "Demasiados intentos fallidos. Inténtalo de nuevo más tarde.")
+        response.headers["Retry-After"] = str(exc.retry_after)
+        return response
 
     @app.exception_handler(SearchJobNotFoundError)
     async def _search_missing(_: Request, __: SearchJobNotFoundError) -> JSONResponse:

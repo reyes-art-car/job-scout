@@ -16,4 +16,8 @@ class User:
     email: str
     password_hash: str
     plan: Plan = Plan.FREE
+    # Las acciones que cuestan dinero (buscar ofertas) exigen un email confirmado.
+    email_verified: bool = False
+    # Se incrementa al cerrar sesión o cambiar la contraseña: invalida todos los tokens emitidos antes.
+    token_version: int = 0
     created_at: datetime | None = None

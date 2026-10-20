@@ -10,7 +10,16 @@ from starlette.types import ASGIApp, Receive, Scope, Send
 WINDOW_SECONDS = 60.0
 _WRITE_METHODS = frozenset({"POST", "PUT", "PATCH", "DELETE"})
 _EXEMPT_PATHS = frozenset({"/api/health"})
-_AUTH_PATHS = frozenset({"/api/auth/login", "/api/auth/register"})
+_AUTH_PATHS = frozenset(
+    {
+        "/api/auth/login",
+        "/api/auth/register",
+        "/api/auth/verify-email",
+        "/api/auth/forgot-password",
+        "/api/auth/reset-password",
+        "/api/auth/delete-account",
+    }
+)
 
 
 @dataclass(frozen=True)
@@ -46,6 +55,18 @@ class SlidingWindowLimiter:
             return window - (now - timestamps[0])
         timestamps.append(now)
         return 0.0
+
+    def peek(self, key: str, limit: int, window: float = WINDOW_SECONDS) -> float:
+        """Como `hit` pero sin registrar nada: segundos a esperar si `key` ya está en el límite, o 0."""
+        timestamps = self._hits.get(key)
+        if not timestamps:
+            return 0.0
+        now = self._clock()
+        recent = [t for t in timestamps if now - t < window]
+        return window - (now - recent[0]) if len(recent) >= limit else 0.0
+
+    def reset(self, key: str) -> None:
+        self._hits.pop(key, None)
 
     def _evict_expired(self, now: float, window: float) -> None:
         for stale in [k for k, ts in self._hits.items() if not ts or now - ts[-1] >= window]:
@@ -84,7 +105,7 @@ class RateLimitMiddleware:
             return None
         if path in _AUTH_PATHS:
             return "auth", self._limits.auth
-        if path.endswith("/export.csv"):
+        if path.endswith("/export.csv") or path == "/api/auth/export":
             return "export", self._limits.exports
         if method in _WRITE_METHODS:
             return "write", self._limits.writes

@@ -3,7 +3,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends
 
 from job_tracker.api.deps import get_current_user, get_search_profile_repository
-from job_tracker.api.schemas.account_schemas import SearchProfileIn, SearchProfileOut
+from job_tracker.api.schemas.profile_schemas import SearchProfileIn, SearchProfileOut
 from job_tracker.domain.candidate.search_profile_repository import SearchProfileRepository
 from job_tracker.domain.user.entities import User
 

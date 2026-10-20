@@ -12,6 +12,10 @@ PROD = {
     "app_env": "production",
     "anthropic_api_key": "sk-ant-test",
     "cors_origins": "https://example.com",
+    "email_backend": "smtp",
+    "smtp_host": "smtp.example.com",
+    "email_from": "no-reply@example.com",
+    "app_base_url": "https://example.com",
 }
 PUBLIC = {"/api/health", "/api/auth/register", "/api/auth/login"}
 
@@ -83,6 +87,7 @@ def test_register_login_and_me(anon_client: TestClient) -> None:
     headers = register(anon_client, "Ana@Example.com")  # el email se normaliza a minúsculas
     me = anon_client.get("/api/auth/me", headers=headers).json()
     assert me["email"] == "ana@example.com" and me["plan"] == "free"
+    assert me["email_verified"] is True  # `register` sigue el enlace del correo, como un usuario real
     assert me["quota"] == {"limit": 1, "used": 0, "remaining": 1}
     login = anon_client.post("/api/auth/login", json={"email": "ANA@example.com", "password": "contraseña-de-prueba-1"})
     assert login.status_code == 200 and login.json()["access_token"]
@@ -96,10 +101,7 @@ def test_login_does_not_reveal_which_part_was_wrong(anon_client: TestClient) -> 
     assert wrong_password.json() == unknown_email.json()
 
 
-def test_duplicate_email_and_weak_password_are_rejected(anon_client: TestClient) -> None:
-    register(anon_client)
-    again = anon_client.post("/api/auth/register", json={"email": "ana@example.com", "password": "x" * 12})
-    assert again.status_code == 409
+def test_weak_passwords_and_bad_emails_are_rejected(anon_client: TestClient) -> None:
     short = anon_client.post("/api/auth/register", json={"email": "b@example.com", "password": "corta"})
     assert short.status_code == 422
     bad_email = anon_client.post("/api/auth/register", json={"email": "no-es-email", "password": "x" * 12})
@@ -110,7 +112,7 @@ def test_passwords_are_never_stored_or_returned_in_clear(anon_client: TestClient
     from job_tracker.infrastructure.db.models import UserModel
 
     response = anon_client.post("/api/auth/register", json={"email": "ana@example.com", "password": "secreto-12345"})
-    assert "secreto-12345" not in response.text
+    assert "secreto-12345" not in response.text and "access_token" not in response.text
     stored = session.query(UserModel).one().password_hash
     assert stored.startswith("scrypt$") and "secreto-12345" not in stored
 
@@ -348,3 +350,71 @@ def test_cv_download_is_confined_to_the_cv_directory(
         response = client.get(f"/api/offers/{offer_id}/cv")
         assert response.status_code in (200, 404)
         assert b"no debe salir" not in response.content
+
+
+# ── Fuerza bruta y abuso ─────────────────────────────────────────────────────────
+
+
+def test_account_is_locked_after_repeated_failed_logins(make_app: Callable[..., FastAPI]) -> None:
+    client = TestClient(make_app(login_failures_per_window=3))
+    register(client)
+    wrong = {"email": "ana@example.com", "password": "mal"}
+    assert [client.post("/api/auth/login", json=wrong).status_code for _ in range(3)] == [401, 401, 401]
+    blocked = client.post("/api/auth/login", json=wrong)
+    assert blocked.status_code == 429 and int(blocked.headers["retry-after"]) >= 1
+    # Bloqueada de verdad: ni siquiera la contraseña correcta entra mientras dura el bloqueo.
+    correct = {"email": "ana@example.com", "password": "contraseña-de-prueba-1"}
+    assert client.post("/api/auth/login", json=correct).status_code == 429
+    # Otra cuenta no se ve afectada.
+    assert client.post("/api/auth/login", json={"email": "otra@example.com", "password": "mal"}).status_code == 401
+
+
+def test_successful_login_resets_the_failure_counter(make_app: Callable[..., FastAPI]) -> None:
+    client = TestClient(make_app(login_failures_per_window=3))
+    register(client)
+    wrong = {"email": "ana@example.com", "password": "mal"}
+    correct = {"email": "ana@example.com", "password": "contraseña-de-prueba-1"}
+    for _ in range(2):
+        client.post("/api/auth/login", json=wrong)
+    assert client.post("/api/auth/login", json=correct).status_code == 200
+    assert [client.post("/api/auth/login", json=wrong).status_code for _ in range(2)] == [401, 401]
+
+
+def test_login_lockout_is_case_insensitive_on_the_email(make_app: Callable[..., FastAPI]) -> None:
+    client = TestClient(make_app(login_failures_per_window=2))
+    register(client)
+    for email in ("ana@example.com", "ANA@example.com"):
+        client.post("/api/auth/login", json={"email": email, "password": "mal"})
+    assert client.post("/api/auth/login", json={"email": "Ana@Example.com", "password": "mal"}).status_code == 429
+
+
+def test_csv_neutralizes_every_formula_prefix(client: TestClient, offer_payload: dict) -> None:
+    for i, prefix in enumerate(["=", "+", "-", "@", "\t", "\r"]):
+        client.post(
+            "/api/offers", json={**offer_payload, "url": f"https://e.com/{i}", "notes": f"{prefix}cmd|' /C calc'!A0"}
+        )
+    csv_text = client.get("/api/offers/export.csv").text
+    assert all(f'"{prefix}cmd' not in csv_text for prefix in ["=", "+", "-", "@", "\t", "\r"])
+
+
+def test_an_attacker_cannot_lock_the_real_owner_out_from_another_ip(make_app: Callable[..., FastAPI]) -> None:
+    client = TestClient(make_app(login_failures_per_window=3, trust_proxy=True))
+    register(client)
+    wrong = {"email": "ana@example.com", "password": "mal"}
+    attacker = {"X-Forwarded-For": "203.0.113.50"}
+    owner = {"X-Forwarded-For": "198.51.100.7"}
+    for _ in range(3):
+        client.post("/api/auth/login", json=wrong, headers=attacker)
+    assert client.post("/api/auth/login", json=wrong, headers=attacker).status_code == 429  # el atacante, bloqueado
+    correct = {"email": "ana@example.com", "password": "contraseña-de-prueba-1"}
+    assert client.post("/api/auth/login", json=correct, headers=owner).status_code == 200  # la dueña, no
+
+
+def test_a_distributed_attack_on_one_account_is_still_stopped(make_app: Callable[..., FastAPI]) -> None:
+    client = TestClient(make_app(login_failures_per_window=2, trust_proxy=True))
+    register(client)
+    wrong = {"email": "ana@example.com", "password": "mal"}
+    # Tope por cuenta = 2 x 5 = 10 fallos repartidos entre IPs distintas (ninguna llega a su propio tope).
+    for i in range(10):
+        client.post("/api/auth/login", json=wrong, headers={"X-Forwarded-For": f"203.0.113.{i}"})
+    assert client.post("/api/auth/login", json=wrong, headers={"X-Forwarded-For": "203.0.113.200"}).status_code == 429

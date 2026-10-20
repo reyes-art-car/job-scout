@@ -5,7 +5,6 @@ from collections.abc import Callable
 from job_tracker.application.offer.create_offer import CreateOffer
 from job_tracker.application.search.parsing import InvalidOfferError, extract_offer_dicts, parse_found_offer
 from job_tracker.application.search.prompt import MAX_KNOWN_URLS, STRATEGIES, build_search_prompt
-from job_tracker.application.search.start_search import utc_now
 from job_tracker.domain.candidate.search_profile_repository import SearchProfileRepository
 from job_tracker.domain.offer.exceptions import DuplicateOfferError
 from job_tracker.domain.offer.repository import OfferRepository
@@ -13,6 +12,7 @@ from job_tracker.domain.search.entities import SearchJob, SearchStatus
 from job_tracker.domain.search.exceptions import LlmError
 from job_tracker.domain.search.llm import SearchLlm
 from job_tracker.domain.search.repository import SearchJobQueue
+from job_tracker.shared.clock import utc_now
 
 logger = logging.getLogger("job_tracker.search")
 

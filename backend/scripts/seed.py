@@ -33,7 +33,11 @@ def _get_or_create_user(users: SqlAlchemyUserRepository, email: str) -> User:
     password = os.environ.get("SEED_PASSWORD") or getpass.getpass(f"Contraseña para la cuenta nueva {email}: ")
     if len(password) < MIN_PASSWORD_LENGTH:
         raise SystemExit(f"La contraseña debe tener al menos {MIN_PASSWORD_LENGTH} caracteres.")
-    return RegisterUser(users, hash_password, registration_open=True).execute(email, password)
+    user = RegisterUser(users, hash_password, registration_open=True).execute(email, password)
+    if user is None:  # carrera improbable: la cuenta se creó entre la consulta y el alta
+        raise SystemExit(f"La cuenta {email} ya existe.")
+    users.mark_email_verified(user.id or 0)  # la crea quien administra el servidor: no hace falta enlace por correo
+    return user
 
 
 def main() -> None:

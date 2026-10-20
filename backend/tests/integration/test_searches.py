@@ -239,3 +239,17 @@ def test_every_strategy_produces_a_prompt(client: TestClient, session: Session, 
     llm = FakeLlm([])
     process_next(session, llm)
     assert "<perfil_candidato>" in llm.prompts[0] and "NO confiable" in llm.prompts[0]
+
+
+def test_global_daily_budget_stops_new_searches_for_everyone(make_client: Callable[..., TestClient]) -> None:
+    from tests.conftest import register
+
+    ana = make_client("ana@example.com", max_searches_per_day=1)
+    ana.put("/api/profile", json=PROFILE)
+    assert ana.post("/api/searches", json={}).status_code == 202
+
+    bea = TestClient(ana.app)
+    bea.headers.update(register(bea, "bea@example.com"))
+    bea.put("/api/profile", json=PROFILE)
+    blocked = bea.post("/api/searches", json={})
+    assert blocked.status_code == 503  # tope global: no importa que Bea no haya gastado su cupo

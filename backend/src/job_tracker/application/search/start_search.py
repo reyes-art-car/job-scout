@@ -1,6 +1,6 @@
 from collections.abc import Callable
 from dataclasses import dataclass
-from datetime import UTC, datetime
+from datetime import datetime, timedelta
 
 from job_tracker.application.search.prompt import STRATEGIES
 from job_tracker.domain.candidate.search_profile_repository import SearchProfileRepository
@@ -8,10 +8,13 @@ from job_tracker.domain.search.entities import SearchJob
 from job_tracker.domain.search.exceptions import (
     ProfileRequiredError,
     SearchAlreadyRunningError,
+    SearchCapacityError,
     SearchQuotaExceededError,
 )
 from job_tracker.domain.search.repository import SearchJobQueue, SearchJobReader
 from job_tracker.domain.user.entities import User
+from job_tracker.domain.user.exceptions import EmailNotVerifiedError
+from job_tracker.shared.clock import utc_now
 
 
 class UnknownStrategyError(ValueError):
@@ -30,10 +33,6 @@ class Quota:
 
 def month_start(now: datetime) -> datetime:
     return datetime(now.year, now.month, 1)
-
-
-def utc_now() -> datetime:
-    return datetime.now(UTC).replace(tzinfo=None)
 
 
 class GetQuota:
@@ -58,20 +57,26 @@ class StartSearch:
         queue: SearchJobQueue,
         profiles: SearchProfileRepository,
         quota: GetQuota,
+        daily_budget: int,
     ):
         self._jobs = jobs
         self._queue = queue
         self._profiles = profiles
         self._quota = quota
+        self._daily_budget = daily_budget
 
     def execute(self, user: User, strategy: str, now: datetime | None = None) -> SearchJob:
         if strategy not in STRATEGIES:
             raise UnknownStrategyError(strategy)
+        if not user.email_verified:
+            raise EmailNotVerifiedError
         user_id = user.id or 0
         if self._profiles.get(user_id) is None:
             raise ProfileRequiredError
         if self._jobs.has_active(user_id):
             raise SearchAlreadyRunningError
+        if self._jobs.count_accepted_since((now or utc_now()) - timedelta(days=1)) >= self._daily_budget:
+            raise SearchCapacityError
         quota = self._quota.execute(user, now)
         if quota.remaining <= 0:
             raise SearchQuotaExceededError(quota.limit)

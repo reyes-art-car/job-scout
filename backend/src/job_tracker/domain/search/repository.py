@@ -15,6 +15,10 @@ class SearchJobReader(Protocol):
 
     def has_active(self, user_id: int) -> bool: ...
 
+    def count_accepted_since(self, since: datetime) -> int:
+        """Búsquedas aceptadas (no fallidas) de TODOS los usuarios desde `since`."""
+        ...
+
 
 class SearchJobQueue(Protocol):
     """Lo que ve el worker: cola global."""

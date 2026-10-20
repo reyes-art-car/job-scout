@@ -34,6 +34,23 @@ def _columns(con: sqlite3.Connection, table: str) -> list[str]:
     return [row[1] for row in con.execute(f"PRAGMA table_info({table})")]
 
 
+# Columnas que se añadieron a «users» después de la primera versión multiusuario. Las cuentas que ya existían se
+# marcan como verificadas: las creó el administrador antes de que existiera el correo de confirmación.
+USER_COLUMNS_ADDED_LATER = {
+    "email_verified": "BOOLEAN NOT NULL DEFAULT 1",
+    "token_version": "INTEGER NOT NULL DEFAULT 0",
+}
+
+
+def _upgrade_users_table(path: Path) -> list[str]:
+    with sqlite3.connect(path) as con:
+        existing = _columns(con, "users")
+        added = [name for name in USER_COLUMNS_ADDED_LATER if existing and name not in existing]
+        for name in added:
+            con.execute(f"ALTER TABLE users ADD COLUMN {name} {USER_COLUMNS_ADDED_LATER[name]}")
+    return added
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--email", required=True)
@@ -48,7 +65,11 @@ def main() -> None:
         print("La base de datos no tiene ofertas del esquema anterior. Se creará con el esquema nuevo al arrancar.")
         return
     if "user_id" in offer_columns:
-        print("La base de datos ya está en el esquema multiusuario. Nada que hacer.")
+        added = _upgrade_users_table(path)
+        if added:
+            print(f"Esquema multiusuario anterior: añadidas las columnas {', '.join(added)} a «users».")
+        else:
+            print("La base de datos ya está en el esquema multiusuario. Nada que hacer.")
         return
 
     password = os.environ.get("SEED_PASSWORD") or getpass.getpass(f"Contraseña para {email}: ")
@@ -96,7 +117,8 @@ def _migrate(path: Path, email: str, password: str) -> None:
         engine.dispose()
 
         con.execute(
-            "INSERT INTO users (email, password_hash, plan, created_at) VALUES (?, ?, 'free', datetime('now'))",
+            "INSERT INTO users (email, password_hash, plan, email_verified, token_version, created_at)"
+            " VALUES (?, ?, 'free', 1, 0, datetime('now'))",
             (email, hash_password(password)),
         )
         user_id = con.execute("SELECT id FROM users WHERE email = ?", (email,)).fetchone()[0]

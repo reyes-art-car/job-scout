@@ -1,4 +1,4 @@
-from datetime import UTC, datetime
+from datetime import datetime
 from typing import Any, cast
 
 from sqlalchemy import CursorResult, Result, func, select, update
@@ -6,10 +6,7 @@ from sqlalchemy.orm import Session
 
 from job_tracker.domain.search.entities import ACTIVE_STATUSES, QUOTA_STATUSES, SearchJob, SearchStatus
 from job_tracker.infrastructure.db.models import SearchJobModel
-
-
-def _now() -> datetime:
-    return datetime.now(UTC).replace(tzinfo=None)
+from job_tracker.shared.clock import utc_now
 
 
 def _rowcount(result: Result[Any]) -> int:
@@ -86,6 +83,12 @@ class SqlAlchemySearchJobRepository:
         )
         return self._session.scalar(stmt.limit(1)) is not None
 
+    def count_accepted_since(self, since: datetime) -> int:
+        stmt = select(func.count()).where(
+            SearchJobModel.created_at >= since, SearchJobModel.status.in_([s.value for s in QUOTA_STATUSES])
+        )
+        return self._session.scalar(stmt) or 0
+
     # --- cola ---
     def add(self, job: SearchJob) -> SearchJob:
         row = SearchJobModel(user_id=job.user_id)
@@ -109,7 +112,7 @@ class SqlAlchemySearchJobRepository:
         claimed = self._session.execute(
             update(SearchJobModel)
             .where(SearchJobModel.id == candidate_id, SearchJobModel.status == SearchStatus.QUEUED.value)
-            .values(status=SearchStatus.RUNNING.value, started_at=_now())
+            .values(status=SearchStatus.RUNNING.value, started_at=utc_now())
         )
         self._session.commit()
         if _rowcount(claimed) != 1:
@@ -134,7 +137,7 @@ class SqlAlchemySearchJobRepository:
             .where(SearchJobModel.status == SearchStatus.RUNNING.value, SearchJobModel.started_at < older_than)
             .values(
                 status=SearchStatus.FAILED.value,
-                finished_at=_now(),
+                finished_at=utc_now(),
                 error="La búsqueda se interrumpió. No se ha descontado de tu cupo.",
             )
         )

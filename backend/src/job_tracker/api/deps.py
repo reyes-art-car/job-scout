@@ -4,6 +4,9 @@ from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.orm import Session
 
+from job_tracker.api.security.email_throttle import EmailThrottle
+from job_tracker.api.security.login_throttle import LoginThrottle
+from job_tracker.application.auth.mailer import AccountMailer
 from job_tracker.application.offer.get_offer_cv import CvLocator
 from job_tracker.application.search.start_search import GetQuota
 from job_tracker.config import Settings
@@ -14,6 +17,7 @@ from job_tracker.domain.offer.repository import OfferRepository
 from job_tracker.domain.search.repository import SearchJobQueue, SearchJobReader
 from job_tracker.domain.user.entities import User
 from job_tracker.domain.user.repository import UserRepository
+from job_tracker.domain.user.tokens import ActionTokens
 from job_tracker.infrastructure.db.base import get_db_session
 from job_tracker.infrastructure.db.sqlalchemy_interview_repository import (
     SqlAlchemyInterviewRepository,
@@ -23,6 +27,7 @@ from job_tracker.infrastructure.db.sqlalchemy_search_job_repository import SqlAl
 from job_tracker.infrastructure.db.sqlalchemy_search_profile_repository import SqlAlchemySearchProfileRepository
 from job_tracker.infrastructure.db.sqlalchemy_user_repository import SqlAlchemyUserRepository
 from job_tracker.infrastructure.files.cv_locator import DirectoryCvLocator
+from job_tracker.infrastructure.security.action_tokens import JwtActionTokens
 from job_tracker.infrastructure.security.tokens import InvalidTokenError, decode_access_token
 
 _bearer = HTTPBearer(auto_error=False, description="Token de acceso obtenido en /api/auth/login")
@@ -31,6 +36,31 @@ _bearer = HTTPBearer(auto_error=False, description="Token de acceso obtenido en 
 def get_app_settings(request: Request) -> Settings:
     settings: Settings = request.app.state.settings
     return settings
+
+
+def get_email_throttle(request: Request) -> EmailThrottle:
+    throttle: EmailThrottle = request.app.state.email_throttle
+    return throttle
+
+
+def get_action_tokens(settings: Settings = Depends(get_app_settings)) -> ActionTokens:
+    secret = settings.jwt_secret.get_secret_value() if settings.jwt_secret else ""
+    return JwtActionTokens(
+        secret=secret, verify_hours=settings.verify_link_hours, reset_minutes=settings.reset_link_minutes
+    )
+
+
+def get_account_mailer(
+    request: Request,
+    settings: Settings = Depends(get_app_settings),
+    tokens: ActionTokens = Depends(get_action_tokens),
+) -> AccountMailer:
+    return AccountMailer(request.app.state.email_sender, tokens, settings.app_base_url)
+
+
+def get_login_throttle(request: Request) -> LoginThrottle:
+    throttle: LoginThrottle = request.app.state.login_throttle
+    return throttle
 
 
 def get_db(db: Session = Depends(get_db_session)) -> Generator[Session, None, None]:
@@ -64,11 +94,12 @@ def get_current_user(
     if credentials is None or settings.jwt_secret is None:
         raise _unauthorized()
     try:
-        user_id = decode_access_token(credentials.credentials, secret=settings.jwt_secret.get_secret_value())
+        claims = decode_access_token(credentials.credentials, secret=settings.jwt_secret.get_secret_value())
     except InvalidTokenError:
         raise _unauthorized() from None
-    user = users.get(user_id)
-    if user is None:
+    user = users.get(claims.user_id)
+    # Una versión distinta significa que la sesión se cerró (o la contraseña cambió) después de emitir el token.
+    if user is None or user.token_version != claims.version:
         raise _unauthorized()
     return user
 

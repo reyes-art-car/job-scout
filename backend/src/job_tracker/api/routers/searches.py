@@ -3,14 +3,16 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, Query, status
 
 from job_tracker.api.deps import (
+    get_app_settings,
     get_current_user,
     get_quota_service,
     get_search_job_queue,
     get_search_job_reader,
     get_search_profile_repository,
 )
-from job_tracker.api.schemas.account_schemas import SearchJobOut, SearchRequest
+from job_tracker.api.schemas.search_schemas import SearchJobOut, SearchRequest
 from job_tracker.application.search.start_search import GetQuota, StartSearch
+from job_tracker.config import Settings
 from job_tracker.domain.candidate.search_profile_repository import SearchProfileRepository
 from job_tracker.domain.search.exceptions import SearchJobNotFoundError
 from job_tracker.domain.search.repository import SearchJobQueue, SearchJobReader
@@ -27,10 +29,16 @@ Quotas = Annotated[GetQuota, Depends(get_quota_service)]
 
 @router.post("", response_model=SearchJobOut, status_code=status.HTTP_202_ACCEPTED)
 def start_search(
-    payload: SearchRequest, user: CurrentUser, reader: Reader, queue: Queue, profiles: Profiles, quotas: Quotas
+    payload: SearchRequest,
+    user: CurrentUser,
+    reader: Reader,
+    queue: Queue,
+    profiles: Profiles,
+    quotas: Quotas,
+    settings: Annotated[Settings, Depends(get_app_settings)],
 ) -> SearchJobOut:
     """Encola una búsqueda. El worker la ejecuta; el cliente consulta su estado con GET /api/searches/{id}."""
-    job = StartSearch(reader, queue, profiles, quotas).execute(user, payload.strategy)
+    job = StartSearch(reader, queue, profiles, quotas, settings.max_searches_per_day).execute(user, payload.strategy)
     return SearchJobOut.from_entity(job)
 
 

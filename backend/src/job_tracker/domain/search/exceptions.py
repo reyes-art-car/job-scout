@@ -8,6 +8,10 @@ class SearchQuotaExceededError(Exception):
         self.limit = limit
 
 
+class SearchCapacityError(Exception):
+    """El servicio ha alcanzado su tope diario global de búsquedas (freno de coste)."""
+
+
 class ProfileRequiredError(Exception):
     pass
 
