@@ -42,13 +42,10 @@
         }
       }
       @if (store.authRequired()) {
-        <form class="token" (submit)="connect($event, tokenInput.value)">
-          <label>
-            La API pide un token
-            <input #tokenInput type="password" autocomplete="off" maxlength="200" required />
-          </label>
-          <button class="btn primary" type="submit">Conectar</button>
-        </form>
+        <a class="btn primary" routerLink="/acceso">Iniciar sesión</a>
+      }
+      @if (loggedIn()) {
+        <button class="link" type="button" (click)="logout()">Cerrar sesión</button>
       }
       <p class="small muted">{{ profileService.profile.name }}<br />{{ profileService.profile.title }}</p>
     </div>

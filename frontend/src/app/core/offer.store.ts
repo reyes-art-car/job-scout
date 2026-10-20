@@ -1,5 +1,6 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { Injectable, computed, inject, signal } from '@angular/core';
+import { AuthToken } from './auth';
 import { CareerService } from './career.service';
 import { ApiOfferGateway } from './gateways/api-offer.gateway';
 import { DemoOfferGateway } from './gateways/demo-offer.gateway';
@@ -18,13 +19,14 @@ const HTTP_UNAUTHORIZED = 401;
 @Injectable({ providedIn: 'root' })
 export class OfferStore {
   private readonly api = inject(ApiOfferGateway);
+  private readonly auth = inject(AuthToken);
   private readonly career = inject(CareerService);
   private readonly demo = inject(DemoOfferGateway);
   private gateway: OfferGateway = this.demo;
 
   readonly offers = signal<Offer[]>([]);
   readonly mode = signal<DataMode>('loading');
-  /** La API respondió 401: hace falta el token de acceso. */
+  /** La API respondió 401: hace falta iniciar sesión. */
   readonly authRequired = signal(false);
 
   readonly stats = computed(() => {
@@ -44,8 +46,9 @@ export class OfferStore {
     this.authRequired.set(false);
     try {
       const items = await this.api.list();
-      // Una API vacía (BD recién creada) no sirve para enseñar la aplicación: se usa la demo.
-      if (items.length > 0) {
+      // Una API vacía sin sesión (BD recién creada) no sirve para enseñar la aplicación: se usa la demo.
+      // Con sesión iniciada, en cambio, «vacío» es la verdad: una cuenta nueva aún no tiene ofertas.
+      if (items.length > 0 || this.auth.token() !== null) {
         this.use(this.api, items, 'api');
         return;
       }

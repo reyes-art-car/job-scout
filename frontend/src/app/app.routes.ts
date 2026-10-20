@@ -46,6 +46,11 @@ export const routes: Routes = [
     loadComponent: () => import('./shell/app-shell').then((m) => m.AppShell),
     children: [
       {
+        path: 'buscar',
+        title: `Buscar ofertas · ${SITE}`,
+        loadComponent: () => import('./features/search/search').then((m) => m.Search),
+      },
+      {
         path: 'panel',
         title: `Panel · ${SITE}`,
         loadComponent: () => import('./features/dashboard/dashboard').then((m) => m.Dashboard),

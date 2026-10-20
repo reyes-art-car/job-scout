@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { AuthToken } from '../core/auth';
 import { CareerService } from '../core/career.service';
 import { LocalDataService } from '../core/local-data.service';
@@ -26,9 +26,11 @@ export class AppShell {
   protected readonly career = inject(CareerService);
   protected readonly profileService = inject(ProfileService);
   private readonly auth = inject(AuthToken);
+  private readonly router = inject(Router);
   private readonly localData = inject(LocalDataService);
 
   protected readonly nav: NavItem[] = [
+    { path: '/buscar', label: 'Buscar ofertas', icon: 'target' },
     { path: '/panel', label: 'Panel', icon: 'grid' },
     { path: '/ofertas', label: 'Ofertas', icon: 'briefcase' },
     { path: '/adaptar-cv', label: 'Adaptar CV', icon: 'file' },
@@ -50,9 +52,10 @@ export class AppShell {
     window.location.reload();
   }
 
-  protected async connect(event: Event, token: string): Promise<void> {
-    event.preventDefault();
-    this.auth.set(token);
-    await this.store.load();
+  protected readonly loggedIn = this.auth.token;
+
+  protected async logout(): Promise<void> {
+    this.auth.set('');
+    await this.router.navigateByUrl('/acceso');
   }
 }

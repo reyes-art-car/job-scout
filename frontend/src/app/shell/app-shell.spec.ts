@@ -20,13 +20,13 @@ describe('AppShell', () => {
     }).compileComponents();
   });
 
-  it('muestra la navegación principal con las siete secciones', () => {
+  it('muestra la navegación principal con las ocho secciones', () => {
     const fixture = TestBed.createComponent(AppShell);
     fixture.detectChanges();
     const links = Array.from((fixture.nativeElement as HTMLElement).querySelectorAll('nav a')).map((a) =>
       a.textContent?.trim(),
     );
-    expect(links).toEqual(['Panel', 'Ofertas', 'Adaptar CV', 'Carta de presentación', 'Brecha de skills', 'Mi experiencia', 'Mi historial']);
+    expect(links).toEqual(['Buscar ofertas', 'Panel', 'Ofertas', 'Adaptar CV', 'Carta de presentación', 'Brecha de skills', 'Mi experiencia', 'Mi historial']);
   });
 
   it('muestra el nombre de la candidata en el pie lateral', () => {

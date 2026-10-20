@@ -1,0 +1,19 @@
+:host { display: block; }
+
+.page-head { margin-bottom: 16px; }
+
+section.card { margin-bottom: 16px; }
+
+.profile { display: flex; flex-direction: column; gap: 14px; max-width: 640px; }
+.profile label { display: flex; flex-direction: column; gap: 6px; font-weight: 600; }
+.profile .check { flex-direction: row; align-items: center; gap: 8px; font-weight: 500; }
+.profile .row { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 14px; }
+.profile .row label { min-width: 0; }
+
+.launch { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 10px; }
+
+.jobs { list-style: none; padding: 0; margin: 0 0 12px; display: flex; flex-direction: column; gap: 10px; }
+.jobs li { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+
+.ok { color: var(--ok, #1a7f4b); font-weight: 600; }
+.error { color: var(--bad); font-weight: 600; }

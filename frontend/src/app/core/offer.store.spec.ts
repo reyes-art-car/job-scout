@@ -2,6 +2,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { offer } from '../../testing/fixtures';
+import { AuthToken } from './auth';
 import { OfferStorage } from './gateways/offer-storage';
 import { Offer } from './models';
 import { CareerService } from './career.service';
@@ -69,6 +70,15 @@ describe('OfferStore', () => {
     await loading;
     expect(store.mode()).toBe('demo');
     expect(store.offers()).toHaveSize(1);
+  });
+
+  it('con sesión iniciada, una API vacía es la verdad y no se sustituye por la demo', async () => {
+    sessionStorage.clear();
+    TestBed.inject(AuthToken).set('token-de-prueba');
+    await loadWithApi(flushApi({ items: [] }));
+    expect(store.mode()).toBe('api');
+    expect(store.offers()).toHaveSize(0);
+    sessionStorage.clear();
   });
 
   it('cae a la demo si la API falla y no pide token', async () => {
