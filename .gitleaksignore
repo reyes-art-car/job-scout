@@ -1,0 +1,3 @@
+# Dummy password in the test verifying passwords are never stored or returned in clear text.
+# Ignore only this historical finding; keep scanning all other secrets and test files.
+8ab32f500b5218adeb6830ec4ab1c6662fae0867:backend/tests/integration/test_security.py:generic-api-key:112
