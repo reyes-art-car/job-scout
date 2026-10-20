@@ -8,7 +8,7 @@
 ![FastAPI](https://img.shields.io/badge/FastAPI-0.143.3-009688?logo=fastapi&logoColor=white)
 ![Python](https://img.shields.io/badge/Python-3.13-3776AB?logo=python&logoColor=white)
 
-**[Try the demo](https://reyes-art-car.github.io/job-scout/)** — runs without a backend, using sample data and browser storage. No account required. The application interface and sample content are currently in Spanish.
+
 
 ![Job search dashboard](docs/screenshots/panel.png)
 
