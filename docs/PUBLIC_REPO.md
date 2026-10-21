@@ -31,7 +31,7 @@ Ya está corregido en la rama de trabajo:
 
 ### 2. Tu email personal está en el historial
 
-El árbol actual usa el alias `mariareyesartcar+github@gmail.com`, pero 70 commits tienen como autor tu email real y 5
+El árbol actual ya no publica ningún email en README ni en ejemplos, pero 70 commits tienen como autor tu email real y 5
 ficheros lo contenían en versiones antiguas. Es menos grave que lo anterior (un email, no tu proceso de selección), pero
 es justo lo que el alias intentaba evitar.
 

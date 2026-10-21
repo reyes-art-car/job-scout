@@ -9,15 +9,15 @@ name: "MARÍA REYES ARTACHO CARRERO"
 title: "Junior Full-Stack Developer"
 location: "Sevilla, España"
 phone: "+34 600 000 000"
-email: "mariareyesartcar+github@gmail.com"
-contact_line: "Sevilla, España  |  (+34) 600 000 000  |  mariareyesartcar+github@gmail.com"
+email: "ada@example.com"
+contact_line: "Sevilla, España  |  (+34) 600 000 000  |  ada@example.com"
 
 summary_prompt_block: |
   CANDIDATA: María Reyes Artacho Carrero
   Título: Junior Full-Stack Developer
   Ubicación: Sevilla, España
   Teléfono: +34 600 000 000
-  Email: mariareyesartcar+github@gmail.com
+  Email: ada@example.com
 
   EXPERIENCIA: Freelance (Marzo 2026 – Actualidad) — Desarrolladora Java/Angular
     CRM comercial full-stack en producción (desarrollo individual):

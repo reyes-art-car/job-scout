@@ -192,6 +192,6 @@ The public demo includes sample job offers and the author's professional profile
 
 **María Reyes Artacho Carrero** · Junior full-stack developer (Java, Spring Boot, Angular) · Seville, Spain
 
-[LinkedIn](https://www.linkedin.com/in/maria-reyes-a-carrero/) · [Email](mailto:mariareyesartcar+github@gmail.com)
+[LinkedIn](https://www.linkedin.com/in/maria-reyes-a-carrero/)
 
 Software propietario: todos los derechos reservados. Consulta [LICENSE](LICENSE).
