@@ -1,0 +1,47 @@
+<main class="gate" id="main-content">
+  @switch (mode) {
+    @case ('verify') {
+      <section class="card">
+        <h1>Confirmar email</h1>
+        @if (busy()) { <p class="muted" role="status">Comprobando el enlace…</p> }
+        @if (done()) { <p class="ok" role="status">{{ done() }}</p> }
+        @if (error()) { <p class="error" role="alert">{{ error() }}</p> }
+        <a class="btn primary" routerLink="/acceso">Ir a iniciar sesión</a>
+      </section>
+    }
+    @case ('forgot') {
+      <form class="card" (submit)="forgot($event, email.value)">
+        <h1>Recuperar contraseña</h1>
+        <p class="muted">Escribe tu email y, si tiene cuenta, te enviaremos un enlace para elegir una contraseña nueva.</p>
+        <label>
+          Email
+          <input #email type="email" autocomplete="email" maxlength="254" required />
+        </label>
+        @if (done()) { <p class="ok" role="status">{{ done() }}</p> }
+        <p class="error" role="alert">{{ error() }}</p>
+        <button class="btn primary" type="submit" [disabled]="busy()">{{ busy() ? 'Enviando…' : 'Enviar enlace' }}</button>
+        <a class="link" routerLink="/acceso">Volver a iniciar sesión</a>
+      </form>
+    }
+    @case ('reset') {
+      <form class="card" (submit)="reset($event)">
+        <h1>Nueva contraseña</h1>
+        @if (done()) {
+          <p class="ok" role="status">{{ done() }}</p>
+          <a class="btn primary" routerLink="/acceso">Iniciar sesión</a>
+        } @else if (!hasToken) {
+          <p class="error" role="alert">Falta el enlace. Abre el que te enviamos por correo o pide uno nuevo.</p>
+          <a class="btn primary" routerLink="/recuperar">Pedir un enlace nuevo</a>
+        } @else {
+          <label>
+            Contraseña nueva (mínimo {{ minPassword }} caracteres)
+            <input name="password" type="password" autocomplete="new-password" [attr.minlength]="minPassword" maxlength="128" required />
+          </label>
+          <p class="error" role="alert">{{ error() }}</p>
+          <button class="btn primary" type="submit" [disabled]="busy()">{{ busy() ? 'Guardando…' : 'Cambiar contraseña' }}</button>
+          <a class="link" routerLink="/recuperar">Pedir un enlace nuevo</a>
+        }
+      </form>
+    }
+  }
+</main>

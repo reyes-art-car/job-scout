@@ -13,7 +13,7 @@ h3 { font-size: 1.05rem; margin-bottom: 6px; }
 .actions { display: flex; flex-wrap: wrap; gap: 12px; }
 .actions.center { justify-content: center; }
 .btn.big { padding: 12px 22px; font-size: 1rem; }
-.hero-shot { width: 100%; height: auto; border: 1px solid var(--border); border-radius: var(--radius); box-shadow: 0 18px 50px rgb(36 59 50 / 14%); }
+.hero-shot { width: 100%; height: auto; border: 1px solid var(--border); border-radius: var(--radius); box-shadow: 0 18px 50px rgb(42 32 39 / 14%); }
 .steps { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); gap: 16px; }
 .num { display: grid; place-items: center; width: 34px; height: 34px; margin-bottom: 12px; border-radius: 50%; background: var(--accent); color: var(--on-accent); font-weight: 700; }
 .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 16px; }

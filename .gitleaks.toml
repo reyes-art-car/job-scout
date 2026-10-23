@@ -1,0 +1,20 @@
+# Configuración de Gitleaks (la lee gitleaks-action automáticamente).
+# Se mantienen TODAS las reglas por defecto y solo se permiten valores de prueba concretos y conocidos.
+title = "Job Hopping & Learning"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Contraseñas y secretos ficticios que usan las pruebas automáticas"
+regexes = [
+  '''contraseña-de-prueba-\d''',
+  '''otra-contraseña-larga-\d''',
+  '''tercera-clave-larga-\d''',
+  '''una-clave-larga-\d''',
+  '''clave-larga-123''',
+  '''secreto-12345''',
+  '''otro-secreto-''',
+  '''tok-verificar-\d+''',
+  '''tok-restablecer-\d+''',
+]

@@ -27,6 +27,11 @@ def clean_text(value: str) -> str:
 def validate_http_url(value: str) -> str:
     """Solo URLs http(s) absolutas: bloquea javascript:, data:, file: y similares."""
     candidate = clean_text(value)
+    # Una URL no contiene espacios ni saltos de línea. `urlsplit` los ignora al analizar, pero el texto
+    # original se guardaría tal cual y podría colarse en un enlace o en un prompt como instrucción.
+    # Se mira también el original: el saneado convierte algunos espacios (p. ej. NBSP) en entidades HTML.
+    if any(char.isspace() for char in candidate) or any(char.isspace() for char in value.strip()):
+        raise ValueError("La URL no puede contener espacios ni saltos de línea")
     parts = urlsplit(candidate)
     if parts.scheme.lower() not in _ALLOWED_URL_SCHEMES or not parts.netloc:
         raise ValueError("La URL debe ser http o https")

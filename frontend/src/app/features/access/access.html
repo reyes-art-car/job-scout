@@ -1,13 +1,37 @@
 <main class="gate" id="main-content">
-  <form class="card" (submit)="submit($event, key.value)">
-    <h1>Acceso privado</h1>
-    <p class="muted">Introduce la clave de acceso para entrar. Si no la tienes, solicítala a la persona que te invitó.</p>
+  <form class="card" (submit)="submit($event, email.value, password.value)">
+    <h1>{{ mode() === 'login' ? 'Iniciar sesión' : 'Crear cuenta' }}</h1>
+    <p class="muted">
+      {{ mode() === 'login' ? 'Entra para ver tus ofertas y lanzar búsquedas.' : 'Crea tu cuenta para guardar tu perfil y buscar ofertas a tu medida.' }}
+    </p>
+    @if (notice()) { <p class="ok" role="status">{{ notice() }}</p> }
     <label>
-      Clave de acceso
-      <input #key type="password" autocomplete="current-password" maxlength="200" required [attr.aria-invalid]="error() ? 'true' : null" aria-describedby="access-error" />
+      Email
+      <input #email type="email" autocomplete="email" maxlength="254" required />
+    </label>
+    <label>
+      Contraseña
+      <input
+        #password
+        type="password"
+        [autocomplete]="mode() === 'login' ? 'current-password' : 'new-password'"
+        [attr.minlength]="mode() === 'register' ? minPassword : null"
+        maxlength="128"
+        required
+        [attr.aria-invalid]="error() ? 'true' : null"
+        aria-describedby="access-error"
+      />
     </label>
     <p id="access-error" class="error" role="alert">{{ error() }}</p>
-    <button class="btn primary" type="submit" [disabled]="busy()">{{ busy() ? 'Comprobando…' : 'Entrar' }}</button>
+    <button class="btn primary" type="submit" [disabled]="busy()">
+      {{ busy() ? 'Un momento…' : mode() === 'login' ? 'Entrar' : 'Crear cuenta' }}
+    </button>
+    @if (mode() === 'login') {
+      <a class="link" routerLink="/recuperar">He olvidado mi contraseña</a>
+      <button class="link" type="button" (click)="switchTo('register')">No tengo cuenta · Crear una</button>
+    } @else {
+      <button class="link" type="button" (click)="switchTo('login')">Ya tengo cuenta · Iniciar sesión</button>
+    }
     <a class="link" routerLink="/">Volver al inicio</a>
   </form>
 </main>

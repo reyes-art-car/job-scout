@@ -29,6 +29,9 @@ COLUMNS: list[tuple[str, str]] = [
 ]
 
 
+FORMULA_PREFIXES = ("=", "+", "-", "@", "\t", "\r")
+
+
 def _cell(offer: Offer, attr: str) -> str:
     value = getattr(offer, attr)
     if value is None:
@@ -36,8 +39,8 @@ def _cell(offer: Offer, attr: str) -> str:
     if attr == "compatibility":
         return f"{value}%"
     text = value.value if hasattr(value, "value") else str(value)
-    # Evita la inyección de fórmulas al abrir el CSV en Excel.
-    return f"'{text}" if text[:1] in ("=", "+", "-", "@") else text
+    # Evita la inyección de fórmulas al abrir el CSV en Excel (OWASP: también tabulador y retorno de carro).
+    return f"'{text}" if text[:1] in FORMULA_PREFIXES else text
 
 
 def offers_to_csv(offers: Iterable[Offer]) -> str:

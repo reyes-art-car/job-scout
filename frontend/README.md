@@ -10,7 +10,7 @@ npx ng test --watch=false --browsers=ChromeHeadless          # 95 pruebas (neces
 npx ng lint                                                  # ESLint con reglas de código limpio y seguridad
 ```
 
-Si la API está protegida con token (`API_TOKEN`), la barra lateral pide el token; se guarda en `sessionStorage` y solo se envía a `/api/`.
+Si la API exige sesión, la aplicación lleva a `/acceso` (inicio de sesión o alta con email y contraseña). El token de sesión se guarda en `sessionStorage` y solo se envía a `/api/`. En `/buscar` cada usuario rellena su perfil y lanza búsquedas de ofertas.
 
 Sin backend, la aplicación arranca en **modo demo** con `data/demo/*.json` (se copian al compilar) y guarda los cambios en `localStorage`. Con el backend en marcha y alguna oferta cargada, usa la API automáticamente.
 

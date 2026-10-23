@@ -6,15 +6,18 @@ from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.trustedhost import TrustedHostMiddleware
 
+from job_tracker.api.deps import get_current_user
 from job_tracker.api.error_handlers import UnhandledErrorMiddleware, register_error_handlers
-from job_tracker.api.routers import auth, health, offers
-from job_tracker.api.security.auth import require_api_token
+from job_tracker.api.routers import auth, health, offers, profile, searches
 from job_tracker.api.security.body_limit import BodySizeLimitMiddleware
+from job_tracker.api.security.email_throttle import EmailThrottle
 from job_tracker.api.security.headers import SecurityHeadersMiddleware
+from job_tracker.api.security.login_throttle import LoginThrottle
 from job_tracker.api.security.rate_limit import Limits, RateLimitMiddleware
 from job_tracker.config import Settings, get_settings
 from job_tracker.infrastructure.db import models  # noqa: F401  (registra las tablas en Base)
 from job_tracker.infrastructure.db.base import Base, engine
+from job_tracker.infrastructure.email.factory import build_email_sender
 
 logger = logging.getLogger("job_tracker")
 
@@ -23,10 +26,10 @@ DOCS_PATHS = ("/docs", "/redoc", "/openapi.json")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
-    # Proyecto de un solo usuario sobre SQLite: crear las tablas al arrancar evita un paso manual.
+    # Crear las tablas al arrancar evita un paso manual en desarrollo; en producción usa Postgres + migraciones.
     Base.metadata.create_all(bind=engine)
-    if app.state.settings.api_token is None:
-        logger.warning("API_TOKEN no configurado: la API queda abierta (solo aceptable en local).")
+    if app.state.settings.app_env == "development":
+        logger.warning("JWT_SECRET no configurado: se usa uno aleatorio y las sesiones no sobreviven al reinicio.")
     yield
 
 
@@ -42,6 +45,11 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         openapi_url="/openapi.json" if docs else None,
     )
     app.state.settings = settings
+    app.state.email_sender = build_email_sender(settings)
+    app.state.email_throttle = EmailThrottle(per_hour=settings.emails_per_address_per_hour)
+    app.state.login_throttle = LoginThrottle(
+        failures=settings.login_failures_per_window, window_minutes=settings.login_window_minutes
+    )
 
     # `add_middleware` apila hacia fuera: el último añadido recibe antes la petición.
     # Orden final (de fuera a dentro): cabeceras → errores no controlados → CORS → hosts → ritmo → tamaño de cuerpo.
@@ -53,6 +61,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             reads=settings.rate_limit_per_minute,
             writes=settings.rate_limit_writes_per_minute,
             exports=settings.rate_limit_exports_per_minute,
+            auth=settings.rate_limit_auth_per_minute,
         ),
         trust_proxy=settings.trust_proxy,
     )
@@ -62,7 +71,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         CORSMiddleware,
         allow_origins=settings.cors_origins_list,
         allow_credentials=False,
-        allow_methods=["GET", "POST", "PATCH"],
+        allow_methods=["GET", "POST", "PUT", "PATCH"],
         allow_headers=["Content-Type", "Authorization"],
         max_age=600,
     )
@@ -76,9 +85,12 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     register_error_handlers(app)
 
     app.include_router(health.router)
-    # Todo lo demás exige token: denegado por defecto, solo /api/health es público.
-    app.include_router(auth.router, dependencies=[Depends(require_api_token)])
-    app.include_router(offers.router, dependencies=[Depends(require_api_token)])
+    # Denegado por defecto: solo /api/health, el registro y el login son públicos.
+    app.include_router(auth.public_router)
+    app.include_router(auth.router)
+    app.include_router(profile.router)
+    app.include_router(searches.router)
+    app.include_router(offers.router, dependencies=[Depends(get_current_user)])
     return app
 
 

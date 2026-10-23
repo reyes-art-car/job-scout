@@ -1,5 +1,5 @@
-# Despliegue de referencia: API + frontend con nginx. Desde la raíz del repositorio:
-#   cp backend/.env.example backend/.env      # y rellena API_TOKEN (mínimo 32 caracteres)
+# Despliegue de referencia: API + worker de búsquedas + frontend con nginx. Desde la raíz del repositorio:
+#   cp backend/.env.example backend/.env      # y rellena JWT_SECRET (32+ caracteres) y ANTHROPIC_API_KEY
 #   docker compose -f infra/docker-compose.yml up --build
 # Abre http://localhost:8080 (en un servidor real, detrás de un proxy con HTTPS).
 
@@ -24,6 +24,29 @@ services:
     mem_limit: 512m
     restart: unless-stopped
     expose: ["8000"]                 # no se publica en el host: solo es accesible desde nginx
+
+  # Ejecuta las búsquedas encoladas por la API. Es el único proceso que llama a la API de Claude.
+  worker:
+    build:
+      context: ..
+      dockerfile: backend/Dockerfile
+    command: ["python", "-m", "job_tracker.worker"]
+    env_file: ../backend/.env
+    environment:
+      APP_ENV: production
+      CORS_ORIGINS: http://localhost:8080
+    volumes:
+      - api-data:/data               # misma base de datos que la API
+    read_only: true
+    tmpfs: [/tmp]
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    pids_limit: 100
+    mem_limit: 512m
+    restart: unless-stopped
+    healthcheck:
+      disable: true                  # no escucha en ningún puerto; el de la imagen es el de la API
+    depends_on: [api]
 
   web:
     build:

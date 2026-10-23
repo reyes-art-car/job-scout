@@ -5,7 +5,7 @@ FastAPI con arquitectura hexagonal. Ver [docs/ARCHITECTURE.md](../docs/ARCHITECT
 ```bash
 python -m venv .venv && .venv\Scripts\activate
 pip install -r requirements-dev.txt && pip install -e .
-cp .env.example .env                    # API_TOKEN obligatorio con APP_ENV=production (ver docs/SECURITY.md)
+cp .env.example .env                    # JWT_SECRET y ANTHROPIC_API_KEY obligatorios con APP_ENV=production (ver docs/SECURITY.md)
 python scripts/seed.py --demo           # o: --excel ../Ofertas_Maria_Reyes.xlsx
 uvicorn job_tracker.main:app --reload   # documentación interactiva en http://localhost:8000/docs
 pytest -q --cov=job_tracker

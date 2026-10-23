@@ -2,7 +2,7 @@
 
 ## Cómo informar de una vulnerabilidad
 
-Escribe a **mariareyesartcar+github@gmail.com** con el asunto «Seguridad · Job Hopping & Learning». Por favor, **no abras un issue
+Usa el [aviso privado de seguridad de GitHub](https://github.com/reyes-art-car/job-scout/security/advisories/new) (pestaña *Security* → *Report a vulnerability*). Por favor, **no abras un issue
 público** hasta que esté corregida.
 
 Incluye, si puedes: qué has encontrado, cómo reproducirlo, qué impacto tiene y la versión o *commit* afectado.

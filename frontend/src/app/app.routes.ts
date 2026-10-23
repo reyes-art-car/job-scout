@@ -7,7 +7,7 @@ export const routes: Routes = [
   {
     path: '',
     pathMatch: 'full',
-    title: `${SITE} · Tu búsqueda de empleo IT, a partir de tu CV`,
+    title: `${SITE} · Cada candidatura te enseña qué aprender`,
     loadComponent: () => import('./features/landing/landing').then((m) => m.Landing),
   },
   {
@@ -19,6 +19,24 @@ export const routes: Routes = [
     path: 'acceso',
     title: `Acceso · ${SITE}`,
     loadComponent: () => import('./features/access/access').then((m) => m.Access),
+  },
+  {
+    path: 'verificar',
+    title: `Confirmar email · ${SITE}`,
+    data: { mode: 'verify' },
+    loadComponent: () => import('./features/access/account-action').then((m) => m.AccountAction),
+  },
+  {
+    path: 'recuperar',
+    title: `Recuperar contraseña · ${SITE}`,
+    data: { mode: 'forgot' },
+    loadComponent: () => import('./features/access/account-action').then((m) => m.AccountAction),
+  },
+  {
+    path: 'restablecer',
+    title: `Nueva contraseña · ${SITE}`,
+    data: { mode: 'reset' },
+    loadComponent: () => import('./features/access/account-action').then((m) => m.AccountAction),
   },
   {
     path: 'aviso-legal',
@@ -45,6 +63,11 @@ export const routes: Routes = [
     canActivate: [accessGuard],
     loadComponent: () => import('./shell/app-shell').then((m) => m.AppShell),
     children: [
+      {
+        path: 'buscar',
+        title: `Buscar ofertas · ${SITE}`,
+        loadComponent: () => import('./features/search/search').then((m) => m.Search),
+      },
       {
         path: 'panel',
         title: `Panel · ${SITE}`,

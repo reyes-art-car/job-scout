@@ -12,7 +12,17 @@
 
 ![Job search dashboard](docs/screenshots/panel.png)
 
-**Bring your own CV.** The landing page lets anyone upload a PDF, DOCX or TXT résumé. It is read in the browser (`pdfjs-dist`, `fflate`), turned into an editable profile and stored in `localStorage`; the sample offers are re-scored against that profile. Nothing is sent to a server, so there are no accounts. A "Borrar mis datos" button erases everything, and the app ships Spanish legal pages (aviso legal, privacidad, cookies, condiciones de uso).
+**Bring your own CV.** The landing page lets anyone upload a PDF, DOCX or TXT résumé. It is read in the browser (`pdfjs-dist`, `fflate`), turned into an editable profile and stored in `localStorage`; the sample offers are re-scored against that profile. In this local mode nothing is sent to a server, so no account is needed (the optional hosted mode adds accounts for automatic offer search, see [docs/MULTIUSER.md](docs/MULTIUSER.md)). A "Borrar mis datos" button erases everything, and the app ships Spanish legal pages (aviso legal, privacidad, cookies, condiciones de uso).
+
+## What makes it different
+
+Most job tools are feeds: they show you more offers. This one is built around what you do between one application and the next.
+
+- **A growth plan, not just a feed.** Every offer explains *why* it scores what it scores, and the skills gap turns the offers you have seen into what to learn next.
+- **Evidence over promises.** A competency only moves up when you back it with a project, course or certificate. CVs and cover letters never claim what your profile cannot support.
+- **You stay in control.** Nothing is applied for, sent or scheduled on your behalf.
+- **Private by default.** In local mode the CV is read in the browser and never leaves your device.
+- **Explainable scoring.** The rules (mandatory = 3, desirable = 1, gaps count zero) are documented in [docs/EVIDENCE_BASED_SEARCH.md](docs/EVIDENCE_BASED_SEARCH.md); there is no opaque "match %". The code is source-available (all rights reserved).
 
 ## Features
 
@@ -91,9 +101,9 @@ uvicorn job_tracker.main:app --reload
 
 On Linux or macOS, activate the environment with `source .venv/bin/activate` and copy the configuration with `cp .env.example .env`.
 
-The development API runs at `http://localhost:8000`, with interactive documentation at `http://localhost:8000/docs`. To import your own spreadsheet, run `python scripts/seed.py --excel path/to/Offers.xlsx` from `backend/`.
+The development API runs at `http://localhost:8000`, with interactive documentation at `http://localhost:8000/docs`. To import your own spreadsheet, run `python scripts/seed.py --email you@example.com --excel path/to/Offers.xlsx` from `backend/`.
 
-Local development can run without an API token. If `API_TOKEN` is configured, enter it in the frontend sidebar; it is stored in `sessionStorage` and sent only to `/api/` requests. Production requires `APP_ENV=production` and an API token of at least 32 characters.
+The API has user accounts: register or sign in from the frontend, and every user only sees their own offers, profile and searches. The session token is stored in `sessionStorage` and sent only to `/api/` requests. Searches run in a separate worker (`python -m job_tracker.worker`) that calls the Claude API. Production requires `APP_ENV=production`, a `JWT_SECRET` of at least 32 characters and an `ANTHROPIC_API_KEY`. See [docs/MULTIUSER.md](docs/MULTIUSER.md), including how to migrate an existing single-user database and how to price the plan from measured usage.
 
 ### Frontend
 
@@ -165,12 +175,12 @@ Most detailed guides are currently in Spanish.
 
 - [Architecture and SOLID principles](docs/ARCHITECTURE.md)
 - [Security controls and limitations](docs/SECURITY.md)
+- [Multi-user accounts, email and pricing](docs/MULTIUSER.md)
+- [Publishing this repository safely](docs/PUBLIC_REPO.md)
 - [Vulnerability disclosure policy](SECURITY.md)
 - [Contributing](CONTRIBUTING.md)
 - [Branch organization and development workflow](docs/DEVELOPMENT_WORKFLOW.md)
 - [Roadmap and suggested improvements](docs/ROADMAP.md)
-- [Skills gap and market analysis](docs/SKILLS_GAP.md)
-- [Job search report — October 17, 2026](docs/BUSQUEDA_2026-10-17.md)
 
 ## Data and privacy
 
@@ -182,6 +192,6 @@ The public demo includes sample job offers and the author's professional profile
 
 **María Reyes Artacho Carrero** · Junior full-stack developer (Java, Spring Boot, Angular) · Seville, Spain
 
-[LinkedIn](https://www.linkedin.com/in/maria-reyes-a-carrero/) · [Email](mailto:mariareyesartcar+github@gmail.com)
+[LinkedIn](https://www.linkedin.com/in/maria-reyes-a-carrero/)
 
 Software propietario: todos los derechos reservados. Consulta [LICENSE](LICENSE).

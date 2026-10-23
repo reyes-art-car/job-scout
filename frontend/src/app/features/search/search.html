@@ -1,0 +1,152 @@
+<header class="page-head">
+  <h1>Buscar ofertas</h1>
+  <p class="muted">Cuéntanos qué buscas y lanzamos una búsqueda de ofertas publicadas esta semana, puntuadas según tu perfil.</p>
+</header>
+
+@if (loading()) {
+  <p class="muted" role="status">Cargando…</p>
+} @else if (!available()) {
+  <section class="card">
+    <h2>Necesitas una cuenta</h2>
+    <p>La búsqueda de ofertas está disponible al iniciar sesión.</p>
+    <a class="btn primary" routerLink="/acceso">Iniciar sesión o crear cuenta</a>
+  </section>
+} @else {
+  @if (account(); as acc) {
+    <section class="card quota" aria-label="Tu plan">
+      <p>
+        <strong>{{ acc.email }}</strong> · plan {{ acc.plan === 'pro' ? 'Pro' : 'Gratis' }}
+      </p>
+      <p class="muted">
+        Búsquedas este mes: {{ acc.quota.used }} de {{ acc.quota.limit }} · quedan {{ acc.quota.remaining }}
+      </p>
+    </section>
+  }
+
+  @if (account(); as acc) {
+    @if (!acc.email_verified) {
+      <section class="card" role="status">
+        <p><strong>Confirma tu email para poder buscar.</strong> Te enviamos un enlace a {{ acc.email }}.</p>
+        <button class="btn" type="button" [disabled]="resending()" (click)="resend()">{{ resending() ? 'Enviando…' : 'Reenviar el enlace' }}</button>
+      </section>
+    }
+  }
+
+  @if (message()) { <p class="ok" role="status">{{ message() }}</p> }
+  @if (error()) { <p class="error" role="alert">{{ error() }}</p> }
+
+  <section class="card">
+    <h2>Mi perfil de búsqueda</h2>
+    <form class="profile" (submit)="saveProfile($event)">
+      <label>
+        Titular
+        <input name="headline" maxlength="255" required [value]="profile()?.headline ?? ''" placeholder="Desarrolladora Java junior" />
+      </label>
+      <label>
+        Resumen (experiencia y formación)
+        <textarea name="summary" rows="4" maxlength="4000" required minlength="10">{{ profile()?.summary ?? '' }}</textarea>
+      </label>
+      <label>
+        Tecnologías y habilidades (separadas por comas)
+        <input name="skills" [value]="(profile()?.skills ?? []).join(', ')" placeholder="Java, Spring Boot, Angular" />
+      </label>
+      <label>
+        Puestos que buscas
+        <input name="target_roles" [value]="(profile()?.target_roles ?? []).join(', ')" placeholder="Backend Java, Full stack" />
+      </label>
+      <label>
+        Términos de búsqueda (opcional)
+        <input name="search_terms" [value]="(profile()?.search_terms ?? []).join(', ')" />
+      </label>
+      <div class="row">
+        <label>
+          Nivel
+          <input name="seniority" maxlength="100" [value]="profile()?.seniority ?? 'junior'" />
+        </label>
+        <label>
+          Años máximos de experiencia exigidos
+          <input name="max_years_experience" type="number" min="0" max="30" [value]="profile()?.max_years_experience ?? 5" />
+        </label>
+        <label>
+          País
+          <input name="country" maxlength="100" [value]="profile()?.country ?? 'España'" />
+        </label>
+      </div>
+      <label>
+        Ciudades donde aceptas trabajo presencial
+        <input name="onsite_cities" [value]="(profile()?.onsite_cities ?? []).join(', ')" placeholder="Sevilla" />
+      </label>
+      <label>
+        Idiomas
+        <input name="languages" [value]="(profile()?.languages ?? []).join(', ')" placeholder="Español nativo, Inglés C1" />
+      </label>
+      <label class="check">
+        <input name="accepts_hybrid" type="checkbox" [checked]="profile()?.accepts_hybrid ?? true" />
+        Acepto trabajo híbrido
+      </label>
+      <label class="check">
+        <input name="remote_only" type="checkbox" [checked]="profile()?.remote_only ?? false" />
+        Solo trabajo 100 % remoto
+      </label>
+      <button class="btn primary" type="submit" [disabled]="saving()">{{ saving() ? 'Guardando…' : 'Guardar perfil' }}</button>
+    </form>
+  </section>
+
+  <section class="card">
+    <h2>Lanzar una búsqueda</h2>
+    @if (!profile()) {
+      <p class="muted">Guarda tu perfil primero: es lo que usamos para encontrar y puntuar las ofertas.</p>
+    } @else {
+      <div class="launch">
+        @for (key of ['general', 'linkedin', 'europa']; track key) {
+          <button class="btn" type="button" [disabled]="starting() || busy() || !(account()?.email_verified) || (account()?.quota?.remaining ?? 0) === 0" (click)="startSearch(key)">
+            {{ strategyLabel(key) }}
+          </button>
+        }
+      </div>
+      <p class="muted small">Una búsqueda tarda unos minutos. Puedes seguir usando la aplicación mientras tanto.</p>
+    }
+  </section>
+
+  <section class="card account" aria-labelledby="account-title">
+    <h2 id="account-title">Mi cuenta y mis datos</h2>
+    <p class="muted">Puedes llevarte todo lo que guardamos de ti o borrar la cuenta cuando quieras.</p>
+    <div class="launch">
+      <button class="btn" type="button" [disabled]="exporting()" (click)="downloadMyData()">
+        {{ exporting() ? 'Preparando…' : 'Descargar mis datos (JSON)' }}
+      </button>
+    </div>
+    <details>
+      <summary>Eliminar mi cuenta</summary>
+      <form class="delete" (submit)="deleteAccount($event)">
+        <p class="muted">Se borran tu cuenta, tu perfil, tus ofertas y tu historial de búsquedas. No se puede deshacer.</p>
+        <label>
+          Confirma con tu contraseña
+          <input name="password" type="password" autocomplete="current-password" maxlength="128" required />
+        </label>
+        <button class="btn danger" type="submit" [disabled]="deleting()">{{ deleting() ? 'Borrando…' : 'Eliminar mi cuenta para siempre' }}</button>
+      </form>
+    </details>
+  </section>
+
+  @if (jobs().length > 0) {
+    <section class="card">
+      <h2>Mis búsquedas</h2>
+      <ul class="jobs">
+        @for (job of jobs(); track job.id) {
+          <li>
+            <strong>{{ strategyLabel(job.strategy) }}</strong>
+            <span class="chip" [class.ok]="job.status === 'done'" [class.bad]="job.status === 'failed'">{{ statusLabel(job.status) }}</span>
+            @if (job.status === 'done') {
+              <span>{{ job.offers_added }} ofertas nuevas</span>
+            }
+            @if (job.status === 'failed' && job.error) {
+              <span class="muted">{{ job.error }}</span>
+            }
+          </li>
+        }
+      </ul>
+      <a class="link" routerLink="/ofertas">Ver mis ofertas</a>
+    </section>
+  }
+}

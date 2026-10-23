@@ -24,8 +24,25 @@ lenguaje y ficheros Excel importados.
 | Amenaza | Control | Código | Prueba |
 |---|---|---|---|
 | Acceso sin autorización | Token Bearer, **denegado por defecto**: solo `/api/health` es público. Comparación de tiempo constante (`hmac.compare_digest`) | `api/security/auth.py` | `test_every_non_public_route_is_protected` recorre las rutas y falla si alguna nueva no exige token |
-| Configuración insegura en producción | La app **no arranca** sin `API_TOKEN` de 32+ caracteres ni con CORS `*` | `config.py` | `test_production_requires_a_strong_token` |
-| Token vacío = acceso abierto | Un `API_TOKEN=` vacío se interpreta como «sin token», nunca como token vacío válido | `config.py` | `test_blank_token_is_treated_as_no_token` |
+| Configuración insegura en producción | La app **no arranca** sin `JWT_SECRET` de 32+ caracteres, sin `ANTHROPIC_API_KEY` ni con CORS `*` | `config.py` | `test_production_requires_a_strong_jwt_secret` |
+| Secreto vacío = sesiones falsificables | Un `JWT_SECRET=` vacío se rechaza en producción y se sustituye por uno aleatorio en desarrollo | `config.py` | `test_blank_secret_is_treated_as_missing` |
+| Sesión robada | `cerrar sesión` y el cambio de contraseña suben la `token_version` de la cuenta: todos los tokens anteriores dejan de valer al instante, en todos los dispositivos | `deps.py`, `sqlalchemy_user_repository.py` | `test_logout_revokes_every_session_of_the_account` |
+| Alta con email ajeno / cuentas basura | El alta no devuelve sesión y exige confirmar el email con un enlace; sin confirmar no se puede buscar (que cuesta dinero) | `accounts.py`, `start_search.py` | `test_unverified_accounts_can_log_in_but_cannot_search` |
+| Enumeración de emails en el registro | El alta y «olvidé mi contraseña» responden igual exista o no la cuenta; quien ya la tenía recibe un aviso por correo | `routers/auth.py` | `test_register_response_is_identical_whether_or_not_the_email_exists` |
+| Enlaces del correo reutilizados o falsificados | Tokens de un solo propósito (`typ`), con caducidad y, el de restablecer, de un solo uso (lleva la versión de la cuenta); una sesión no vale como enlace ni al revés | `tokens.py`, `action_tokens.py` | `test_reset_link_works_only_once`, `test_email_links_cannot_be_used_as_sessions` |
+| Inundar el buzón de un tercero | Máximo 3 correos de cuenta por dirección y hora; el límite por IP también cubre estas rutas | `email_throttle.py`, `rate_limit.py` | `test_reset_emails_are_throttled_per_address` |
+| Bloquear a la dueña de una cuenta a propósito | El bloqueo por fallos es por cuenta **e IP**; el tope global por cuenta es 5 veces mayor | `login_throttle.py` | `test_an_attacker_cannot_lock_the_real_owner_out_from_another_ip` |
+| Derecho de acceso y portabilidad (RGPD) | `GET /api/auth/export` devuelve todo lo guardado de la persona, sin el hash de la contraseña y sin datos de otras cuentas | `account_data.py` | `test_export_never_includes_the_password_hash_or_other_users_data` |
+| Derecho de supresión (RGPD) | `POST /api/auth/delete-account` borra cuenta, perfil, ofertas, entrevistas y búsquedas en una transacción (explícito: SQLite no aplica `ON DELETE CASCADE` por defecto) | `sqlalchemy_user_repository.py` | `test_deleting_the_account_removes_every_trace_of_it` |
+| Borrar la cuenta de otro con una sesión robada | El borrado exige la contraseña actual y sus fallos cuentan como intentos de login (bloqueo por cuenta e IP) | `account_data.py`, `routers/auth.py` | `test_wrong_passwords_on_delete_are_throttled_like_logins` |
+| Fuga de datos personales al publicar | Los datos de la demo son ficticios; los informes de búsqueda reales no se versionan; gitleaks revisa el historial | `data/demo`, `.gitignore`, `.gitleaks.toml` | [PUBLIC_REPO.md](PUBLIC_REPO.md) |
+| Fuerza bruta de contraseñas | Límite por IP (10/min en nginx y en la app) **y** bloqueo temporal de la cuenta tras 10 fallos en 15 min; scrypt (N=2^14) para el hash | `rate_limit.py`, `login_throttle.py`, `infra/nginx` | `test_account_is_locked_after_repeated_failed_logins` |
+| Enumeración de usuarios por tiempo | Un email desconocido se verifica contra un hash falso y devuelve el mismo error que una clave incorrecta | `accounts.py`, `passwords.py` | `test_login_does_not_reveal_which_part_was_wrong` |
+| Acceso a datos de otra cuenta (IDOR) | Todo repositorio de ofertas, entrevistas y búsquedas se construye con el `user_id` y trata una fila ajena como inexistente (404) | `sqlalchemy_*_repository.py` | `test_users_cannot_see_or_touch_each_others_offers` |
+| Token JWT falsificado o caducado | Algoritmo fijado a HS256 (sin `alg: none`), `exp` obligatorio y el usuario se relee en cada petición | `tokens.py`, `deps.py` | `test_unsigned_alg_none_token_is_rejected` |
+| Gasto descontrolado en la API de Claude | Cupo mensual por plan, una búsqueda a la vez, tope diario **global** (`MAX_SEARCHES_PER_DAY`) y topes de búsquedas web y tokens por trabajo | `start_search.py`, `config.py` | `test_global_daily_budget_stops_new_searches_for_everyone` |
+| URL con saltos de línea (inyección en enlace o prompt) | Se rechaza cualquier URL con espacios o saltos de línea, también los de no separación | `sanitize.py` | `test_urls_with_whitespace_or_line_breaks_are_rejected` |
+| Inyección de fórmulas en CSV | Se neutraliza `= + - @`, tabulador y retorno de carro, en API y frontend | `export_offers.py`, `export.ts` | `test_csv_neutralizes_every_formula_prefix` |
 | Fuerza bruta y abuso | Límite por IP y minuto (lectura 120 · escritura 30 · exportación 6), ventana deslizante con memoria acotada, `429` con `Retry-After` | `api/security/rate_limit.py` | `test_rate_limit_*`, `test_limiter_*` |
 | Suplantación de IP | `X-Forwarded-For` solo se usa con `TRUST_PROXY=true` y se toma el **último** valor (el que añade nuestro proxy) | `rate_limit.client_ip` | `test_client_ip_ignores_forwarded_header…` |
 | Cuerpos enormes | Máximo 1 MB por `Content-Length` y también en transferencias por fragmentos | `api/security/body_limit.py` | `test_oversized_body_is_rejected` |
@@ -83,12 +100,13 @@ La respuesta del modelo se trata como **entrada no confiable** (un anuncio puede
 ## Puesta en producción
 
 ```bash
-python -c "import secrets; print(secrets.token_urlsafe(48))"   # → API_TOKEN
+python -c "import secrets; print(secrets.token_urlsafe(48))"   # → JWT_SECRET
 ```
 
 ```ini
 APP_ENV=production
-API_TOKEN=<token generado>
+JWT_SECRET=<secreto generado>
+ANTHROPIC_API_KEY=<tu clave de la API de Claude>
 CORS_ORIGINS=https://tu-dominio
 ALLOWED_HOSTS=tu-dominio
 TRUST_PROXY=true        # solo si hay nginx delante
@@ -133,8 +151,8 @@ Lo siguiente **no** está resuelto, y conviene saberlo antes de exponer la aplic
 
 - **Licencia propietaria** (`LICENSE`): todos los derechos reservados. Es lo que da base legal para reclamar una copia.
   La licencia MIT anterior ya se concedió a quien clonó el repositorio antes del cambio y no se puede retirar.
-- **Clave de acceso** (`API_TOKEN`, ≥ 32 caracteres en producción): sin ella la API devuelve 401 y la aplicación
-  muestra la pantalla `/acceso`. Es una clave compartida: sirve hasta que haya cuentas de usuario.
+- **Cuentas de usuario** (JWT firmado con `JWT_SECRET`, ≥ 32 caracteres en producción): sin sesión válida la API
+  devuelve 401. Cada usuario solo ve sus propias ofertas, perfil y búsquedas. Ver [MULTIUSER.md](MULTIUSER.md).
 - **Límite real:** el código del frontend viaja al navegador y no se puede ocultar. Lo que sí se protege es la API, los
   datos y, cuando se implemente, la lógica con LLM, que debe vivir solo en el servidor tras la clave o la cuenta.
 - **Pendiente (decisión tuya):** pasar el repositorio a privado y retirar la demo de GitHub Pages, que publica todo el

@@ -34,7 +34,7 @@ export class Landing {
     { icon: 'briefcase', title: 'Ofertas en tabla y Kanban', text: 'Filtra, arrastra entre estados, añade ofertas a mano con compatibilidad estimada y exporta a CSV.' },
     { icon: 'file', title: 'CV adaptado a cada oferta', text: 'Prioriza tus logros y tecnologías según la oferta, sin inventar experiencia que tu CV no respalda.' },
     { icon: 'mail', title: 'Cartas de presentación', text: 'Cartas editables en tono formal o cercano, con la opción de reconocer lo que aún estás aprendiendo.' },
-    { icon: 'target', title: 'Brecha de skills', text: 'Qué tecnologías te faltan, cuáles pesan más y qué proyecto puede demostrarlas.' },
+    { icon: 'steps', title: 'Brecha de skills', text: 'Qué tecnologías te faltan, cuáles pesan más y qué proyecto puede demostrarlas.' },
     { icon: 'check', title: 'Evidencias, no promesas', text: 'Una competencia sube de nivel solo cuando la respaldas con un proyecto, curso o certificado.' },
   ];
 
@@ -45,7 +45,7 @@ export class Landing {
   ];
 
   protected readonly privacy = [
-    'Sin cuentas ni contraseñas.',
+    'La demo y el modo local no necesitan cuenta ni contraseña. La búsqueda automática de ofertas sí, y es opcional.',
     'Tu CV se procesa en tu navegador y no se sube a ningún servidor.',
     'Solo se guarda en tu dispositivo (almacenamiento local), y puedes borrarlo con un clic.',
     'Sin cookies de publicidad, analítica ni rastreo de terceros.',

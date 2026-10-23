@@ -68,7 +68,7 @@ describe('Evidence-based cover letters', () => {
     });
     const text = letter.paragraphs.join(' ');
     expect(text).toContain('CRM en producción');
-    expect(text).not.toContain('Freelance');
+    expect(text).not.toContain('Freelance'); // el empleo actual no se escribe a mano en la carta
     expect(text).not.toContain('trabajo a diario');
     expect(text).toContain('Todavía no puedo acreditar Apache Kafka');
     expect(letter.closing).toContain('en dos semanas');

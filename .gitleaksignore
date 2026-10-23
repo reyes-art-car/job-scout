@@ -1,0 +1,5 @@
+# Dummy password in the test verifying passwords are never stored or returned in clear text.
+# Ignore only this historical finding; keep scanning all other secrets and test files.
+8ab32f500b5218adeb6830ec4ab1c6662fae0867:backend/tests/integration/test_security.py:generic-api-key:112
+# Dummy link token in the frontend test that checks the email-verification and password-reset requests.
+67abb57a1f7130888c1e5307978bdcb23dc32c05:frontend/src/app/core/search.service.spec.ts:generic-api-key:46

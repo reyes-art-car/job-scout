@@ -17,7 +17,7 @@ interface StorageItem {
   styleUrl: './legal.scss',
 })
 export class Cookies {
-  protected readonly updated = '17 de octubre de 2026';
+  protected readonly updated = '20 de octubre de 2026';
 
   protected readonly items: StorageItem[] = [
     {
@@ -41,8 +41,8 @@ export class Cookies {
     {
       key: 'jobhunter.api.token',
       type: 'Almacenamiento de sesión',
-      purpose: 'Solo si conectas tu propia API local con un token. No se usa en este sitio público.',
-      lifetime: 'Hasta cerrar la pestaña',
+      purpose: 'Token de sesión que se guarda al iniciar sesión con tu cuenta (opcional). Se envía solo a la API de este sitio.',
+      lifetime: 'Hasta cerrar sesión o la pestaña',
     },
   ];
 }
