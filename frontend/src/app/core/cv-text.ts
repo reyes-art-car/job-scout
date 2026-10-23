@@ -23,7 +23,7 @@ export function detectFormat(name: string, head: Uint8Array): CvFormat {
   throw new CvFileError('Formato no admitido. Sube tu CV en PDF, DOCX o TXT.');
 }
 
-const ENTITIES: Record<string, string> = { '&amp;': '&', '&lt;': '<', '&gt;': '>', '&quot;': '"', '&apos;': "'" };
+const ENTITIES: Record<string, string> = { '&amp;': '&', '&quot;': '"', '&apos;': "'" };
 
 /** Convierte el XML de un documento Word en líneas de texto, marcando los párrafos de lista como viñetas. */
 export function docxXmlToText(xml: string): string {
@@ -35,7 +35,7 @@ export function docxXmlToText(xml: string): string {
         .replace(/<w:tab\/>/g, ' ')
         .replace(/<w:br\/>/g, '\n')
         .replace(/<[^>]+>/g, '')
-        .replace(/&(?:amp|lt|gt|quot|apos);/g, (entity) => ENTITIES[entity]);
+        .replace(/&(?:amp|quot|apos);/g, (entity) => ENTITIES[entity]);
       return /<w:numPr>/.test(paragraph) && text.trim() ? `• ${text}` : text;
     })
     .join('\n');
