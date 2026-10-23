@@ -9,7 +9,8 @@ export type CvFormat = 'pdf' | 'docx' | 'txt';
 
 export class CvFileError extends Error {}
 
-const ascii = (bytes: Uint8Array, length: number): string => String.fromCharCode(...bytes.slice(0, length));
+const ascii = (bytes: Uint8Array, length: number): string =>
+  String.fromCharCode(...bytes.slice(0, length));
 
 /** Decide el formato por el contenido y no solo por la extensión, para rechazar archivos renombrados. */
 export function detectFormat(name: string, head: Uint8Array): CvFormat {
@@ -23,7 +24,24 @@ export function detectFormat(name: string, head: Uint8Array): CvFormat {
   throw new CvFileError('Formato no admitido. Sube tu CV en PDF, DOCX o TXT.');
 }
 
-const ENTITIES: Record<string, string> = { '&amp;': '&', '&lt;': '<', '&gt;': '>', '&quot;': '"', '&apos;': "'" };
+const ENTITIES: Record<string, string> = {
+  '&amp;': '&',
+  '&lt;': '<',
+  '&gt;': '>',
+  '&quot;': '"',
+  '&apos;': "'",
+};
+
+/** Quita las etiquetas repitiendo el pase hasta que no cambie, para que `<<b>script>` no reconstruya una etiqueta. */
+function stripTags(value: string): string {
+  let previous: string;
+  let current = value;
+  do {
+    previous = current;
+    current = current.replace(/<[^>]*>/g, '');
+  } while (current !== previous);
+  return current;
+}
 
 /** Convierte el XML de un documento Word en líneas de texto, marcando los párrafos de lista como viñetas. */
 export function docxXmlToText(xml: string): string {
@@ -31,11 +49,9 @@ export function docxXmlToText(xml: string): string {
     .split(/<w:p[ >]/)
     .slice(1)
     .map((paragraph) => {
-      const text = paragraph
-        .replace(/<w:tab\/>/g, ' ')
-        .replace(/<w:br\/>/g, '\n')
-        .replace(/<[^>]+>/g, '')
-        .replace(/&(?:amp|lt|gt|quot|apos);/g, (entity) => ENTITIES[entity]);
+      const text = stripTags(
+        paragraph.replace(/<w:tab\/>/g, ' ').replace(/<w:br\/>/g, '\n'),
+      ).replace(/&(?:amp|lt|gt|quot|apos);/g, (entity) => ENTITIES[entity]);
       return /<w:numPr>/.test(paragraph) && text.trim() ? `• ${text}` : text;
     })
     .join('\n');
@@ -50,7 +66,11 @@ async function pdfText(data: Uint8Array): Promise<string> {
     const parts: string[] = [];
     for (let number = 1; number <= Math.min(document.numPages, MAX_PDF_PAGES); number++) {
       const content = await (await document.getPage(number)).getTextContent();
-      parts.push(...content.items.map((item) => ('str' in item ? item.str + (item.hasEOL ? '\n' : ' ') : '')));
+      parts.push(
+        ...content.items.map((item) =>
+          'str' in item ? item.str + (item.hasEOL ? '\n' : ' ') : '',
+        ),
+      );
       parts.push('\n');
     }
     return parts.join('');
@@ -62,7 +82,9 @@ async function pdfText(data: Uint8Array): Promise<string> {
 async function docxText(data: Uint8Array): Promise<string> {
   const { unzipSync, strFromU8 } = await import('fflate');
   // Se descomprime solo el documento principal y con tope de tamaño, para no abrir un «zip bomb».
-  const files = unzipSync(data, { filter: (file) => file.name === 'word/document.xml' && file.originalSize <= MAX_XML_BYTES });
+  const files = unzipSync(data, {
+    filter: (file) => file.name === 'word/document.xml' && file.originalSize <= MAX_XML_BYTES,
+  });
   const xml = files['word/document.xml'];
   if (!xml) throw new CvFileError('No se ha podido leer el documento de Word.');
   return docxXmlToText(strFromU8(xml));
@@ -75,14 +97,23 @@ export async function extractCvText(file: File): Promise<string> {
   const format = detectFormat(file.name, data);
   let text: string;
   try {
-    text = format === 'pdf' ? await pdfText(data) : format === 'docx' ? await docxText(data) : new TextDecoder('utf-8').decode(data);
+    text =
+      format === 'pdf'
+        ? await pdfText(data)
+        : format === 'docx'
+          ? await docxText(data)
+          : new TextDecoder('utf-8').decode(data);
   } catch (error) {
     if (error instanceof CvFileError) throw error;
-    throw new CvFileError('No se ha podido leer el archivo. Comprueba que no esté protegido con contraseña ni dañado.');
+    throw new CvFileError(
+      'No se ha podido leer el archivo. Comprueba que no esté protegido con contraseña ni dañado.',
+    );
   }
   text = text.slice(0, MAX_TEXT_CHARS);
   if (text.replace(/\s/g, '').length < 40) {
-    throw new CvFileError('No se ha encontrado texto en el archivo. Si es un PDF escaneado (una imagen), expórtalo de nuevo con texto seleccionable.');
+    throw new CvFileError(
+      'No se ha encontrado texto en el archivo. Si es un PDF escaneado (una imagen), expórtalo de nuevo con texto seleccionable.',
+    );
   }
   return text;
 }
