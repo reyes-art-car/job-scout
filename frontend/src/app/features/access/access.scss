@@ -4,4 +4,8 @@ form { width: min(100%, 400px); display: flex; flex-direction: column; gap: 16px
 label { display: flex; flex-direction: column; gap: 6px; font-weight: 600; }
 .error { margin: 0; min-height: 1.25em; color: var(--bad); font-weight: 600; }
 .ok { margin: 0; color: var(--ok, #1a7f4b); font-weight: 600; }
-.link { align-self: flex-start; }
+.link { align-self: stretch; }
+.btn.primary { gap: 18px; min-height: 48px; padding: 12px 20px; border: 0; border-radius: 8px; background: var(--accent); color: var(--on-accent); transition: filter 0.15s; }
+.btn.primary:hover:not(:disabled) { background: var(--accent); filter: brightness(0.9); }
+.link { display: inline-flex; align-items: center; justify-content: center; min-height: 48px; padding: 12px 20px; font: inherit; font-weight: 600; color: var(--text); background: var(--surface); border: 1px solid var(--border); border-radius: 8px; text-decoration: none; cursor: pointer; text-align: center; transition: border-color 0.15s, color 0.15s; }
+.link:hover { border-color: var(--accent); color: var(--accent); }
