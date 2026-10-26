@@ -1,17 +1,17 @@
 <app-public-shell>
   <section class="hero">
     <div class="hero-text">
-      <span class="eyebrow">Para quien busca su primer o siguiente puesto en IT</span>
-      <h1>Cada candidatura te enseña qué aprender para la siguiente.</h1>
+      <p class="kicker">Para quien busca su primer puesto en IT, o el siguiente</p>
+      <h1>Cada candidatura te dice qué aprender para la siguiente.</h1>
       <p class="lead">
-        Puntuamos cada oferta contra tu CV y te explicamos el porqué: qué cumples, qué te falta y qué proyecto lo
-        demostraría. Tú decides a qué aplicar; nada se envía en tu nombre. Todo en tu navegador: tu CV no sale de tu dispositivo.
+        Pones tu CV, pegas una oferta y ves cuánto encajas y por qué: lo que ya cumples, lo que te falta y qué proyecto
+        pequeño lo demostraría. Tú decides dónde aplicar. Nada se envía en tu nombre y tu CV se queda en tu navegador.
       </p>
       <div class="actions">
-        <a class="btn primary big" routerLink="/importar-cv"><app-icon name="download" /> Subir mi CV</a>
-        <a class="btn big" routerLink="/panel">Ver la demo con datos de ejemplo</a>
+        <a class="btn primary big" routerLink="/importar-cv">Subir mi CV <span aria-hidden="true">→</span></a>
+        <a class="secondary" routerLink="/panel">Probar la demo</a>
       </div>
-      <p class="small muted">Gratis · La demo y el modo local no piden cuenta · PDF, DOCX o TXT hasta 5 MB</p>
+      <p class="small muted">Gratis. La demo y el modo local no piden cuenta. PDF, DOCX o TXT de hasta 5 MB.</p>
     </div>
     <img
       class="hero-shot"
@@ -25,9 +25,8 @@
   <section id="como-funciona" class="band">
     <h2>Cómo funciona</h2>
     <ol class="steps">
-      @for (step of steps; track step.title; let i = $index) {
-        <li class="card">
-          <span class="num" aria-hidden="true">{{ i + 1 }}</span>
+      @for (step of steps; track step.title) {
+        <li>
           <h3>{{ step.title }}</h3>
           <p class="muted">{{ step.text }}</p>
         </li>
@@ -36,26 +35,25 @@
   </section>
 
   <section class="band alt">
-    <h2>Qué puedes hacer</h2>
-    <div class="features">
+    <h2>Lo que hay dentro</h2>
+    <dl class="features">
       @for (feature of features; track feature.title) {
-        <article class="card feature">
-          <span class="icon"><app-icon [name]="feature.icon" [size]="22" /></span>
-          <h3>{{ feature.title }}</h3>
-          <p class="muted">{{ feature.text }}</p>
-        </article>
+        <div class="feature">
+          <dt>{{ feature.title }}</dt>
+          <dd class="muted">{{ feature.text }}</dd>
+        </div>
       }
-    </div>
+    </dl>
   </section>
 
   <section class="band">
-    <h2>Así se ve</h2>
+    <h2>Capturas</h2>
     <div class="shots">
       @for (shot of shots; track shot.file) {
-        <figure class="card shot">
+        <figure class="shot">
           <img [src]="'img/' + shot.file" width="1440" height="900" loading="lazy" [alt]="'Captura de la sección ' + shot.title" />
           <figcaption>
-            <strong>{{ shot.title }}</strong>
+            <strong>{{ shot.title }}.</strong>
             <span class="muted">{{ shot.text }}</span>
           </figcaption>
         </figure>
@@ -65,14 +63,14 @@
 
   <section class="band alt privacy">
     <div>
-      <h2>Tus datos se quedan contigo</h2>
+      <h2>Tu CV no sale de tu ordenador</h2>
       <p class="muted">
-        Job Hopping &amp; Learning funciona por completo en tu navegador. No hay servidor que reciba tu currículum, ni base de datos,
-        ni cuenta que crear.
+        La aplicación corre entera en tu navegador. No hay servidor que reciba tu currículum ni hace falta registrarse para
+        usarla.
       </p>
-      <ul class="ticks">
+      <ul class="plain">
         @for (item of privacy; track item) {
-          <li><app-icon name="check" [size]="18" /> {{ item }}</li>
+          <li>{{ item }}</li>
         }
       </ul>
       <p class="small">
@@ -80,22 +78,22 @@
         <a routerLink="/cookies">política de cookies</a>.
       </p>
     </div>
-    <aside class="card note">
-      <h3>Lo que conviene saber</h3>
+    <aside class="note">
+      <h3>Antes de empezar</h3>
       <ul>
-        <li>Las ofertas que verás son de ejemplo. Las puntuamos con las tecnologías de tu CV, y puedes añadir las tuyas.</li>
-        <li>La lectura del CV es automática y puede equivocarse: siempre podrás revisarla y corregirla antes de guardar.</li>
-        <li>La búsqueda automática de ofertas con Claude Code solo está disponible instalando el proyecto en local.</li>
+        <li>Las ofertas que verás son de ejemplo. Se puntúan con las tecnologías de tu CV, y puedes añadir las tuyas.</li>
+        <li>El CV se lee de forma automática y a veces se equivoca. Podrás revisarlo y corregirlo antes de guardar.</li>
+        <li>La búsqueda automática de ofertas con Claude Code solo funciona si instalas el proyecto en local.</li>
       </ul>
     </aside>
   </section>
 
   <section class="band final">
-    <h2>Empieza con tu propio CV</h2>
-    <p class="muted">Tarda menos de un minuto y puedes borrar todo cuando quieras.</p>
-    <div class="actions center">
-      <a class="btn primary big" routerLink="/importar-cv"><app-icon name="download" /> Subir mi CV</a>
-      <a class="btn big" href="https://github.com/reyes-art-car/job-scout" target="_blank" rel="noopener noreferrer">Ver el código</a>
+    <h2>Pruébalo con tu propio CV</h2>
+    <p class="muted">Lleva un minuto y puedes borrarlo todo cuando quieras.</p>
+    <div class="actions">
+      <a class="btn primary big" routerLink="/importar-cv">Subir mi CV <span aria-hidden="true">→</span></a>
+      <a class="secondary" href="https://github.com/reyes-art-car/job-scout" target="_blank" rel="noopener noreferrer">Ver el código</a>
     </div>
   </section>
 </app-public-shell>
